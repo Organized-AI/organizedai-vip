@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORGANIZED AI — Managed AI Agent Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Industrial palette — built from the handshake image */
+  --bg-primary: #0c0b09;
+  --bg-secondary: #141210;
+  --bg-card: #1a1814;
+  --bg-card-hover: #211e18;
+  --border: #2a2520;
+  --border-hover: #3a3428;
+  --gold: #F5D623;
+  --gold-dim: #8B7A12;
+  --gold-bright: #FFE94A;
+  --gold-glow: rgba(245, 214, 35, 0.06);
+  --gold-glow-strong: rgba(245, 214, 35, 0.12);
+  --rust: #C4943D;
+  --metal: #8a8a8a;
+  --metal-light: #b0b0b0;
+  --text-primary: #f0ece4;
+  --text-secondary: #a09888;
+  --text-muted: #605848;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --max-width: 1100px;
+  --content-width: 720px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-decoration: none; font-family: var(--font-mono); font-size: 0.9em; transition: color 0.2s; }
+a:hover { color: var(--gold-bright); }
+::selection { background: var(--gold-dim); color: var(--text-primary); }
+
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; }
+section { padding: 6rem 0; }
+.section-border { border-top: 1px solid var(--border); }
+
+/* ========== NAV ========== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(12, 11, 9, 0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+nav .container { display: flex; justify-content: space-between; align-items: center; }
+.nav-logo {
+  font-family: var(--font-mono); font-weight: 800; font-size: 0.85rem;
+  color: var(--text-primary); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s;
+  padding-bottom: 2px;
+}
+.nav-links a:hover { color: var(--text-secondary); }
+.nav-links a.active { color: var(--gold); border-bottom: 1px solid var(--gold); }
+
+/* ========== PAGES ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== HERO ========== */
+.hero {
+  margin-top: 60px;
+  padding: 4rem 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  min-height: 85vh;
+}
+.hero-text { padding: 2rem 0; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--gold);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--gold-dim); padding: 0.35rem 0.85rem;
+  margin-bottom: 2rem;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; background: var(--gold);
+  border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hero h1 {
+  font-family: var(--font-mono); font-weight: 800;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  color: var(--text-primary); line-height: 1.15;
+  margin-bottom: 1.5rem; letter-spacing: -0.01em;
+}
+.hero h1 em {
+  font-style: normal; color: var(--gold);
+}
+.hero .tagline {
+  font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2.5rem;
+  line-height: 1.7; max-width: 480px;
+}
+.hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.hero-image {
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.hero-image-frame {
+  width: 100%; max-width: 440px; aspect-ratio: 1;
+  background: var(--gold);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 120px rgba(245, 214, 35, 0.08), 0 0 40px rgba(245, 214, 35, 0.04);
+}
+.hero-image-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 20px;
+}
+/* Retro halftone-ish overlay */
+.hero-image-frame::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.8rem;
+  padding: 0.9rem 2rem; letter-spacing: 0.05em; text-transform: uppercase;
+  transition: all 0.2s; cursor: pointer; border: none;
+}
+.btn-primary {
+  background: var(--gold); color: var(--bg-primary); font-weight: 700;
+}
+.btn-primary:hover { background: var(--gold-bright); color: var(--bg-primary); }
+.btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ========== FRAMEWORK 3-COL ========== */
+.framework { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.framework-col {
+  padding: 2rem; background: var(--bg-card); border: 1px solid var(--border);
+}
+.framework-col h3 {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.framework-col p { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; }
+
+/* ========== SERVICES ========== */
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.service-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2rem; transition: all 0.25s;
+}
+.service-card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+.service-card.highlighted {
+  border-color: var(--gold-dim);
+  background: var(--gold-glow);
+  box-shadow: 0 0 40px rgba(245, 214, 35, 0.03);
+}
+.service-card .tier-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+  color: var(--gold-dim); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.service-card.highlighted .tier-label { color: var(--gold); }
+.service-card h3 {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.5rem;
+}
+.service-card .desc {
+  font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;
+}
+.service-card .features { list-style: none; }
+.service-card .features li {
+  font-size: 0.88rem; padding: 0.45rem 0; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 0.75rem;
+}
+.service-card .features li::before {
+  content: '→'; color: var(--gold-dim); font-family: var(--font-mono); font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.service-card.highlighted .features li::before { color: var(--gold); }
+.service-card .features li:last-child { border-bottom: none; }
+
+/* ========== STATS ========== */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border);
+}
+.stat {
+  text-align: center; padding: 2.5rem 1rem;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat .value {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 800;
+  color: var(--gold); display: block; line-height: 1;
+}
+.stat .label {
+  font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.5rem;
+}
+
+/* ========== STACK DIAGRAM ========== */
+.stack-section { padding: 6rem 0; }
+.stack-wrapper {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2.5rem; overflow-x: auto;
+}
+.stack-layer {
+  display: grid; grid-template-columns: 200px 1fr;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+  align-items: center;
+}
+.stack-layer:last-child { border-bottom: none; }
+.stack-layer.active {
+  background: var(--gold-glow);
+  margin: 0 -2.5rem; padding: 1rem 2.5rem;
+  border-bottom: 1px solid var(--gold-dim);
+  border-top: 1px solid var(--gold-dim);
+}
+.stack-name {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700;
+  color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.stack-layer.active .stack-name { color: var(--gold); }
+.stack-source {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+.stack-desc {
+  font-size: 0.85rem; color: var(--text-secondary);
+}
+.stack-layer.active .stack-desc { color: var(--gold); opacity: 0.8; }
+
+/* ========== SECTION HEADERS ========== */
+.section-header { margin-bottom: 3rem; }
+.section-header h2 {
+  font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+.section-header p { font-size: 1rem; color: var(--text-muted); }
+
+/* ========== PAPERS ========== */
+.papers-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.paper-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2rem; transition: all 0.25s; cursor: pointer;
+  display: grid; grid-template-columns: 4px 1fr; gap: 1.5rem;
+}
+.paper-card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+.paper-accent { background: var(--gold-dim); border-radius: 2px; }
+.paper-card:hover .paper-accent { background: var(--gold); }
+.paper-meta {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.paper-card h3 {
+  font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.35rem; line-height: 1.3;
+}
+.paper-subtitle { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; }
+.paper-abstract {
+  font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;
+  border-left: 2px solid var(--gold-dim); padding-left: 1rem;
+}
+.paper-read {
+  display: inline-block; margin-top: 1rem;
+  font-family: var(--font-mono); font-size: 0.78rem; color: var(--gold);
+}
+.paper-tags { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.paper-tag {
+  font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+  border: 1px solid var(--border); padding: 0.15rem 0.5rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+
+/* ========== CLAW ECOSYSTEM ========== */
+.claw-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+}
+.claw-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 1.5rem; transition: border-color 0.3s, background 0.3s;
+}
+.claw-card:hover {
+  border-color: var(--gold-dim); background: var(--bg-card-hover);
+}
+.claw-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.5rem;
+}
+.claw-name {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  color: var(--gold);
+}
+.claw-lang {
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted);
+  border: 1px solid var(--border); padding: 0.15rem 0.5rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.claw-stars {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--rust);
+  margin-bottom: 0.75rem;
+}
+.claw-desc {
+  font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+.claw-use {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);
+  border-top: 1px solid var(--border); padding-top: 0.75rem;
+  letter-spacing: 0.03em;
+}
+
+/* ========== AGENT DEPTH ========== */
+.depth-stack {
+  display: flex; flex-direction: column; gap: 0;
+}
+.depth-layer {
+  display: grid; grid-template-columns: 80px 1fr; gap: 2rem;
+  padding: 2.5rem 2rem; border-left: 2px solid var(--border);
+  position: relative; transition: border-color 0.3s;
+}
+.depth-layer:hover { border-left-color: var(--gold-dim); }
+.depth-layer::before {
+  content: ''; position: absolute; left: -6px; top: 2.5rem;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--bg-primary); border: 2px solid var(--border);
+  transition: border-color 0.3s, background 0.3s;
+}
+.depth-layer:hover::before {
+  border-color: var(--gold); background: var(--gold);
+}
+.depth-number {
+  font-family: var(--font-mono); font-size: 2.5rem; font-weight: 800;
+  color: var(--border); line-height: 1;
+}
+.depth-layer:hover .depth-number { color: var(--gold-dim); }
+.depth-content h3 {
+  font-family: var(--font-mono); font-size: 0.92rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.75rem;
+}
+.depth-tag {
+  font-size: 0.68rem; color: var(--gold); border: 1px solid var(--gold-dim);
+  padding: 0.15rem 0.5rem; margin-left: 0.75rem;
+  letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500;
+}
+.depth-content p {
+  font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65;
+  max-width: 600px;
+}
+
+/* ========== ABOUT ========== */
+.about-grid { display: grid; grid-template-columns: 5fr 3fr; gap: 4rem; }
+.about-grid h3 {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.about-grid p { margin-bottom: 1rem; }
+.about-grid strong { color: var(--text-primary); }
+.principle {
+  padding: 1.25rem; border-left: 2px solid var(--gold-dim);
+  margin-bottom: 1rem; background: var(--gold-glow);
+}
+.principle h4 {
+  font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.35rem;
+}
+.principle p { font-size: 0.88rem; margin-bottom: 0; color: var(--text-secondary); }
+
+.sidebar-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.sidebar-card h3 { margin-bottom: 0.75rem; }
+.events-list { list-style: none; }
+.events-list li {
+  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.events-list li:last-child { border-bottom: none; }
+.event-name { color: var(--text-primary); font-weight: 500; }
+.event-detail {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);
+}
+
+/* ========== CONTACT ========== */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+.contact-form input, .contact-form textarea {
+  width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 0.9rem;
+  padding: 0.9rem 1rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s;
+}
+.contact-form input:focus, .contact-form textarea:focus { border-color: var(--gold-dim); }
+.contact-form textarea { min-height: 150px; resize: vertical; }
+.contact-form input::placeholder, .contact-form textarea::placeholder { color: var(--text-muted); }
+.contact-info h3 {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.contact-info p { margin-bottom: 1.5rem; }
+.calendly-placeholder {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 3rem; text-align: center; margin-bottom: 1.5rem;
+}
+
+/* ========== CTA ========== */
+.cta-section { text-align: center; padding: 8rem 0; position: relative; }
+.cta-section::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(245,214,35,0.04), transparent 70%);
+  pointer-events: none;
+}
+.cta-section h2 {
+  font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 800; color: var(--text-primary); margin-bottom: 1rem;
+}
+.cta-section p { color: var(--text-muted); margin-bottom: 2rem; }
+.cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ========== FOOTER ========== */
+footer {
+  border-top: 1px solid var(--border); padding: 1.5rem 0;
+}
+footer .container {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.copyright { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); }
+.footer-links { display: flex; gap: 1.5rem; list-style: none; align-items: center; }
+.footer-links a { font-size: 0.7rem; color: var(--text-muted); }
+.footer-links a:hover { color: var(--text-secondary); }
+.a2a-badge {
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--gold);
+  border: 1px solid var(--gold-dim); padding: 0.2rem 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; text-align: center; min-height: auto; padding: 2rem 0; }
+  .hero .tagline { margin-left: auto; margin-right: auto; }
+  .hero-cta { justify-content: center; }
+  .hero-image { order: -1; }
+  .hero-image-frame { max-width: 300px; }
+}
+@media (max-width: 900px) {
+  .claw-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .framework { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-bottom: 1px solid var(--border); }
+  section { padding: 4rem 0; }
+  .nav-links { gap: 1rem; }
+  .nav-links a { font-size: 0.68rem; }
+  .stack-layer { grid-template-columns: 1fr; gap: 0.25rem; }
+  .claw-grid { grid-template-columns: 1fr; }
+  .depth-layer { grid-template-columns: 50px 1fr; gap: 1rem; padding: 1.5rem 1rem; }
+  .depth-number { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <div class="nav-logo">ORGANIZED <span>AI</span></div>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
+      <li><a href="#" onclick="showPage('services')" id="nav-services">Services</a></li>
+      <li><a href="#" onclick="showPage('papers')" id="nav-papers">Papers</a></li>
+      <li><a href="#" onclick="showPage('about')" id="nav-about">About</a></li>
+      <li><a href="#" onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ================================================================ -->
+<!-- HOME -->
+<!-- ================================================================ -->
+<div id="page-home" class="page active">
+
+  <section>
+    <div class="container">
+      <div class="hero">
+        <div class="hero-text">
+          <div class="hero-badge">Systems Operational</div>
+          <h1>We deploy and manage <em>AI agent infrastructure.</em></h1>
+          <p class="tagline">The full Claw ecosystem — OpenClaw, NanoClaw, MicroClaw, PicoClaw, ZeroClaw, ExoClaw. Secured by FrawdBot. Powered by Qwen-Agent. Interfaced through Claude Code Slack. On your hardware, not ours.</p>
+          <div class="hero-cta">
+            <a href="#" onclick="showPage('contact')" class="btn btn-primary">Schedule Consultation →</a>
+            <a href="#" onclick="showPage('papers')" class="btn btn-ghost">Read Our Papers →</a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="hero-image-frame">
+            <img src="IMG_1110.PNG" alt="Human and machine handshake — infrastructure partnership" style="width:100%;height:100%;object-fit:cover;border-radius:20px;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRAMEWORK -->
+  <section class="section-border">
+    <div class="container">
+      <div class="framework">
+        <div class="framework-col">
+          <h3>The Challenge</h3>
+          <p>Enterprises want AI agents but lack the infrastructure to run them securely at scale. Internal teams don't have the SRE expertise for production agent deployments.</p>
+        </div>
+        <div class="framework-col">
+          <h3>The Opportunity</h3>
+          <p>OpenClaw and 40,000+ agent platforms are production-ready. Edge compute on customer hardware makes deployment affordable. The entire stack is open source.</p>
+        </div>
+        <div class="framework-col">
+          <h3>The Risk</h3>
+          <p>Without proper infrastructure, agents become security liabilities and compliance gaps. Prompt injection, data exfiltration, and insider threats at machine velocity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section-border">
+    <div class="container">
+      <div class="stats-bar">
+        <div class="stat"><span class="value">9+</span><span class="label">Deployments</span></div>
+        <div class="stat"><span class="value">6–12h</span><span class="label">Setup Time</span></div>
+        <div class="stat"><span class="value">40K+</span><span class="label">Compatible Platforms</span></div>
+        <div class="stat"><span class="value">21K</span><span class="label">Lines of Detection</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLAW ECOSYSTEM -->
+  <section class="section-border">
+    <div class="container">
+      <div class="section-header">
+        <h2>The Claw Ecosystem</h2>
+        <p>Six runtimes. One managed infrastructure. The right agent for every deployment.</p>
+      </div>
+      <div class="claw-grid">
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">OpenClaw</span>
+            <span class="claw-lang">TypeScript</span>
+          </div>
+          <div class="claw-stars">250K+ ⭐</div>
+          <p class="claw-desc">The flagship. Full-featured enterprise agent with 50+ integrations, plugin system, and department-specific loadouts.</p>
+          <div class="claw-use">Enterprise Mac Mini / MacBook Pro edge deployments</div>
+        </div>
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">NanoClaw</span>
+            <span class="claw-lang">Python · Agent SDK</span>
+          </div>
+          <div class="claw-stars">Anthropic Agent SDK</div>
+          <p class="claw-desc">Containerized, security-first. Runs on Anthropic's Agent SDK with isolated containers for every tool execution.</p>
+          <div class="claw-use">Secure multi-channel — Slack, Discord, WhatsApp, Gmail</div>
+        </div>
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">MicroClaw</span>
+            <span class="claw-lang">Rust</span>
+          </div>
+          <div class="claw-stars">Multi-channel runtime</div>
+          <p class="claw-desc">Shared agent engine with provider abstraction, durable session state, and layered memory across every chat platform.</p>
+          <div class="claw-use">Chat-native workflows with persistent state</div>
+        </div>
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">PicoClaw</span>
+            <span class="claw-lang">Go</span>
+          </div>
+          <div class="claw-stars">&lt;10MB RAM</div>
+          <p class="claw-desc">Ultra-lightweight. Built by Sipeed to run on $10 RISC-V boards, IP cameras, routers, and microcontrollers.</p>
+          <div class="claw-use">IoT edge, embedded hardware, sensor networks</div>
+        </div>
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">ZeroClaw</span>
+            <span class="claw-lang">Rust</span>
+          </div>
+          <div class="claw-stars">3.4MB binary</div>
+          <p class="claw-desc">Sub-10ms startup. Under 5MB RAM at runtime. 22 AI provider support. Zero dependency overhead.</p>
+          <div class="claw-use">Minimal footprint, maximum provider flexibility</div>
+        </div>
+        <div class="claw-card">
+          <div class="claw-header">
+            <span class="claw-name">ExoClaw</span>
+            <span class="claw-lang">WASM Sandbox</span>
+          </div>
+          <div class="claw-stars">Deploy in &lt;60s</div>
+          <p class="claw-desc">Managed hosting with WASM-sandboxed tool execution. Real-time monitoring, team workspaces, 100+ AgentSkills.</p>
+          <div class="claw-use">Cloud deployments with zero-config infrastructure</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENT DEPTH -->
+  <section class="section-border">
+    <div class="container">
+      <div class="section-header">
+        <h2>Agent Depth</h2>
+        <p>Three layers from human conversation to machine execution.</p>
+      </div>
+      <div class="depth-stack">
+        <div class="depth-layer depth-interface">
+          <div class="depth-number">01</div>
+          <div class="depth-content">
+            <h3>Interface Layer <span class="depth-tag">Claude Code Slack</span></h3>
+            <p>Teams interact through natural Slack conversations. @mention Claude with a task, get progress updates in threads, create PRs directly. Already powering enterprise workflows at Netflix, Spotify, Salesforce. The human-agent boundary.</p>
+          </div>
+        </div>
+        <div class="depth-layer depth-framework">
+          <div class="depth-number">02</div>
+          <div class="depth-content">
+            <h3>Framework Layer <span class="depth-tag">Qwen-Agent</span></h3>
+            <p>Self-hosted reasoning with Qwen3.5 models. MCP support, function calling, code interpreter via Docker sandbox, RAG, and multi-agent orchestration. Air-gapped inference — customer data never leaves customer hardware.</p>
+          </div>
+        </div>
+        <div class="depth-layer depth-runtime">
+          <div class="depth-number">03</div>
+          <div class="depth-content">
+            <h3>Runtime Layer <span class="depth-tag">The Claws</span></h3>
+            <p>Six open-source runtimes matched to deployment requirements. OpenClaw for enterprise, PicoClaw for IoT, ZeroClaw for minimal footprint, NanoClaw for containerized security, MicroClaw for multi-channel, ExoClaw for managed cloud. All secured by FrawdBot. All monitored by Organized AI.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="stack-section section-border">
+    <div class="container">
+      <div class="section-header">
+        <h2>The Stack</h2>
+        <p>Open source at every layer. Managed infrastructure underneath.</p>
+      </div>
+      <div class="stack-wrapper">
+        <div class="stack-layer">
+          <div><div class="stack-name">Agent Commerce</div><div class="stack-source">Coinbase x402</div></div>
+          <div class="stack-desc">HTTP 402 protocol · Agent-to-agent payments · Crypto + fiat settlement</div>
+        </div>
+        <div class="stack-layer">
+          <div><div class="stack-name">Orchestration</div><div class="stack-source">Stripe Minions</div></div>
+          <div class="stack-desc">MCP Toolshed · One-shot execution · 400+ tools · Deterministic interleaving</div>
+        </div>
+        <div class="stack-layer">
+          <div><div class="stack-name">Agent Framework</div><div class="stack-source">Qwen-Agent / The Claws</div></div>
+          <div class="stack-desc">6 runtimes · Function calling · RAG · MCP integration · Code interpreter · Claude Code Slack interface</div>
+        </div>
+        <div class="stack-layer">
+          <div><div class="stack-name">Runtime Isolation</div><div class="stack-source">Alibaba OpenSandbox</div></div>
+          <div class="stack-desc">Docker · Kubernetes · gVisor · Kata Containers · Firecracker microVM</div>
+        </div>
+        <div class="stack-layer">
+          <div><div class="stack-name">Security Layer</div><div class="stack-source">FrawdBot</div></div>
+          <div class="stack-desc">Behavioral analysis · 12 detection rules · Campaign tracking · 21,000-line engine</div>
+        </div>
+        <div class="stack-layer active">
+          <div><div class="stack-name">★ Managed Infrastructure</div><div class="stack-source">Organized AI</div></div>
+          <div class="stack-desc">Edge deployment · SRE dashboards · ClickHouse · LangFuse · SOC 2 · Hardware provisioning</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section section-border">
+    <div class="container">
+      <h2>Ready to deploy?</h2>
+      <p>From unboxing to production in 6–12 hours.</p>
+      <div class="cta-buttons">
+        <a href="#" onclick="showPage('contact')" class="btn btn-primary">Schedule Consultation →</a>
+        <a href="#" onclick="showPage('papers')" class="btn btn-ghost">Read Our Papers →</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ================================================================ -->
+<!-- SERVICES -->
+<!-- ================================================================ -->
+<div id="page-services" class="page">
+  <section style="margin-top:80px;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Services</h2>
+        <p>Three tiers. One infrastructure philosophy. Your hardware.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="tier-label">Tier 1</div>
+          <h3>Agent Setup</h3>
+          <div class="desc">Unbox to production. 6–12 hours.</div>
+          <ul class="features">
+            <li>Complete OpenClaw installation</li>
+            <li>Mac Mini / MacBook Pro config</li>
+            <li>FrawdBot security included</li>
+            <li>N8N integration layer (200+)</li>
+            <li>SSH remote management</li>
+            <li>Disappearing API key handling</li>
+          </ul>
+        </div>
+        <div class="service-card highlighted">
+          <div class="tier-label">Tier 2 · Most Popular</div>
+          <h3>Managed Infrastructure</h3>
+          <div class="desc">Ongoing SRE. Monthly retainer.</div>
+          <ul class="features">
+            <li>Everything in Setup, plus:</li>
+            <li>SRE dashboard system</li>
+            <li>ClickHouse caching layer</li>
+            <li>LangFuse API routing</li>
+            <li>PostHog observability</li>
+            <li>Prompt injection protection</li>
+            <li>API gateway + policy enforcement</li>
+          </ul>
+        </div>
+        <div class="service-card">
+          <div class="tier-label">Tier 3</div>
+          <h3>Enterprise</h3>
+          <div class="desc">SOC 2. Multi-agent. Edge fleet.</div>
+          <ul class="features">
+            <li>Everything in Managed, plus:</li>
+            <li>SOC 2 compliance architecture</li>
+            <li>Multi-agent orchestration</li>
+            <li>Department-level access control</li>
+            <li>Tailscale edge deployment</li>
+            <li>Hardware leasing facilitation</li>
+            <li>Dedicated Slack support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAPERS -->
+<!-- ================================================================ -->
+<div id="page-papers" class="page">
+  <section style="margin-top:80px;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Papers</h2>
+        <p>Engineering documentation from real deployments and production conversations.</p>
+      </div>
+      <div class="papers-list">
+
+        <div class="paper-card">
+          <div class="paper-accent"></div>
+          <div>
+            <div class="paper-meta">March 2026 · Jordaaan Hill · 12 min read</div>
+            <h3>The Agent Infrastructure Stack</h3>
+            <div class="paper-subtitle">How Four Open-Source Projects Define the Future of Managed AI Services</div>
+            <div class="paper-abstract">A technical analysis of the emerging agent infrastructure stack — from Stripe's one-shot coding agents and Alibaba's sandbox isolation to Qwen's agent framework and Coinbase's agent payment protocol. Together they reveal a clear infrastructure layer that managed service providers must build on.</div>
+            <div class="paper-tags">
+              <span class="paper-tag">Stripe Minions</span>
+              <span class="paper-tag">OpenSandbox</span>
+              <span class="paper-tag">Qwen-Agent</span>
+              <span class="paper-tag">x402</span>
+              <span class="paper-tag">MCP</span>
+            </div>
+            <span class="paper-read">Read Paper →</span>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="paper-accent"></div>
+          <div>
+            <div class="paper-meta">March 2026 · Jordaaan Hill & Colin McNamara · 10 min read</div>
+            <h3>The Infrastructure Playbook</h3>
+            <div class="paper-subtitle">Building Managed AI Agent Services from First Principles</div>
+            <div class="paper-abstract">A technical guide to building managed AI agent infrastructure. Covers the database-in-front-of-database pattern, SRE dashboard architecture, API gateway design, fraud detection integration, and SOC 2 compliance — all derived from production deployments.</div>
+            <div class="paper-tags">
+              <span class="paper-tag">ClickHouse</span>
+              <span class="paper-tag">LangFuse</span>
+              <span class="paper-tag">SOC 2</span>
+              <span class="paper-tag">SRE</span>
+            </div>
+            <span class="paper-read">Read Paper →</span>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="paper-accent"></div>
+          <div>
+            <div class="paper-meta">March 2026 · Jordaaan Hill & Colin McNamara · 8 min read</div>
+            <h3>Edge Compute Economics</h3>
+            <div class="paper-subtitle">Why Customer Hardware Beats the Cloud for AI Agent Deployment</div>
+            <div class="paper-abstract">An analysis of deploying AI agents on customer-owned hardware versus cloud infrastructure. Covers the distributed compute model, Tailscale tunnel architecture, configuration management at the edge, and the economics that make on-premise Mac deployments more cost-effective at scale.</div>
+            <div class="paper-tags">
+              <span class="paper-tag">Edge</span>
+              <span class="paper-tag">Tailscale</span>
+              <span class="paper-tag">Mac Mini</span>
+              <span class="paper-tag">Cost Analysis</span>
+            </div>
+            <span class="paper-read">Read Paper →</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================================ -->
+<!-- ABOUT -->
+<!-- ================================================================ -->
+<div id="page-about" class="page">
+  <section style="margin-top:80px;">
+    <div class="container">
+      <div class="section-header">
+        <h2>About</h2>
+        <p>Infrastructure consultancy for the agent era.</p>
+      </div>
+      <div class="about-grid">
+        <div>
+          <h3>Who We Are</h3>
+          <p>Organized AI is an infrastructure consultancy specializing in AI agent deployment. We partner with <a href="https://selfimprovingcode.ai" target="_blank">Self-Improving Code</a> (Colin McNamara) for enterprise-grade architecture and <a href="https://frawdbot.ai" target="_blank">FrawdBot</a> for insider threat detection.</p>
+          <p>We don't build agents. We build the infrastructure that makes agents production-ready — the SRE dashboards, the caching layers, the API gateways, the security monitoring, the edge deployments. The boring stuff that makes the exciting stuff work.</p>
+
+          <h3 style="margin-top:2.5rem;">Our Principles</h3>
+          <div class="principle">
+            <h4>On-Premise First</h4>
+            <p>Your Mac Mini, your office, your network, your data. Edge compute beats cloud for AI agent workloads — lower latency, better economics, full data sovereignty.</p>
+          </div>
+          <div class="principle">
+            <h4>Framework-Agnostic</h4>
+            <p>OpenClaw, Qwen-Agent, CrewAI, AutoGen — we don't care which framework you choose. 40,000+ options exist. The infrastructure underneath is the same.</p>
+          </div>
+          <div class="principle">
+            <h4>Security by Default</h4>
+            <p>FrawdBot behavioral analysis is bundled in every deployment. Not an upsell. 21,000 lines of detection engine monitoring for insider threats at machine velocity.</p>
+          </div>
+        </div>
+        <div>
+          <div class="sidebar-card">
+            <h3>Events</h3>
+            <ul class="events-list">
+              <li><div class="event-name">ClawCon</div><div class="event-detail">SXSW · Austin, TX</div></li>
+              <li><div class="event-name">Claw School</div><div class="event-detail">Training · Antler Austin</div></li>
+              <li><div class="event-name">Office Hours</div><div class="event-detail">Weekly · Virtual</div></li>
+            </ul>
+          </div>
+          <div class="sidebar-card">
+            <h3>Partners</h3>
+            <ul class="events-list">
+              <li><div class="event-name"><a href="https://selfimprovingcode.ai">Self-Improving Code</a></div><div class="event-detail">Enterprise architecture</div></li>
+              <li><div class="event-name"><a href="https://frawdbot.ai">FrawdBot</a></div><div class="event-detail">Insider threat detection</div></li>
+            </ul>
+          </div>
+          <div class="sidebar-card">
+            <h3>Open Source</h3>
+            <ul class="events-list">
+              <li><div class="event-name"><a href="https://github.com/organized-ai">GitHub → organized-ai</a></div><div class="event-detail">Public repositories</div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================================ -->
+<!-- CONTACT -->
+<!-- ================================================================ -->
+<div id="page-contact" class="page">
+  <section style="margin-top:80px;">
+    <div class="container">
+      <div class="section-header">
+        <h2>Contact</h2>
+        <p>Tell us about your infrastructure needs.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-form">
+          <input type="text" placeholder="Name">
+          <input type="email" placeholder="Email">
+          <input type="text" placeholder="Company">
+          <textarea placeholder="Tell us about your agent infrastructure needs — current stack, team size, deployment goals, compliance requirements..."></textarea>
+          <button class="btn btn-primary" style="width:100%;">Send Message →</button>
+        </div>
+        <div class="contact-info">
+          <h3>Schedule Directly</h3>
+          <p>30-minute consultation to scope your deployment.</p>
+          <div class="calendly-placeholder">
+            <p style="font-family:var(--font-mono); font-size:0.78rem; color:var(--text-muted);">[ Calendly Embed ]</p>
+            <a href="#" class="btn btn-ghost" style="margin-top:1.5rem;">Open Scheduling →</a>
+          </div>
+          <h3>Direct</h3>
+          <p><a href="mailto:contact@organizedai.vip" style="font-size:1rem;">contact@organizedai.vip</a></p>
+          <h3>Response Time</h3>
+          <p style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-secondary);">Under 24 hours for qualified inquiries.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+      <li><a href="https://selfimprovingcode.ai" target="_blank">Self-Improving Code</a></li>
+      <li><a href="https://frawdbot.ai" target="_blank">FrawdBot</a></li>
+      <li><span class="a2a-badge">A2A ENABLED</span></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
