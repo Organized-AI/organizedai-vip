@@ -922,13 +922,14 @@ footer .container {
         <p>Tell us about your infrastructure needs.</p>
       </div>
       <div class="contact-grid">
-        <div class="contact-form">
-          <input type="text" placeholder="Name">
-          <input type="email" placeholder="Email">
-          <input type="text" placeholder="Company">
-          <textarea placeholder="Tell us about your agent infrastructure needs — current stack, team size, deployment goals, compliance requirements..."></textarea>
-          <button class="btn btn-primary" style="width:100%;">Send Message →</button>
-        </div>
+        <form id="contact-form" class="contact-form" onsubmit="return false;">
+          <input type="text" id="contact-name" placeholder="Name" required>
+          <input type="email" id="contact-email" placeholder="Email" required>
+          <input type="text" id="contact-company" placeholder="Company">
+          <textarea id="contact-message" placeholder="Tell us about your agent infrastructure needs — current stack, team size, deployment goals, compliance requirements..." required></textarea>
+          <button id="contact-submit" class="btn btn-primary" style="width:100%;" type="button">Send Message →</button>
+          <p id="contact-status" style="font-family:var(--font-mono); font-size:0.8rem; margin-top:0.75rem; min-height:1.2em;"></p>
+        </form>
         <div class="contact-info">
           <h3>Schedule Directly</h3>
           <p>30-minute consultation to scope your deployment.</p>
@@ -967,6 +968,50 @@ function showPage(page) {
   document.getElementById('nav-' + page).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+document.getElementById('contact-submit').addEventListener('click', async function() {
+  var btn = this;
+  var status = document.getElementById('contact-status');
+  var name = document.getElementById('contact-name').value.trim();
+  var email = document.getElementById('contact-email').value.trim();
+  var company = document.getElementById('contact-company').value.trim();
+  var message = document.getElementById('contact-message').value.trim();
+
+  if (!name || !email || !message) {
+    status.style.color = 'var(--rust)';
+    status.textContent = 'Please fill in name, email, and message.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  status.style.color = 'var(--text-muted)';
+  status.textContent = '';
+
+  try {
+    var res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, company: company, message: message })
+    });
+
+    if (res.ok) {
+      status.style.color = 'var(--gold)';
+      status.textContent = 'Message sent. We\u2019ll be in touch within 24 hours.';
+      document.getElementById('contact-form').reset();
+    } else {
+      var data = await res.json().catch(function() { return {}; });
+      status.style.color = 'var(--rust)';
+      status.textContent = data.error || 'Something went wrong. Please email contact@organizedai.vip directly.';
+    }
+  } catch (e) {
+    status.style.color = 'var(--rust)';
+    status.textContent = 'Network error. Please email contact@organizedai.vip directly.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send Message \u2192';
+});
 </script>
 
 </body>
