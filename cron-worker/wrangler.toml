@@ -1,0 +1,6 @@
+name = "organizedai-vip-cron"
+main = "index.js"
+compatibility_date = "2026-03-08"
+
+[triggers]
+crons = ["0 6 * * *"]  # Daily at 06:00 UTC
