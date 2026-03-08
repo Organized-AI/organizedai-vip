@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Edge Compute Economics — Organized AI</title>
-<meta name="description" content="An analysis of deploying AI agents on customer-owned hardware versus cloud infrastructure. Covers the distributed compute model, Tailscale tunnel architecture, and the economics of on-premise Mac deployments.">
+<meta name="description" content="An analysis of why customer-owned hardware beats cloud infrastructure for AI agent deployment. Covers the economic model, data sovereignty advantages, and the distributed architecture that makes edge-first viable.">
 <meta name="author" content="Jordaaan Hill & Colin McNamara">
 <meta property="og:title" content="Edge Compute Economics — Organized AI">
 <meta property="og:description" content="Why Customer Hardware Beats the Cloud for AI Agent Deployment">
@@ -179,23 +179,18 @@ pre {
   letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.4rem;
 }
 
-/* Comparison table */
-.comparison-table {
-  width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;
-  font-size: 0.88rem;
+/* CTA */
+.cta-block {
+  background: var(--gold-glow-strong); border: 1px solid var(--gold-dim);
+  padding: 2rem 2.5rem; margin: 3rem 0 1.5rem; text-align: center;
 }
-.comparison-table th {
-  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700;
-  color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;
-  text-align: left; padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--gold-dim); background: var(--bg-card);
+.cta-block p { font-size: 1rem; color: var(--text-primary); margin-bottom: 1rem; }
+.cta-block a.cta-link {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.85rem;
+  color: var(--bg-primary); background: var(--gold); padding: 0.6rem 1.8rem;
+  font-weight: 700; letter-spacing: 0.04em; transition: background 0.2s;
 }
-.comparison-table td {
-  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
-  color: var(--text-secondary);
-}
-.comparison-table tr:hover td { background: var(--gold-glow); }
-.comparison-table .highlight { color: var(--gold); font-weight: 600; }
+.cta-block a.cta-link:hover { background: var(--gold-bright); }
 
 .references {
   border-top: 1px solid var(--border); padding-top: 2rem; margin-top: 3rem;
@@ -217,8 +212,6 @@ pre {
   .metrics { grid-template-columns: repeat(2, 1fr); }
   pre { font-size: 0.68rem; padding: 1rem; }
   .paper-header h1 { font-size: 1.6rem; }
-  .comparison-table { font-size: 0.78rem; }
-  .comparison-table th, .comparison-table td { padding: 0.5rem 0.6rem; }
 }
 </style>
 </head>
@@ -231,15 +224,14 @@ pre {
 <article class="paper-container">
 
   <header class="paper-header">
-    <div class="meta">March 2026 &middot; Jordaaan Hill &amp; Colin McNamara &middot; 10 min read</div>
+    <div class="meta">March 2026 &middot; Jordaaan Hill &amp; Colin McNamara &middot; 7 min read</div>
     <h1>Edge Compute Economics</h1>
     <div class="subtitle">Why Customer Hardware Beats the Cloud for AI Agent Deployment</div>
-    <div class="abstract">An analysis of deploying AI agents on customer-owned hardware versus cloud infrastructure. Covers the distributed compute model, Tailscale tunnel architecture, configuration management at the edge, and the economics that make on-premise Mac deployments more cost-effective than cloud at scale.</div>
+    <div class="abstract">The default assumption for deploying AI agents is cloud infrastructure. For the majority of managed agent deployments, that assumption is wrong. This paper makes the economic and architectural case for edge-first deployment on customer-owned hardware.</div>
     <div class="paper-tags">
-      <span class="paper-tag">Edge</span>
-      <span class="paper-tag">Tailscale</span>
-      <span class="paper-tag">Mac Mini</span>
+      <span class="paper-tag">Edge Compute</span>
       <span class="paper-tag">Cost Analysis</span>
+      <span class="paper-tag">Data Sovereignty</span>
       <span class="paper-tag">Deployment</span>
     </div>
   </header>
@@ -248,14 +240,11 @@ pre {
     <h2>Contents</h2>
     <ol>
       <li><a href="#introduction">The Cloud Assumption</a></li>
-      <li><a href="#distributed">The Distributed Deployment Model</a></li>
-      <li><a href="#hardware">Hardware Strategy</a></li>
-      <li><a href="#tailscale">Tailscale Tunnel Architecture</a></li>
-      <li><a href="#cost">Cost Comparison: Edge vs. Cloud</a></li>
-      <li><a href="#enterprise">Enterprise Deployment: The Multi-Agent Model</a></li>
-      <li><a href="#n8n">N8N Integration Layer</a></li>
+      <li><a href="#distributed">The Distributed Model</a></li>
+      <li><a href="#hardware">Hardware Considerations</a></li>
+      <li><a href="#cost">The Economics</a></li>
+      <li><a href="#enterprise">Enterprise Multi-Agent Deployments</a></li>
       <li><a href="#conclusion">Conclusion: The Edge Advantage</a></li>
-      <li><a href="#references">References</a></li>
     </ol>
   </nav>
 
@@ -268,319 +257,137 @@ pre {
 
     <p>For AI agent deployments, the cloud assumption is wrong.</p>
 
-    <p>Not wrong in every case &mdash; there are legitimate reasons to run agents in the cloud, and we will cover them. But for the majority of managed agent deployments serving small-to-medium businesses and mid-market enterprises, customer-owned hardware provides better economics, better latency, better security, and better data sovereignty than any cloud configuration.</p>
+    <p>Not wrong in every case &mdash; there are legitimate reasons to run agents in the cloud. But for the majority of managed agent deployments serving small-to-medium businesses and mid-market enterprises, customer-owned hardware provides better economics, better latency, better security, and better data sovereignty than any cloud configuration.</p>
 
-    <p>The key insight is counterintuitive: <strong>customer laptops and desktops collectively provide more total compute capacity than any data center.</strong> Every Mac Mini sitting under a desk is an idle compute node. Every MacBook Pro in a conference room is an underutilized inference machine. The compute already exists. It is already purchased. It is already on the customer's network. The only thing missing is the infrastructure to make it useful.</p>
-
-    <p>This paper provides the economic analysis, the deployment architecture, and the operational model for edge-first AI agent infrastructure.</p>
+    <p>The key insight is counterintuitive: <strong>customer offices collectively provide more idle compute capacity than any data center.</strong> Every compact desktop sitting under a desk is an idle compute node. Every laptop in a conference room is an underutilized inference machine. The compute already exists. It is already purchased. It is already on the customer's network. The only thing missing is the infrastructure to make it useful.</p>
 
     <!-- 2. DISTRIBUTED DEPLOYMENT -->
-    <h2 id="distributed">2. The Distributed Deployment Model</h2>
+    <h2 id="distributed">2. The Distributed Model</h2>
 
-    <p>The edge deployment model inverts the traditional cloud architecture. Instead of a central cluster serving multiple customers, each customer runs their own agent infrastructure on their own hardware. A central control plane manages all deployments remotely.</p>
+    <p>The edge deployment model inverts the traditional cloud architecture. Instead of a central cluster serving multiple customers, each customer runs their own agent infrastructure on their own hardware. A central control plane manages all deployments remotely through encrypted mesh networking.</p>
 
 <pre>
               [Central Control Plane]
-              Organized AI Operations
-                 |  Tailscale Mesh  |
-        +--------+---------+--------+
-        |                  |                  |
-        v                  v                  v
-  [Mac Mini]         [MacBook Pro]      [Mac Mini]
-  Client A Office    Client B Remote    Client C Office
-  - OpenClaw         - Qwen-Agent       - OpenClaw
-  - FrawdBot         - FrawdBot         - FrawdBot
-  - N8N              - N8N              - N8N
-  - ClickHouse       - ClickHouse       - ClickHouse
+               Operations Center
+              |  Encrypted Mesh  |
+     +--------+---------+--------+
+     |                  |                  |
+     v                  v                  v
+[Desktop]          [Laptop]           [Desktop]
+Client A           Client B           Client C
+Office             Remote             Office
+
+Each node: self-contained agent
+infrastructure with security
+monitoring and integrations
 </pre>
 
-    <p>Each client deployment is self-contained. The agent framework, security monitoring, integration layer, and caching database all run on the same hardware. No data leaves the customer's network during normal operation. The Tailscale mesh provides secure remote management access for the operations team without requiring VPN infrastructure, port forwarding, or firewall modifications.</p>
+    <p>Each client deployment is self-contained. The agent framework, security monitoring, integration layer, and observability stack all run on the same hardware. No data leaves the customer's network during normal operation. Secure mesh networking provides remote management access without requiring VPN infrastructure, port forwarding, or firewall modifications on the customer's network.</p>
 
     <h3>Operational Model</h3>
 
-    <p>Clients never touch the terminal. They interact with their agents through Slack, email, or web interfaces. All infrastructure management &mdash; updates, configuration changes, key rotation, troubleshooting &mdash; happens remotely via SSH over Tailscale.</p>
+    <p>Clients never touch the terminal. They interact with their agents through familiar interfaces &mdash; Slack, email, or web dashboards. All infrastructure management happens remotely: updates, configuration changes, credential rotation, troubleshooting.</p>
 
-    <p>This operational model is critical to the business. The managed service value proposition is: "We handle the infrastructure so you do not have to." If clients need to open a terminal, the service has failed. Every operational task must be remotely executable.</p>
+    <div class="callout">
+      <div class="callout-label">Insight</div>
+      <p>The managed service value proposition is simple: "We handle the infrastructure so you do not have to." <strong>If clients need to open a terminal, the service has failed.</strong> Every operational task must be remotely executable without customer involvement.</p>
+    </div>
 
-    <h3>Secure Credential Handling</h3>
+    <!-- 3. HARDWARE -->
+    <h2 id="hardware">3. Hardware Considerations</h2>
 
-    <p>API keys are provisioned using a disappearing key pattern. Keys are generated, transmitted to the edge device over the encrypted Tailscale tunnel, written to environment variables, and the transmission record is purged. At no point does a key persist in a chat log, email, or shared document. Key rotation is automated on a configurable schedule, with the SRE dashboard tracking rotation status across all deployments.</p>
+    <p>Hardware selection for edge agent deployments is more consequential than cloud provisioning. You cannot spin up a different instance type to test performance. The hardware ships to a customer's office and stays there. Getting it right matters.</p>
 
-    <!-- 3. HARDWARE STRATEGY -->
-    <h2 id="hardware">3. Hardware Strategy</h2>
+    <h3>Why Apple Silicon</h3>
 
-    <p>Hardware selection for edge agent deployments is more constrained than cloud provisioning. You cannot spin up a different instance type to test performance. The hardware ships to a customer's office and stays there for months or years. Getting it right matters.</p>
-
-    <h3>Why Mac Specifically</h3>
-
-    <p>Apple Silicon provides the best performance-per-watt for AI inference workloads among consumer hardware. The M-series unified memory architecture eliminates the CPU-GPU memory transfer bottleneck that limits NVIDIA-based systems for small-batch inference. A Mac Mini M4 with 32GB unified memory runs local Qwen 3.5 models at interactive speeds with negligible fan noise and 15-30W power draw.</p>
+    <p>Unified memory architecture eliminates the CPU-GPU memory transfer bottleneck that limits traditional systems for small-batch inference. Current-generation consumer hardware runs local models at interactive speeds with negligible noise and minimal power draw &mdash; critical factors for office environments.</p>
 
     <p>Practical advantages compound beyond raw performance:</p>
 
     <ul>
-      <li><strong>Form factor:</strong> A Mac Mini is 5 inches square. It sits on a desk, a shelf, or behind a monitor. No rack, no server room, no cooling considerations.</li>
-      <li><strong>Noise:</strong> Silent under typical agent workloads. This matters in office environments.</li>
-      <li><strong>Reliability:</strong> No moving parts in the SSD. Fanless or near-fanless under sustained load. Mean time between failures measured in years.</li>
-      <li><strong>Ecosystem:</strong> macOS provides native Docker support, Homebrew for package management, and robust SSH server capabilities. The operations team uses the same tools they use on Linux servers.</li>
-      <li><strong>Availability:</strong> Available at any Apple Store. Replacement hardware can be provisioned same-day in most metro areas.</li>
+      <li><strong>Form factor:</strong> Compact enough to sit on a desk or shelf. No rack, no server room, no cooling considerations.</li>
+      <li><strong>Silence:</strong> Fanless or near-fanless under typical agent workloads. This matters in professional environments.</li>
+      <li><strong>Reliability:</strong> No moving parts. Mean time between failures measured in years.</li>
+      <li><strong>Availability:</strong> Replacement hardware can be provisioned same-day in most metro areas.</li>
+      <li><strong>Ecosystem:</strong> Robust tooling for container management, package management, and remote administration.</li>
     </ul>
 
-    <h3>Hardware Tiers</h3>
-
-    <table class="comparison-table">
-      <thead>
-        <tr>
-          <th>Device</th>
-          <th>Use Case</th>
-          <th>RAM</th>
-          <th>Cost</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Mac Mini M4</td>
-          <td>Standard agent deployment</td>
-          <td>32GB</td>
-          <td class="highlight">$1,299</td>
-        </tr>
-        <tr>
-          <td>Mac Mini M4 Pro</td>
-          <td>Multi-agent + local inference</td>
-          <td>48GB</td>
-          <td class="highlight">$1,999</td>
-        </tr>
-        <tr>
-          <td>MacBook Pro M4 Pro</td>
-          <td>Mobile/remote deployment</td>
-          <td>48GB</td>
-          <td class="highlight">$2,499</td>
-        </tr>
-        <tr>
-          <td>Mac Studio M3 Ultra</td>
-          <td>High-compute local inference</td>
-          <td>192GB</td>
-          <td class="highlight">$5,999</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>What We Tested and Rejected</h3>
-
-    <p>We tested Fly.io for containerized agent deployments. Results were poor. Agent workloads are bursty and state-heavy &mdash; they saturate a container during reasoning, then idle during tool execution. Cloud container platforms optimize for sustained throughput, not burst-idle patterns. The cold start latency on Fly.io machines added seconds to agent interactions that users expected to be instant.</p>
-
-    <p>Experimental deployments on Raspberry Pi 5 and repurposed iPhone 11 hardware demonstrated that agents can run on constrained devices, but the performance was inadequate for production use cases. These remain research targets for IoT-adjacent deployments where PicoClaw's sub-10MB footprint becomes relevant.</p>
-
-    <!-- 4. TAILSCALE -->
-    <h2 id="tailscale">4. Tailscale Tunnel Architecture</h2>
-
-    <p>Tailscale is the networking layer that makes edge deployments manageable. It provides a WireGuard-based mesh network that connects all edge devices to the central control plane without requiring any modifications to the customer's network infrastructure.</p>
-
-<pre>
-[Organized AI Control Plane]
-    |
-    | Tailscale coordination server
-    | (auth, key exchange, NAT traversal)
-    |
-    +--- WireGuard tunnel ---> [Client A: Mac Mini]
-    |                            192.168.x.x (local)
-    |                            100.x.x.x (Tailscale)
-    |
-    +--- WireGuard tunnel ---> [Client B: MacBook Pro]
-    |                            10.0.x.x (local)
-    |                            100.x.x.x (Tailscale)
-    |
-    +--- WireGuard tunnel ---> [Client C: Mac Mini]
-                                 172.16.x.x (local)
-                                 100.x.x.x (Tailscale)
-</pre>
-
-    <h3>Zero-Trust Networking</h3>
-
-    <p>Every connection is authenticated and encrypted. There is no "trusted network" &mdash; each device is individually authenticated against the Tailscale coordination server. This means a compromised device on the customer's LAN cannot access the agent infrastructure without valid Tailscale credentials. The security model does not depend on corporate firewall rules.</p>
-
-    <h3>Configuration Management at the Edge</h3>
-
-    <p>Managing configurations across distributed edge devices requires a different approach than managing cloud instances. We use a trigger-file pattern:</p>
-
-    <ol>
-      <li>The control plane writes a configuration file to a shared directory on the edge device via Tailscale SSH.</li>
-      <li>A local cron job monitors the shared directory for new or modified files.</li>
-      <li>When a trigger file is detected, the cron job executes the corresponding configuration update.</li>
-      <li>Execution status is written back to the shared directory for the control plane to verify.</li>
-    </ol>
-
     <div class="callout technical">
-      <div class="callout-label">Technical Note</div>
-      <p>The trigger-file pattern deliberately avoids persistent agent connections from the control plane to edge devices. If the control plane is compromised, it cannot push arbitrary commands to edge devices &mdash; it can only write configuration files that the local cron job validates before execution. <strong>This is defense-in-depth applied to the management plane itself.</strong></p>
+      <div class="callout-label">Key Principle</div>
+      <p>Agent workloads are bursty and state-heavy &mdash; they saturate compute during reasoning, then idle during tool execution. Cloud container platforms optimize for sustained throughput, not burst-idle patterns. <strong>Edge hardware absorbs burst workloads without the cold-start penalties and per-second billing of cloud containers.</strong></p>
     </div>
 
-    <h3>Scaling the Mesh</h3>
+    <!-- 4. COST -->
+    <h2 id="cost">4. The Economics</h2>
 
-    <p>Adding a new customer is adding a node to the mesh. Install Tailscale on the new device, authenticate it against the control plane, push the initial configuration, verify connectivity. The entire process takes 15&ndash;20 minutes of the operations team's time. There is no infrastructure provisioning, no subnet allocation, no firewall rules to update.</p>
+    <p>The economic case for edge deployment is straightforward when you account for total cost of ownership over a multi-year horizon.</p>
 
-    <!-- 5. COST COMPARISON -->
-    <h2 id="cost">5. Cost Comparison: Edge vs. Cloud</h2>
+    <p>Cloud deployments for AI agents carry compounding costs: GPU-capable compute, storage, bandwidth egress fees, monitoring services, and management overhead. These costs scale linearly with each customer and inflate annually with provider pricing increases.</p>
 
-    <p>The economic case for edge deployment is straightforward when you account for total cost of ownership over a 24-month horizon.</p>
-
-    <h3>Cloud Deployment Cost (per customer)</h3>
-
-    <table class="comparison-table">
-      <thead>
-        <tr><th>Line Item</th><th>Monthly</th><th>24-Month Total</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Compute (GPU-capable VM)</td><td>$800</td><td>$19,200</td></tr>
-        <tr><td>Storage (100GB SSD + backups)</td><td>$50</td><td>$1,200</td></tr>
-        <tr><td>Bandwidth (50GB egress)</td><td>$45</td><td>$1,080</td></tr>
-        <tr><td>Monitoring (Datadog/similar)</td><td>$75</td><td>$1,800</td></tr>
-        <tr><td>Management overhead</td><td>$200</td><td>$4,800</td></tr>
-        <tr><td><strong>Total</strong></td><td class="highlight"><strong>$1,170</strong></td><td class="highlight"><strong>$28,080</strong></td></tr>
-      </tbody>
-    </table>
-
-    <h3>Edge Deployment Cost (per customer)</h3>
-
-    <table class="comparison-table">
-      <thead>
-        <tr><th>Line Item</th><th>Monthly</th><th>24-Month Total</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Mac Mini M4 (one-time, amortized)</td><td>$54</td><td>$1,299</td></tr>
-        <tr><td>Electricity (~25W average)</td><td>$3</td><td>$72</td></tr>
-        <tr><td>Tailscale (included in business plan)</td><td>$0</td><td>$0</td></tr>
-        <tr><td>Monitoring (self-hosted ClickHouse + PostHog)</td><td>$0</td><td>$0</td></tr>
-        <tr><td>Management overhead</td><td>$150</td><td>$3,600</td></tr>
-        <tr><td><strong>Total</strong></td><td class="highlight"><strong>$207</strong></td><td class="highlight"><strong>$4,971</strong></td></tr>
-      </tbody>
-    </table>
+    <p>Edge deployments front-load the hardware cost (which can be amortized or leased) and then benefit from near-zero marginal infrastructure costs. Electricity for compact hardware is negligible. Self-hosted monitoring eliminates per-seat SaaS fees. Mesh networking access is included in standard business plans.</p>
 
     <div class="metrics">
-      <div class="metric"><span class="value">82%</span><span class="label">Cost Reduction vs. Cloud</span></div>
-      <div class="metric"><span class="value">$23K</span><span class="label">Savings Per Customer / 24mo</span></div>
+      <div class="metric"><span class="value">>80%</span><span class="label">Cost Reduction vs. Cloud</span></div>
       <div class="metric"><span class="value">3mo</span><span class="label">Hardware Break-Even</span></div>
+      <div class="metric"><span class="value">6&ndash;12h</span><span class="label">Deployment Time</span></div>
     </div>
 
-    <p>The numbers are not close. Edge deployment costs 82% less than equivalent cloud infrastructure over a 24-month period. The Mac Mini pays for itself in hardware savings within three months. Every month after that is pure margin improvement.</p>
+    <p>The hardware pays for itself within months. Every month after that is pure margin improvement. And the advantage compounds: hardware costs are fixed while cloud costs inflate annually.</p>
 
-    <h3>Cloud Credits Strategy</h3>
+    <h3>The Leasing Model</h3>
 
-    <p>Cloud infrastructure still has a role in the architecture &mdash; as a burst capacity layer and for workloads that genuinely require elastic scaling. The strategy is to leverage cloud credits aggressively: $100K first-year credits from AWS through startup programs, then use Google Cloud credits for negotiation leverage at renewal. The API gateway's provider abstraction layer makes switching between cloud providers a configuration change, not a migration.</p>
+    <p>Hardware leasing converts capital expenditure to operating expenditure for the customer, following the same pattern as ISP-provided equipment. The customer sees a single monthly line item that covers hardware, infrastructure, and management. For the customer, it looks like a SaaS subscription. For the infrastructure provider, it is a managed hardware deployment with full remote access.</p>
 
-    <p>The key constraint: <strong>never build a dependency on any single cloud provider.</strong> The abstraction layer ensures that cloud providers remain interchangeable commodities, not strategic dependencies.</p>
+    <h3>Cloud as Burst Capacity</h3>
 
-    <!-- 6. ENTERPRISE -->
-    <h2 id="enterprise">6. Enterprise Deployment: The Multi-Agent Model</h2>
+    <p>Cloud infrastructure still has a role &mdash; as a burst capacity layer for workloads that genuinely require elastic scaling. The key constraint: <strong>never build a dependency on any single cloud provider.</strong> Provider abstraction at the routing layer ensures cloud providers remain interchangeable commodities, not strategic dependencies. Leverage startup credits and competitive pricing across providers without code changes.</p>
 
-    <p>Enterprise customers do not run a single agent. They run fleets. A marketing agent handles ad copy and campaign management. An HR agent processes applications and schedules interviews. A finance agent reconciles invoices and generates reports. A field operations agent manages inventory and dispatch.</p>
+    <!-- 5. ENTERPRISE -->
+    <h2 id="enterprise">5. Enterprise Multi-Agent Deployments</h2>
 
-    <h3>Orchestration Architecture</h3>
+    <p>Enterprise customers do not run a single agent. They run fleets. A marketing agent handles campaigns. An HR agent processes applications. A finance agent reconciles invoices. A field operations agent manages dispatch.</p>
 
-<pre>
-[Master Orchestrator Agent]
-      |
-      +---> [Marketing Agent] ---> #marketing-ai (Slack)
-      |         tools: Meta Ads, Google Ads, CRM
-      |
-      +---> [HR Agent] ----------> #hr-ai (Slack)
-      |         tools: ATS, Calendar, Email
-      |
-      +---> [Finance Agent] -----> #finance-ai (Slack)
-      |         tools: QuickBooks, Bank API, Invoice OCR
-      |
-      +---> [Field Ops Agent] ---> #ops-ai (Slack)
-                tools: Inventory, Dispatch, GPS
-</pre>
+    <h3>Department-Level Isolation</h3>
 
-    <p>The master orchestrator handles cross-department tasks &mdash; "Generate a quarterly report combining marketing spend, revenue, and headcount changes" &mdash; by delegating subtasks to specialist agents and aggregating results.</p>
-
-    <h3>Access Control via Slack Channels</h3>
+    <p>Each agent operates in its own scope with access only to department-relevant tools and data. The marketing agent cannot access financial records. The HR agent cannot modify production systems. This isolation is enforced at the infrastructure layer, not by trusting the agent framework to behave correctly.</p>
 
     <div class="callout">
       <div class="callout-label">Insight</div>
-      <p>Different Slack channels for different agents gives you audit trails, access control, and user familiarity &mdash; all from a tool they already use. <strong>The HR team cannot see finance agent conversations. The marketing team cannot access HR data. Slack's native permissions become the access control layer.</strong> No custom RBAC system required.</p>
+      <p>Dedicated communication channels per agent (one Slack channel per department agent) provide audit trails, access control, and user familiarity from a tool teams already use. <strong>Native platform permissions become the access control layer. No custom RBAC system required.</strong></p>
     </div>
 
-    <p>Each agent has a dedicated Slack channel. Users interact with their department's agent by posting in the relevant channel. The agent responds in-thread, maintaining conversation context. This pattern provides:</p>
+    <h3>Cross-Department Orchestration</h3>
 
-    <ul>
-      <li><strong>Natural access control:</strong> Only channel members can interact with the agent</li>
-      <li><strong>Complete audit trail:</strong> Every interaction is logged in Slack's native history</li>
-      <li><strong>User familiarity:</strong> No new interface to learn &mdash; it is just Slack</li>
-      <li><strong>Mobile access:</strong> Agents are accessible from the Slack mobile app</li>
-      <li><strong>Integration:</strong> Slack's built-in file sharing, reactions, and threading work naturally with agent conversations</li>
-    </ul>
+    <p>A master orchestrator handles cross-department tasks &mdash; "Generate a quarterly report combining marketing spend, revenue, and headcount changes" &mdash; by delegating subtasks to specialist agents and aggregating results. Each specialist agent operates within its authorized scope while the orchestrator coordinates the workflow.</p>
 
-    <h3>Load Balancing</h3>
+    <h3>Integration at Scale</h3>
 
-    <p>For enterprise deployments with heavy agent usage, Coolify provides dynamic container orchestration on the edge hardware. When the marketing agent is generating quarterly reports and the finance agent is running month-end reconciliation simultaneously, Coolify dynamically allocates CPU and memory resources between containers based on current demand. This is local load balancing &mdash; no cloud orchestrator required.</p>
+    <p>Agents are only as useful as the systems they can access. A robust integration layer with hundreds of pre-built connectors handles the API calls, authentication, and error handling for business tools customers already use. Pre-configured agent packages optimized for specific industries &mdash; commercial real estate, professional services, security operations &mdash; reduce deployment time from weeks to hours.</p>
 
-    <!-- 7. N8N -->
-    <h2 id="n8n">7. N8N Integration Layer</h2>
-
-    <p>Agents are only as useful as the systems they can access. N8N provides the integration layer that connects agents to the business tools customers already use.</p>
-
-    <p>N8N is a workflow automation platform with 200+ one-click integrations. When an agent needs to create a CRM contact, send an email, update a spreadsheet, or trigger a webhook, N8N handles the API calls, authentication, and error handling. The agent describes the action; N8N executes it.</p>
-
-    <h3>Pre-Configured Packages</h3>
-
-    <p>Rather than building custom integrations for each customer, we deploy pre-configured agent packages optimized for specific business outcomes:</p>
-
-    <p><strong>Commercial Real Estate Package:</strong></p>
-    <ul>
-      <li>Google Ads campaign management and bid optimization</li>
-      <li>Meta Ads audience targeting and creative rotation</li>
-      <li>CRM sync with listing updates and lead scoring</li>
-      <li>Automated property comparison reports</li>
-    </ul>
-
-    <p><strong>Professional Services Package:</strong></p>
-    <ul>
-      <li>Calendar management and meeting scheduling</li>
-      <li>Email triage and response drafting</li>
-      <li>Invoice generation from time tracking data</li>
-      <li>Client communication templates and follow-ups</li>
-    </ul>
-
-    <p><strong>Security Operations Package:</strong></p>
-    <ul>
-      <li>Alert monitoring and triage across security tools</li>
-      <li>Incident response workflow automation</li>
-      <li>Compliance reporting generation</li>
-      <li>Vendor risk assessment automation</li>
-    </ul>
-
-    <div class="callout technical">
-      <div class="callout-label">Technical Note</div>
-      <p>N8N runs locally on the edge device alongside the agent. Integration traffic stays on the customer's network where possible. When an agent creates a CRM record, the N8N workflow calls the CRM API directly from the customer's IP address &mdash; not from a cloud proxy. <strong>This means the customer's existing IP allowlists, VPN rules, and network policies apply automatically.</strong></p>
-    </div>
-
-    <!-- 8. CONCLUSION -->
-    <h2 id="conclusion">8. Conclusion: The Edge Advantage</h2>
+    <!-- 6. CONCLUSION -->
+    <h2 id="conclusion">6. Conclusion: The Edge Advantage</h2>
 
     <p>The edge deployment model provides four structural advantages that compound over time:</p>
 
     <p><strong>Data sovereignty.</strong> Customer data never leaves customer hardware. For regulated industries &mdash; healthcare, finance, legal &mdash; this is not a nice-to-have. It is a compliance requirement. Edge deployment satisfies data residency requirements by design, not by configuration.</p>
 
-    <p><strong>Cost advantage.</strong> An 82% cost reduction versus cloud is not a rounding error. Over a 24-month period, the savings per customer exceed $23,000. Across a portfolio of customers, this is the difference between a sustainable business and a cash-burning operation. And the advantage compounds: hardware costs are fixed while cloud costs inflate annually.</p>
+    <p><strong>Cost advantage.</strong> Over 80% cost reduction versus cloud is not a rounding error. Across a portfolio of customers, this is the difference between a sustainable business and a cash-burning operation. Hardware costs are fixed. Cloud costs inflate annually.</p>
 
-    <p><strong>Performance.</strong> Local inference on Apple Silicon eliminates the network round-trip to cloud model providers. For interactive agent workflows &mdash; where a user is waiting for a response in Slack &mdash; the latency reduction from 2&ndash;3 seconds (cloud) to 200&ndash;500 milliseconds (local) changes the user experience from "waiting for the AI" to "instant response." This is the difference between agents that people tolerate and agents that people prefer.</p>
+    <p><strong>Performance.</strong> Local inference eliminates network round-trips to cloud providers. The latency reduction from seconds to hundreds of milliseconds changes the user experience from "waiting for the AI" to "instant response." This is the difference between agents people tolerate and agents people prefer.</p>
 
-    <p><strong>Operational simplicity.</strong> The consultancy model &mdash; we manage it, you own it &mdash; aligns incentives correctly. The customer owns the hardware asset. Organized AI provides the managed infrastructure service. Hardware leasing converts the capital expenditure to a monthly operating expense that feels like a SaaS subscription. The customer sees a single monthly line item. Behind that line item is a fully managed agent infrastructure deployment on hardware they own, on their network, under their physical control.</p>
+    <p><strong>Operational simplicity.</strong> The customer owns the hardware asset. The managed service handles everything else. Hardware leasing converts capex to a monthly line item that feels like a SaaS subscription. One invoice. Full infrastructure management. On hardware they own, on their network, under their physical control.</p>
 
-    <p>The cloud is not going away. But for AI agent infrastructure, the edge is where the economics, the security model, and the user experience converge. The hardware already exists in your customers' offices. The infrastructure to make it useful is what Organized AI provides.</p>
+    <p>The cloud is not going away. But for AI agent infrastructure, the edge is where the economics, the security model, and the user experience converge. The hardware already exists in your customers' offices. The infrastructure to make it useful is what we provide.</p>
 
-    <p>For the complete managed infrastructure architecture that runs on this edge hardware, see our companion paper: <a href="infrastructure-playbook.html">The Infrastructure Playbook</a>. For the open-source stack that defines the layers above the infrastructure, see <a href="agent-infrastructure-stack.html">The Agent Infrastructure Stack</a>.</p>
+    <div class="cta-block">
+      <p><strong>Ready to explore whether edge deployment is right for your organization?</strong></p>
+      <a href="../index.html#contact" class="cta-link">Schedule a Consultation</a>
+    </div>
 
     <!-- REFERENCES -->
     <div class="references">
       <h2 id="references">References</h2>
       <ol>
-        <li>Tailscale, Inc. "WireGuard-Based Mesh Networking." <a href="https://tailscale.com" target="_blank">tailscale.com</a></li>
-        <li>Apple, Inc. "Mac Mini Technical Specifications." <a href="https://www.apple.com/mac-mini/specs/" target="_blank">apple.com/mac-mini/specs</a></li>
-        <li>N8N GmbH. "Workflow Automation with 200+ Integrations." <a href="https://n8n.io" target="_blank">n8n.io</a></li>
-        <li>Coolify. "Self-Hosted Application Deployment." <a href="https://coolify.io" target="_blank">coolify.io</a></li>
-        <li>FrawdBot. "Behavioral Analysis for AI Agent Security." <a href="https://frawdbot.ai" target="_blank">frawdbot.ai</a></li>
         <li>McNamara, Colin. "Self-Improving Code: Enterprise Agent Architecture." <a href="https://selfimprovingcode.ai" target="_blank">selfimprovingcode.ai</a></li>
         <li>Hill, Jordaaan. "The Agent Infrastructure Stack." <a href="agent-infrastructure-stack.html">Organized AI Papers</a>, March 2026.</li>
         <li>Hill, Jordaaan and McNamara, Colin. "The Infrastructure Playbook." <a href="infrastructure-playbook.html">Organized AI Papers</a>, March 2026.</li>
