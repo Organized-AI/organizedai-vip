@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organized Teams — Local — Organized AI</title>
+<meta name="description" content="Fully private AI agent workforce running entirely on your hardware. Qwen-Agent, OpenCode in Slack, Paperclip governance, zero cloud dependency.">
+<meta property="og:title" content="Organized Teams — Local — Organized AI">
+<meta property="og:description" content="Fully private. Fully local. Zero cloud dependency.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0c0b09;
+  --bg-secondary: #141210;
+  --bg-card: #1a1814;
+  --bg-card-hover: #211e18;
+  --border: #2a2520;
+  --border-hover: #3a3428;
+  --gold: #F5D623;
+  --gold-dim: #8B7A12;
+  --gold-bright: #FFE94A;
+  --gold-glow: rgba(245, 214, 35, 0.06);
+  --gold-glow-strong: rgba(245, 214, 35, 0.12);
+  --rust: #C4943D;
+  --metal: #8a8a8a;
+  --metal-light: #b0b0b0;
+  --text-primary: #f0ece4;
+  --text-secondary: #a09888;
+  --text-muted: #605848;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --max-width: 1100px;
+  --content-width: 720px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-decoration: none; font-family: var(--font-mono); font-size: 0.9em; transition: color 0.2s; }
+a:hover { color: var(--gold-bright); }
+::selection { background: var(--gold-dim); color: var(--text-primary); }
+
+.container { max-width: var(--content-width); margin: 0 auto; padding: 0 2rem; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2rem 0 1rem; transition: color 0.2s;
+}
+.back-link:hover { color: var(--gold); }
+
+.hero-section {
+  padding: 3rem 0 2rem; border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+.deploy-badge {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  color: var(--metal-light); letter-spacing: 0.14em; text-transform: uppercase;
+  border: 1px solid var(--border-hover); padding: 0.25rem 0.7rem;
+  margin-bottom: 1rem;
+}
+.hero-section h1 {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 800;
+  color: var(--text-primary); line-height: 1.2; margin-bottom: 0.75rem;
+}
+.hero-section .subtitle {
+  font-size: 1.1rem; color: var(--text-secondary); max-width: 560px;
+}
+
+h2 {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin: 2.5rem 0 1rem;
+  letter-spacing: 0.04em;
+}
+h3 {
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+  color: var(--gold); margin: 2rem 0 0.75rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+p { margin-bottom: 1rem; }
+ul { list-style: none; margin-bottom: 1.5rem; }
+ul li {
+  font-size: 0.92rem; padding: 0.4rem 0; color: var(--text-secondary);
+  display: flex; align-items: baseline; gap: 0.75rem;
+}
+ul li::before {
+  content: '→'; color: var(--gold-dim); font-family: var(--font-mono); font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.arch-diagram {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2rem; margin: 2rem 0; font-family: var(--font-mono);
+  font-size: 0.78rem; line-height: 1.8; color: var(--metal-light);
+  white-space: pre; overflow-x: auto;
+}
+
+.callout {
+  background: var(--gold-glow); border-left: 3px solid var(--gold-dim);
+  padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  font-size: 0.92rem; color: var(--text-secondary);
+}
+.callout strong { color: var(--gold); }
+
+.privacy-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 0.5rem 1rem; margin: 1rem 0;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--metal-light); letter-spacing: 0.06em;
+}
+.privacy-badge::before {
+  content: '◆'; color: var(--gold-dim);
+}
+
+/* Gate overlay */
+.gated-content { position: relative; }
+.gate-blur { filter: blur(5px); pointer-events: none; user-select: none; }
+.gate-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(transparent 0%, var(--bg-primary) 40%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.gate-box {
+  background: var(--bg-card); border: 1px solid var(--gold-dim);
+  padding: 2.5rem; max-width: 420px; text-align: center;
+  box-shadow: 0 0 60px rgba(245, 214, 35, 0.05);
+}
+.gate-box h3 {
+  color: var(--text-primary); text-transform: none; letter-spacing: 0;
+  font-size: 1rem; margin-bottom: 0.5rem;
+}
+.gate-box p {
+  font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;
+}
+.gate-box input {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--bg-primary); border: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-mono); font-size: 0.85rem;
+  margin-bottom: 0.75rem; outline: none;
+}
+.gate-box input:focus { border-color: var(--gold-dim); }
+.gate-box button {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--gold); color: var(--bg-primary);
+  border: none; font-family: var(--font-mono); font-size: 0.8rem;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s;
+}
+.gate-box button:hover { background: var(--gold-bright); }
+.gate-box .gate-note {
+  font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0;
+}
+
+.footer {
+  border-top: 1px solid var(--border); padding: 2rem 0; margin-top: 4rem;
+  text-align: center;
+}
+.footer a { font-size: 0.75rem; color: var(--text-muted); }
+
+@media (max-width: 768px) {
+  .hero-section h1 { font-size: 1.4rem; }
+  .arch-diagram { font-size: 0.65rem; padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/" class="back-link">← Back to Organized AI</a>
+</div>
+
+<div class="container">
+  <div class="hero-section">
+    <div class="deploy-badge">Local Deploy</div>
+    <h1>Organized Teams — Local</h1>
+    <p class="subtitle">Fully private AI agent workforce running entirely on your hardware. No data leaves your device. No API costs. No cloud dependency.</p>
+  </div>
+</div>
+
+<!-- VISIBLE CONTENT (ungated) -->
+<div class="container">
+
+  <div class="privacy-badge">Zero data exfiltration — all inference runs on-device</div>
+
+  <h2>Why Local?</h2>
+  <p>Some organizations can't send data to the cloud. Legal, compliance, competitive sensitivity, or simple preference — the reasons vary, but the requirement is absolute: nothing leaves the building.</p>
+  <p>Organized Teams — Local gives you the same structured agent workforce as the Cloud deployment, but running entirely on hardware you own and control. Open-weight models replace frontier APIs. Local inference replaces cloud calls. Your data stays on your device.</p>
+
+  <h2>Architecture Overview</h2>
+  <div class="arch-diagram">┌─────────────────────────────────────────────────┐
+│                YOUR SLACK                       │
+│   DMs · Channels · Threads · Voice              │
+│   (bot token — outbound messages only)          │
+├─────────────────────────────────────────────────┤
+│        OPENCODE / AIDER (Agent Interface)       │
+│   Reads messages · Executes tasks · Replies      │
+│   Powered by local models — no API calls         │
+├─────────────────────────────────────────────────┤
+│          PAPERCLIP (Orchestration)               │
+│   Org charts · Goals · Budgets · Tickets         │
+│   Self-hosted · Embedded Postgres                │
+├─────────────────────────────────────────────────┤
+│         QWEN-AGENT (Inference Framework)         │
+│   Local model serving · Function calling         │
+│   RAG · Code interpreter · Browser automation    │
+├──────────────────┬──────────────────────────────┤
+│  CLAWBOX GUI     │  OPEN-WEIGHT MODELS           │
+│  Local instance  │  Qwen · Llama · Mistral       │
+│  management      │  Zero token costs              │
+├──────────────────┴──────────────────────────────┤
+│           FRAWDBOT (Security Layer)              │
+│   Behavioral analysis · Runs locally             │
+│   Insider threat detection on-device             │
+├─────────────────────────────────────────────────┤
+│          MAC HARDWARE (Infrastructure)           │
+│   Mac Mini · MacBook Pro · M-series silicon      │
+│   Complete data sovereignty                      │
+└─────────────────────────────────────────────────┘</div>
+
+  <div class="callout">
+    <strong>Key difference from Cloud:</strong> The Slack bot token is the only external connection — it routes messages between you and your local agents. All processing, inference, and data storage happens on your hardware. No frontier model APIs, no token billing, no data in transit.
+  </div>
+
+  <h2>Core Components</h2>
+
+  <h3>Slack Interface Layer</h3>
+  <p>Same Slack experience as Cloud. Send a message, get work done. The bot token connects your Slack workspace to the local agent — messages flow in, responses flow out. The processing happens entirely on your machine.</p>
+
+  <h3>OpenCode / Aider</h3>
+  <p>Open-source coding agents that connect to local models instead of cloud APIs. Same back-and-forth chat interface through Slack. Same ability to read code, make changes, run commands, and respond with results. Different engine underneath — one that never phones home.</p>
+
+</div>
+
+<!-- GATED CONTENT -->
+<div class="container gated-content" id="gated-section">
+  <div class="gate-blur" id="blur-content">
+
+    <h3>Qwen-Agent Framework</h3>
+    <p>The inference backbone. Qwen-Agent provides a three-level architecture: atomic components (models + tools), high-level agents, and application-layer assistants. Native MCP integration connects your agents to local tools. The built-in code interpreter runs in a sandboxed Docker container. RAG handles document processing for 1M+ token contexts.</p>
+    <p>Browser automation via BrowserQwen lets agents interact with web interfaces when needed — still running through local models, still keeping data on-device.</p>
+
+    <h3>Open-Weight Models</h3>
+    <p>Choose from the leading open-weight model families: Qwen (Alibaba), Llama (Meta), Mistral, or any model compatible with your hardware. M-series Apple Silicon handles inference efficiently — an M3 Mac Mini runs Qwen-2.5-72B at usable speeds for agent tasks. No per-token billing. No API rate limits. No usage caps.</p>
+
+    <h3>Paperclip Governance</h3>
+    <p>Same organizational structure as Cloud. Org charts define agent hierarchies. Goals cascade from mission to task. Budgets track compute usage (local resource allocation instead of token costs). The ticket system maintains full audit trails. Self-hosted with embedded Postgres — no external database dependency.</p>
+
+    <h3>FrawdBot Security</h3>
+    <p>FrawdBot runs locally alongside your agents. Same 12 behavioral rules, same rolling statistical baselines, same campaign detection — but all analysis happens on your hardware. Agent activity patterns are monitored without any data leaving the device. Insider threat detection that respects the same privacy guarantees as the rest of the stack.</p>
+
+    <h3>ClawBox GUI</h3>
+    <p>Local instance of the management dashboard. Monitor agent activity, review task queues, adjust resource allocation, and manage the agent fleet — all through a browser interface running on localhost. No cloud dashboard, no external telemetry.</p>
+
+    <h2>Hardware Requirements</h2>
+    <div class="arch-diagram">Recommended:
+  Mac Mini M3 Pro (36GB)     — 3-5 agents, mid-size models
+  Mac Mini M3 Max (64GB)     — 5-10 agents, large models
+  MacBook Pro M3 Max (96GB)  — Full team, 70B+ models
+  Mac Studio M3 Ultra (192GB) — Enterprise fleet, multiple 70B+
+
+Minimum:
+  Mac Mini M3 (16GB)         — 1-2 agents, small models (7B)</div>
+
+    <h2>What You Get</h2>
+    <ul>
+      <li>Full agent team running entirely on your hardware</li>
+      <li>Slack as your single interface — same experience as Cloud</li>
+      <li>Complete data sovereignty — nothing leaves the device</li>
+      <li>Zero API costs — no per-token billing, ever</li>
+      <li>Open-weight models you can inspect and audit</li>
+      <li>Organizational governance with local audit trails</li>
+      <li>Behavioral security monitoring on-device</li>
+      <li>No external dependencies beyond Slack bot token</li>
+      <li>Local management dashboard via ClawBox</li>
+      <li>Scales with hardware — add a Mac, add capacity</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Who this is for:</strong> Legal firms, healthcare organizations, defense contractors, financial services, competitive R&D teams — anyone who needs AI agent capabilities without data leaving their control. The trade-off is capability (open-weight vs frontier models) for absolute privacy.
+    </div>
+
+  </div>
+
+  <div class="gate-overlay" id="gate-overlay">
+    <div class="gate-box">
+      <h3>Continue Reading</h3>
+      <p>Enter your email to unlock the full Organized Teams — Local breakdown, including hardware requirements, privacy architecture, and deployment details.</p>
+      <input type="email" id="gate-email" placeholder="you@company.com" required>
+      <button onclick="unlockContent()">Unlock Full Breakdown</button>
+      <p class="gate-note">We'll send you updates on Organized Teams. No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+</div>
+
+<div class="container footer">
+  <a href="/">← Organized AI</a>
+</div>
+
+<script>
+function unlockContent() {
+  const email = document.getElementById('gate-email').value.trim();
+  if (!email || !email.includes('@')) { document.getElementById('gate-email').style.borderColor = '#c44'; return; }
+
+  // Send to Slack via webhook
+  fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Gated Content Unlock',
+      email: email,
+      company: 'Organized Teams — Local',
+      message: 'User unlocked the Local detail page.'
+    })
+  });
+
+  // Unlock content
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+
+  // Remember unlock
+  localStorage.setItem('ot-local-unlocked', '1');
+}
+
+// Check if already unlocked
+if (localStorage.getItem('ot-local-unlocked') === '1') {
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
