@@ -215,6 +215,52 @@ nav .container { display: flex; justify-content: space-between; align-items: cen
 .service-card.highlighted .features li::before { color: var(--gold); }
 .service-card .features li:last-child { border-bottom: none; }
 
+/* ========== ORGANIZED TEAMS ========== */
+.teams-section { padding: 4rem 0; border-top: 1px solid var(--border); }
+.teams-header {
+  text-align: center; margin-bottom: 3rem;
+}
+.teams-header h3 {
+  font-family: var(--font-mono); font-size: 1.6rem; font-weight: 800;
+  color: var(--text-primary); margin-bottom: 0.5rem;
+}
+.teams-header .teams-tagline {
+  font-size: 0.95rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto;
+}
+.teams-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.team-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2.5rem; transition: all 0.25s; position: relative;
+}
+.team-card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+.team-card.cloud { border-color: var(--gold-dim); background: var(--gold-glow); }
+.team-card .deploy-label {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 0.75rem; display: inline-block;
+  border: 1px solid var(--gold-dim); padding: 0.2rem 0.6rem;
+}
+.team-card h4 {
+  font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.35rem;
+}
+.team-card .team-desc {
+  font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;
+}
+.team-card .features { list-style: none; }
+.team-card .features li {
+  font-size: 0.88rem; padding: 0.45rem 0; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 0.75rem;
+}
+.team-card .features li::before {
+  content: '→'; color: var(--gold-dim); font-family: var(--font-mono); font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.team-card.cloud .features li::before { color: var(--gold); }
+.team-card .features li:last-child { border-bottom: none; }
+@media (max-width: 768px) { .teams-grid { grid-template-columns: 1fr; } }
+
 /* ========== STATS ========== */
 .stats-bar {
   display: grid; grid-template-columns: repeat(4, 1fr);
@@ -780,6 +826,51 @@ footer .container {
           </ul>
         </div>
       </div>
+
+      <!-- ORGANIZED TEAMS -->
+      <div class="teams-section">
+        <div class="teams-header">
+          <h3>Organized Teams</h3>
+          <p class="teams-tagline">Run AI agent teams like a company — with org structures, budgets, and Slack as the control plane. Choose your deployment.</p>
+        </div>
+        <div class="teams-grid">
+          <div class="team-card cloud">
+            <div class="deploy-label">Cloud Deploy</div>
+            <h4>Organized Teams — Cloud</h4>
+            <div class="team-desc">Full-stack agent workforce on managed servers.</div>
+            <ul class="features">
+              <li>OpenClaw agent orchestration</li>
+              <li>Claude Code inside Slack</li>
+              <li>Paperclip org charts, goals & governance</li>
+              <li>One-command cloud deploy (EasyClaw)</li>
+              <li>ClawBox GUI (Commonstack)</li>
+              <li>Auto-rotating API keys</li>
+              <li>FrawdBot insider threat detection</li>
+              <li>Tailscale secure mesh</li>
+              <li>Multi-model routing via Commonstack</li>
+              <li>Pay-as-you-go token billing</li>
+            </ul>
+          </div>
+          <div class="team-card">
+            <div class="deploy-label">Local Deploy</div>
+            <h4>Organized Teams — Local</h4>
+            <div class="team-desc">Fully private. Fully local. Zero cloud dependency.</div>
+            <ul class="features">
+              <li>Qwen-Agent framework (local inference)</li>
+              <li>OpenCode / Aider inside Slack</li>
+              <li>Paperclip org charts, goals & governance</li>
+              <li>Mac Mini / MacBook Pro deployment</li>
+              <li>ClawBox GUI (local instance)</li>
+              <li>FrawdBot behavioral monitoring</li>
+              <li>Complete data sovereignty</li>
+              <li>Open-weight models (Qwen, Llama, Mistral)</li>
+              <li>Zero API costs or external billing</li>
+              <li>No external dependencies</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </div>
