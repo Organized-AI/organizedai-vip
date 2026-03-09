@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Unlock — Organized AI</title>
+<style>
+body { background: #0c0b09; color: #f0ece4; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.box { text-align: center; max-width: 500px; padding: 2rem; }
+h1 { font-size: 1.2rem; margin-bottom: 1rem; }
+p { color: #a09888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+a { display: block; color: #F5D623; padding: 0.5rem 0; font-size: 0.85rem; text-decoration: none; }
+a:hover { color: #FFE94A; }
+.done { color: #4CAF50; font-size: 0.8rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="box">
+<h1>Admin Access</h1>
+<p>All gated content has been unlocked for this browser.</p>
+
+<a href="/papers/agent-infrastructure-stack">The Agent Infrastructure Stack</a>
+<a href="/papers/infrastructure-playbook">The Infrastructure Playbook</a>
+<a href="/papers/edge-compute-economics">Edge Compute Economics</a>
+<a href="/teams/cloud">Organized Teams — Cloud</a>
+<a href="/teams/local">Organized Teams — Local</a>
+
+<p class="done">All gates bypassed via localStorage.</p>
+</div>
+
+<script>
+// Unlock all gated content
+localStorage.setItem('paper-stack-unlocked', '1');
+localStorage.setItem('paper-infra-unlocked', '1');
+localStorage.setItem('paper-edge-unlocked', '1');
+localStorage.setItem('ot-cloud-unlocked', '1');
+localStorage.setItem('ot-local-unlocked', '1');
+</script>
+</body>
+</html>
