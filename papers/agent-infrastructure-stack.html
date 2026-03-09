@@ -226,6 +226,38 @@ pre {
 .footer-links a { font-size: 0.7rem; color: var(--text-muted); }
 .footer-links a:hover { color: var(--text-secondary); }
 
+/* Gate overlay */
+.gated-content { position: relative; }
+.gate-blur { filter: blur(5px); pointer-events: none; user-select: none; }
+.gate-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(transparent 0%, var(--bg-primary) 40%);
+  display: flex; align-items: center; justify-content: center; z-index: 10;
+}
+.gate-box {
+  background: var(--bg-card); border: 1px solid var(--gold-dim);
+  padding: 2.5rem; max-width: 420px; text-align: center;
+  box-shadow: 0 0 60px rgba(245, 214, 35, 0.05);
+}
+.gate-box h3 { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; text-transform: none; letter-spacing: 0; }
+.gate-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+.gate-box input {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--bg-primary); border: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-mono); font-size: 0.85rem;
+  margin-bottom: 0.75rem; outline: none;
+}
+.gate-box input:focus { border-color: var(--gold-dim); }
+.gate-box button {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--gold); color: var(--bg-primary);
+  border: none; font-family: var(--font-mono); font-size: 0.8rem;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s;
+}
+.gate-box button:hover { background: var(--gold-bright); }
+.gate-box .gate-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
@@ -305,6 +337,13 @@ pre {
 </pre>
 
     <p>Every layer above the bottom two exists as open-source software, available today. The security and managed infrastructure layers below &mdash; the ones that deploy, monitor, secure, and maintain the whole stack on real hardware &mdash; are what separates a GitHub repository from a production service.</p>
+
+  </div>
+</article>
+
+<div class="gated-content" id="gated-section" style="max-width:720px;margin:0 auto;padding:0 2rem;">
+  <div class="gate-blur" id="blur-content">
+  <div class="paper-content">
 
     <!-- 2. RUNTIME ISOLATION -->
     <h2 id="runtime-isolation">2. Layer 1: Runtime Isolation</h2>
@@ -443,7 +482,18 @@ pre {
     </div>
 
   </div><!-- /paper-content -->
-</article>
+  </div>
+
+  <div class="gate-overlay" id="gate-overlay">
+    <div class="gate-box">
+      <h3>Continue Reading</h3>
+      <p>Enter your email to unlock the full paper — runtime isolation, orchestration patterns, agent commerce, and the managed infrastructure thesis.</p>
+      <input type="email" id="gate-email" placeholder="you@company.com" required>
+      <button onclick="unlockContent()">Unlock Full Paper</button>
+      <p class="gate-note">We'll send you updates on new papers. No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+</div>
 
 <footer class="paper-footer">
   <div class="paper-wide container" style="max-width:1100px;margin:0 auto;padding:0 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
@@ -456,5 +506,22 @@ pre {
   </div>
 </footer>
 
+<script>
+function unlockContent() {
+  const email = document.getElementById('gate-email').value.trim();
+  if (!email || !email.includes('@')) { document.getElementById('gate-email').style.borderColor = '#c44'; return; }
+  fetch('/api/contact', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Paper Unlock', email: email, company: 'Agent Infrastructure Stack', message: 'User unlocked the Agent Infrastructure Stack paper.' })
+  });
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+  localStorage.setItem('paper-stack-unlocked', '1');
+}
+if (localStorage.getItem('paper-stack-unlocked') === '1') {
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+}
+</script>
 </body>
 </html>
