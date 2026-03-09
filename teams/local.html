@@ -11,6 +11,7 @@
 <meta property="og:site_name" content="Organized AI">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -266,6 +267,10 @@ ul li::before {
 
     <h3>ClawBox GUI</h3>
     <p>Local instance of the management dashboard. Monitor agent activity, review task queues, adjust resource allocation, and manage the agent fleet — all through a browser interface running on localhost. No cloud dashboard, no external telemetry.</p>
+
+    <h3>PostHog Product Analytics</h3>
+    <p>PostHog runs self-hosted alongside your agent fleet — same product analytics, session replay, and feature flags as the Cloud deployment, but entirely on your hardware. Track agent usage patterns, task completion rates, and feature adoption without any data leaving the device. HogAI natural language queries work against your local ClickHouse instance.</p>
+    <p>Event data stays in your local PostgreSQL and ClickHouse databases. No external telemetry. No cloud analytics. Complete analytical sovereignty matching your data sovereignty.</p>
 
     <h3>Observability Stack</h3>
     <p>Full OTEL-based observability running locally. Claude Code Hooks (or OpenCode equivalents) emit spans to a local OTEL Collector. Prometheus captures infrastructure metrics. Grafana dashboards visualize token usage, task completion rates, model routing decisions, and resource utilization — all on localhost.</p>

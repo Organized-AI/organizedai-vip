@@ -11,6 +11,7 @@
 <meta property="og:site_name" content="Organized AI">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -251,6 +252,10 @@ ul li::before {
     <h3>EasyClaw Deployment</h3>
     <p>One command to launch your entire agent infrastructure. EasyClaw provisions a Hetzner cloud server, hardens SSH with key-only authentication, configures UFW firewall and fail2ban, installs OpenClaw, and sets up Tailscale mesh networking. From zero to production agent team in under an hour.</p>
     <p>Auto-rotating API keys ensure credential hygiene without manual intervention. Systemd manages agent processes. Automated cleanup prevents resource bloat.</p>
+
+    <h3>PostHog Product Analytics</h3>
+    <p>PostHog provides the product analytics layer for the entire agent stack. Track agent usage patterns, feature adoption, and user behavior across all channels. Session replay captures exactly what happened during every interaction. Feature flags enable gradual rollouts of new agent capabilities. HogAI lets you query event data in natural language — ask "which agents had the highest task completion rate last week" and get answers instantly.</p>
+    <p>In the Cloud deployment, PostHog runs as a managed service integrated with the OTEL pipeline. Event data flows to ClickHouse for high-cardinality analytics and materialized views power real-time dashboards.</p>
 
     <h3>Observability Stack</h3>
     <p>Every agent action is instrumented. Claude Code Hooks capture tool usage, task completions, and session metrics. OpenTelemetry pipelines route telemetry to Prometheus (infrastructure), Grafana Tempo (traces), Langfuse (LLM observability), and PostHog (product analytics). Grafana dashboards surface cost savings, token burn rate, routing tier distribution, cache hit rates, and SLA uptime in real time.</p>
