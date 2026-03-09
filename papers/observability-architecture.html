@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Observability Architecture — Organized AI</title>
+<meta name="description" content="Full-stack observability for AI agent teams: OpenTelemetry hooks, KPI dashboards, token economics, fleet orchestration, and behavioral security monitoring.">
+<meta property="og:title" content="The Observability Architecture — Organized AI">
+<meta property="og:description" content="OTEL + Claude Hooks → KPI Dashboards. The complete observability stack for managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0c0b09;
+  --bg-secondary: #141210;
+  --bg-card: #1a1814;
+  --bg-card-hover: #211e18;
+  --border: #2a2520;
+  --border-hover: #3a3428;
+  --gold: #F5D623;
+  --gold-dim: #8B7A12;
+  --gold-bright: #FFE94A;
+  --gold-glow: rgba(245, 214, 35, 0.06);
+  --gold-glow-strong: rgba(245, 214, 35, 0.12);
+  --rust: #C4943D;
+  --metal: #8a8a8a;
+  --metal-light: #b0b0b0;
+  --text-primary: #f0ece4;
+  --text-secondary: #a09888;
+  --text-muted: #605848;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --max-width: 1100px;
+  --content-width: 720px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-decoration: none; font-family: var(--font-mono); font-size: 0.9em; transition: color 0.2s; }
+a:hover { color: var(--gold-bright); }
+::selection { background: var(--gold-dim); color: var(--text-primary); }
+
+.container { max-width: var(--content-width); margin: 0 auto; padding: 0 2rem; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2rem 0 1rem; transition: color 0.2s;
+}
+.back-link:hover { color: var(--gold); }
+
+.paper-header {
+  padding: 3rem 0 2rem; border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+.paper-meta-top {
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem;
+}
+.paper-header h1 {
+  font-family: var(--font-mono); font-size: 1.8rem; font-weight: 800;
+  color: var(--text-primary); line-height: 1.2; margin-bottom: 0.75rem;
+}
+.paper-header .subtitle {
+  font-size: 1.05rem; color: var(--text-secondary); max-width: 600px;
+}
+
+h2 {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin: 2.5rem 0 1rem;
+  letter-spacing: 0.04em;
+}
+h3 {
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+  color: var(--gold); margin: 2rem 0 0.75rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+p { margin-bottom: 1rem; }
+ul { list-style: none; margin-bottom: 1.5rem; }
+ul li {
+  font-size: 0.92rem; padding: 0.4rem 0; color: var(--text-secondary);
+  display: flex; align-items: baseline; gap: 0.75rem;
+}
+ul li::before {
+  content: '->'; color: var(--gold-dim); font-family: var(--font-mono); font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.arch-diagram {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2rem; margin: 2rem 0; font-family: var(--font-mono);
+  font-size: 0.72rem; line-height: 1.7; color: var(--metal-light);
+  white-space: pre; overflow-x: auto;
+}
+
+.callout {
+  background: var(--gold-glow); border-left: 3px solid var(--gold-dim);
+  padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  font-size: 0.92rem; color: var(--text-secondary);
+}
+.callout strong { color: var(--gold); }
+
+table {
+  width: 100%; border-collapse: collapse; margin: 1.5rem 0;
+  font-size: 0.85rem;
+}
+th {
+  text-align: left; font-family: var(--font-mono); font-size: 0.72rem;
+  font-weight: 700; color: var(--gold-dim); letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+td:first-child {
+  font-family: var(--font-mono); font-size: 0.82rem; color: var(--metal-light);
+}
+
+/* Gate overlay */
+.gated-content { position: relative; }
+.gate-blur { filter: blur(5px); pointer-events: none; user-select: none; }
+.gate-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(transparent 0%, var(--bg-primary) 40%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.gate-box {
+  background: var(--bg-card); border: 1px solid var(--gold-dim);
+  padding: 2.5rem; max-width: 420px; text-align: center;
+  box-shadow: 0 0 60px rgba(245, 214, 35, 0.05);
+}
+.gate-box h3 {
+  color: var(--text-primary); text-transform: none; letter-spacing: 0;
+  font-size: 1rem; margin-bottom: 0.5rem;
+}
+.gate-box p {
+  font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;
+}
+.gate-box input {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--bg-primary); border: 1px solid var(--border);
+  color: var(--text-primary); font-family: var(--font-mono); font-size: 0.85rem;
+  margin-bottom: 0.75rem; outline: none;
+}
+.gate-box input:focus { border-color: var(--gold-dim); }
+.gate-box button {
+  width: 100%; padding: 0.7rem 1rem;
+  background: var(--gold); color: var(--bg-primary);
+  border: none; font-family: var(--font-mono); font-size: 0.8rem;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s;
+}
+.gate-box button:hover { background: var(--gold-bright); }
+.gate-box .gate-note {
+  font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; margin-bottom: 0;
+}
+
+.footer {
+  border-top: 1px solid var(--border); padding: 2rem 0; margin-top: 4rem;
+  text-align: center;
+}
+.footer a { font-size: 0.75rem; color: var(--text-muted); }
+
+@media (max-width: 768px) {
+  .paper-header h1 { font-size: 1.3rem; }
+  .arch-diagram { font-size: 0.6rem; padding: 1rem; }
+  table { font-size: 0.78rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/" class="back-link">← Back to Organized AI</a>
+</div>
+
+<div class="container">
+  <div class="paper-header">
+    <div class="paper-meta-top">March 2026 · Jordaaan Hill · 14 min read</div>
+    <h1>The Observability Architecture</h1>
+    <p class="subtitle">OTEL + Claude Code Hooks to KPI Dashboards — how we instrument, monitor, and secure every layer of the AI agent stack.</p>
+  </div>
+</div>
+
+<!-- VISIBLE CONTENT (ungated) -->
+<div class="container">
+
+  <h2>Why Observability Matters for Agent Teams</h2>
+  <p>When autonomous agents make decisions, execute code, and interact with production systems, you need visibility into every layer. Not just "is it running" — but what is it doing, what is it costing, and is anyone gaming the system. Traditional APM doesn't cover this. You need purpose-built observability for AI agent infrastructure.</p>
+
+  <p>This paper documents the full observability architecture powering Organized AI's managed agent deployments — from Claude Code hooks that capture developer interactions, through OpenTelemetry pipelines that route telemetry, to KPI dashboards that surface actionable metrics and FrawdBot security that catches behavioral anomalies before they become incidents.</p>
+
+</div>
+
+<!-- GATED CONTENT -->
+<div class="container gated-content" id="gated-section">
+  <div class="gate-blur" id="blur-content">
+
+  <h2>The Eight-Layer Stack</h2>
+  <p>The observability architecture spans eight distinct layers, each with specific responsibilities. Data flows upward from instrumentation to storage, while security monitoring operates as a cross-cutting concern with access to every layer.</p>
+
+  <div class="arch-diagram">LAYER 1 — CLAUDE CODE HOOKS (Developer Workstation)
+  PostToolUse (async) → Write|Edit|Bash → file changes + test results
+  Stop (agent)        → task completion verification + test pass rate
+  SessionEnd          → session duration, tool calls, git diff stats
+  PreCompact          → context utilization %, token burn rate
+  Emitter: .claude/hooks/otel-emit.js → @opentelemetry/sdk-node
+                              │
+                              │ OTLP/HTTP :4318
+                              ▼
+LAYER 2 — OTEL COLLECTOR (Mac Mini M4)
+  Receivers → Batch Processor (5s / 100) → Exporters
+  Fan-out to Tier 1 (infra) and Tier 2 (LLM)
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+LAYER 3 — AGENT RUNTIME
+  OpenClaw Gateway :3000     ClawRouter (14-dimension scoring, &lt;1ms)
+  WhatsApp · Telegram · Discord · Web API · iMessage · Signal
+  Ollama :11434 → SIMPLE(3B) · MEDIUM(8B) · COMPLEX(70B) · CODE(7B)
+  diagnostics-otel → GenAI semantic convention spans
+                              │
+                              ▼
+LAYER 4 — TOKEN FLOAT CACHING
+  Semantic Cache (Redis :6379) → exact match + vector similarity (0.92)
+  Token Broker :5050 → provider arbitrage across 6+ providers
+  Token Pool Manager → pre-purchased bulk pools + spot pricing
+  Cache hits = $0 cost = pure margin → funds hardware leases
+                              │
+                              ▼
+LAYER 5 — KPI DASHBOARDS
+  Prometheus :9090 → time-series metrics, 15s scrape
+  Grafana Tempo :3200 → distributed traces, TraceQL
+  Langfuse :3100 → trace explorer, prompt mgmt, eval scores
+  PostHog → product analytics, feature flags, HogAI queries
+  Grafana :3001 → Cost | Tokens | Routing | SLA | Cache | Float
+                              │
+                              ▼
+LAYER 6 — DATA PERSISTENCE
+  PostgreSQL :5432 → langfuse_db · posthog_db · grafana_db · frawdbot_db · token_float_db
+  ClickHouse :8123 → metrics · events · traces · fraud analytics · cache analytics
+  S3 Cold Storage → parquet export · backups · data lake · forensic archive
+                              │
+                              ▼
+LAYER 7 — FRAWDBOT SECURITY (cross-cutting)
+  Agent Fraud    → rogue tools, skill tampering, loop exploitation
+  Insider Threat → off-hours access, privilege escalation, data exfil
+  Cost Fraud     → token laundering, tier manipulation, budget bypass
+  Prompt Security → injection detection, jailbreak, PII exfiltration
+  Cache Fraud    → cache poisoning, pool draining, rate manipulation
+                              │
+                              ▼
+LAYER 8 — CLAWHERD FLEET ORCHESTRATOR
+  Git repo as source of truth → configs, skills, fleet definitions
+  Pull-based agent → clawherd-agent syncs every 5 min via launchd
+  Roles: control-plane · dev-workstation · client-node · studio-lease
+  SOPS + age encryption → secrets in git, decrypted only on target</div>
+
+  <h2>Layer 1: Claude Code Hooks</h2>
+  <p>Every developer interaction with Claude Code generates telemetry. Four hook types capture different event classes:</p>
+  <ul>
+    <li><strong>PostToolUse</strong> — fires asynchronously on Write, Edit, and Bash operations. Captures file changes and test results without blocking the developer workflow.</li>
+    <li><strong>Stop</strong> — agent-type hook that verifies task completion. Checks test pass rate before allowing the session to end.</li>
+    <li><strong>SessionEnd</strong> — logs session duration, total tool calls, and git diff statistics for productivity tracking.</li>
+    <li><strong>PreCompact</strong> — captures context window utilization percentage and token burn rate before context compaction occurs.</li>
+  </ul>
+  <p>All hooks feed into <code>.claude/hooks/otel-emit.js</code>, which converts JSON stdin into proper OpenTelemetry spans using <code>@opentelemetry/sdk-node</code>. Spans ship to the OTEL Collector via OTLP/HTTP on port 4318.</p>
+
+  <h2>Layer 2: OTEL Collector</h2>
+  <p>The central nervous system. Receives telemetry from both Claude Code Hooks and OpenClaw's <code>diagnostics-otel</code> plugin. A batch processor (5-second timeout, 100-span batches) smooths traffic before fan-out to downstream exporters.</p>
+  <p>Two tiers of export: Tier 1 sends infrastructure metrics to Prometheus and traces to Tempo. Tier 2 routes LLM-specific data to Langfuse and product analytics to PostHog. This separation keeps infrastructure SRE dashboards fast while giving ML teams their own observability plane.</p>
+
+  <h2>Layer 3: Agent Runtime</h2>
+  <p>OpenClaw Gateway on port 3000 handles inbound messages from six channels: WhatsApp, Telegram, Discord, Web API, iMessage, and Signal. ClawRouter scores every request across 14 dimensions in under 1ms, routing to the optimal model tier.</p>
+  <p>Local inference through Ollama serves four model tiers: SIMPLE (3B parameters), MEDIUM (8B), COMPLEX (70B), and CODE (7B specialized). The <code>diagnostics-otel</code> plugin emits GenAI semantic convention spans for every inference call — model, tokens in/out, latency, and cost.</p>
+
+  <h2>Layer 4: Token Float Caching</h2>
+  <p>The economic engine. Three caching strategies combine to eliminate redundant inference costs:</p>
+  <ul>
+    <li><strong>Exact Match</strong> — hash lookup in under 1ms. Identical prompts return cached responses.</li>
+    <li><strong>Semantic Cache</strong> — vector similarity using <code>all-MiniLM-L6-v2</code> embeddings at 0.92 threshold. Similar-enough prompts hit cache.</li>
+    <li><strong>KV Cache (LMCache)</strong> — reuses computed key-value pairs for shared prefix optimization in local models.</li>
+  </ul>
+  <p>Combined hit rate target: 30-50%. Every cache hit costs $0 — pure margin.</p>
+
+  <div class="callout">
+    <strong>Token Float Economics:</strong> The Token Broker on port 5050 routes requests across providers at wholesale rates (Ollama, OpenRouter, Anthropic, OpenAI, Google, Groq) while billing clients at retail. The margin from cache hits + local inference + provider arbitrage funds Mac Studio hardware leases. Phase 1: 3 units at $900-1,200/mo. Phase 3: 15 units at $4,500-6,000/mo. ROI per unit: ~10-15x lease cost in client revenue.
+  </div>
+
+  <h2>Layer 5: KPI Dashboards</h2>
+  <h3>Tier 1 — Infrastructure</h3>
+  <ul>
+    <li><strong>Prometheus</strong> (:9090) — time-series metrics with 15-second scrape interval</li>
+    <li><strong>Grafana Tempo</strong> (:3200) — distributed trace storage with TraceQL queries</li>
+    <li><strong>AlertManager</strong> (:9093) — alert routing, deduplication, webhook receivers</li>
+  </ul>
+
+  <h3>Tier 2 — LLM Observability</h3>
+  <ul>
+    <li><strong>Langfuse</strong> (:3100) — trace explorer, prompt version management, evaluation scores, cost analytics per trace</li>
+    <li><strong>PostHog</strong> — product analytics, feature flags, HogAI natural language queries over event data</li>
+  </ul>
+
+  <p>Grafana dashboards on port 3001 surface: Cost Savings, Token Burn Rate, Routing Tier Distribution, Task Completion Rate, Latency p95, SLA Uptime, Cache Hit Rate, and Float Balance.</p>
+
+  <h2>Layer 6: Data Persistence</h2>
+
+  <table>
+    <tr><th>Store</th><th>Databases</th><th>Purpose</th></tr>
+    <tr><td>PostgreSQL :5432</td><td>langfuse_db, posthog_db, grafana_db, frawdbot_db, token_float_db</td><td>Transactional data, audit trails, billing ledger</td></tr>
+    <tr><td>ClickHouse :8123</td><td>Metrics, Events, Traces, Fraud Analytics, Cache Analytics</td><td>High-cardinality OLAP, materialized P&amp;L views</td></tr>
+    <tr><td>S3 Cold Storage</td><td>Parquet, DB Backups, Data Lake, Forensic Archive, Billing Archive</td><td>Long-term retention, compliance, ML training data</td></tr>
+  </table>
+
+  <p>Data lifecycle: hot (PostgreSQL, real-time) to warm (ClickHouse, analytical) to cold (S3 Parquet, archived). Daily partitioning with Snappy compression. Nightly pg_dump. Weekly ClickHouse backups to S3. Forensic archives are immutable with chain-of-custody logging.</p>
+
+  <h2>Layer 7: FrawdBot Security</h2>
+  <p>Five detection modules run continuously against all agent activity:</p>
+  <ul>
+    <li><strong>Agent Fraud</strong> — rogue tool usage, skill file tampering, loop exploitation, token abuse patterns</li>
+    <li><strong>Insider Threat</strong> — off-hours access, privilege escalation, data exfiltration, config tampering</li>
+    <li><strong>Cost Fraud</strong> — token laundering, tier manipulation, routing bypass, budget circumvention</li>
+    <li><strong>Prompt Security</strong> — injection detection, jailbreak attempts, PII exfiltration signals</li>
+    <li><strong>Cache/Broker Fraud</strong> — cache poisoning, pool draining, rate manipulation, billing fraud</li>
+  </ul>
+  <p>Ingestion spans four sources: Langfuse API traces, direct PostgreSQL reads, Prometheus PromQL baselines, and AlertManager webhooks. Response actions: kill session (Gateway API), adjust trust score (ClawRouter), push alerts (AlertManager), write to forensic storage.</p>
+
+  <h2>Layer 8: ClawHerd Fleet Orchestrator</h2>
+  <p>Fleet configuration management for distributed Mac hardware. A Git repository serves as the single source of truth — configs, skill manifests, fleet definitions, and encrypted secrets all version-controlled.</p>
+  <p>Every Mac runs <code>clawherd-agent</code>, a pull-based daemon syncing every 5 minutes via launchd. The agent resolves its role from <code>inventory.yaml</code>, diffs desired state against actual state, and applies only what changed. Idempotent. No push. No SSH.</p>
+
+  <h3>Roles</h3>
+  <ul>
+    <li><strong>control-plane</strong> — full stack: all services, all skills, all models (Mac Mini M4)</li>
+    <li><strong>dev-workstation</strong> — hooks + OTEL only (MacBook M1 Pro)</li>
+    <li><strong>client-node</strong> — OpenClaw + Ollama + per-client skill profile</li>
+    <li><strong>studio-lease</strong> — inherits control-plane + token float + remote metrics shipping</li>
+  </ul>
+
+  <h3>Skills Distribution</h3>
+  <p>A <code>registry.yaml</code> marketplace catalog defines skill bundles: core (free), marketing, sales, product, data, gtm, dev. Per-client resolution combines tier minimums with vertical selection and addon toggles. Skills sync via rsync to <code>~/.openclaw/skills/</code> with hot-reload on the Gateway. Semver versioning with canary rollouts and automatic rollback on health check failure.</p>
+
+  <h3>Secrets Management</h3>
+  <p>SOPS + age encryption at rest in Git. The age private key lives in macOS Keychain. Decrypted only on the target Mac at apply time. Never logged. Never in OTEL spans.</p>
+
+  <h2>Port Map</h2>
+  <table>
+    <tr><th>Port</th><th>Service</th><th>Layer</th></tr>
+    <tr><td>:3000</td><td>OpenClaw Gateway</td><td>Agent Runtime</td></tr>
+    <tr><td>:3001</td><td>Grafana Dashboards</td><td>Visualization</td></tr>
+    <tr><td>:3100</td><td>Langfuse</td><td>LLM Observability</td></tr>
+    <tr><td>:3200</td><td>Grafana Tempo</td><td>Trace Storage</td></tr>
+    <tr><td>:4000</td><td>FrawdBot Engine</td><td>Security</td></tr>
+    <tr><td>:4001</td><td>FrawdBot Dashboard</td><td>Security UI</td></tr>
+    <tr><td>:4317</td><td>OTEL Collector gRPC</td><td>Internal</td></tr>
+    <tr><td>:4318</td><td>OTEL Collector HTTP</td><td>Primary Ingress</td></tr>
+    <tr><td>:5050</td><td>Token Broker</td><td>Provider Arbitrage</td></tr>
+    <tr><td>:5432</td><td>PostgreSQL</td><td>Data Persistence</td></tr>
+    <tr><td>:6379</td><td>Redis</td><td>Semantic Cache</td></tr>
+    <tr><td>:8000</td><td>Coolify Dashboard</td><td>Deployment PaaS</td></tr>
+    <tr><td>:8123</td><td>ClickHouse</td><td>OLAP Analytics</td></tr>
+    <tr><td>:9090</td><td>Prometheus</td><td>Metrics Storage</td></tr>
+    <tr><td>:9093</td><td>AlertManager</td><td>Alert Routing</td></tr>
+    <tr><td>:11434</td><td>Ollama</td><td>Local Inference</td></tr>
+  </table>
+
+  <h2>Metric Namespaces</h2>
+  <p>Seven metric namespaces cover the full stack:</p>
+  <ul>
+    <li><strong>openclaw.*</strong> — tokens, cost.usd, run.duration_ms, context.tokens, message.processed</li>
+    <li><strong>claude.hooks.*</strong> — events_total, tasks_done, test_pass_rate, files_modified, session_dur_s, context_util</li>
+    <li><strong>clawrouter.*</strong> — decisions (by tier/model), score_ms, fallbacks</li>
+    <li><strong>frawdbot.*</strong> — threats_detected, agent_trust_score, quarantine_actions, prompt_injections, exfil_attempts</li>
+    <li><strong>cache.*</strong> — exact_hits, semantic_hits, misses, hit_rate, savings_usd, latency_saved_ms</li>
+    <li><strong>broker.*</strong> — requests_routed, cost_per_request, retail_rate, wholesale_rate, margin_per_request, pool_remaining</li>
+    <li><strong>float.*</strong> — monthly_gross, lease_coverage, cache_contribution, local_contribution, arbitrage_contribution</li>
+  </ul>
+
+  <div class="callout">
+    <strong>Deployment:</strong> The entire stack deploys via Coolify (:8000), a self-hosted PaaS managing Docker containers. Stack templates cover AI (OpenClaw+Ollama+Router), Cache (Redis+Broker), Observability (Prometheus+Grafana+Tempo+OTEL), Data (PostgreSQL+ClickHouse+Langfuse), and Security (FrawdBot+AlertManager). Caddy reverse proxy handles SSL termination with auto-routing. Git-push deploys. One-click client provisioning.
+  </div>
+
+  </div>
+
+  <div class="gate-overlay" id="gate-overlay">
+    <div class="gate-box">
+      <h3>Continue Reading</h3>
+      <p>Enter your email to unlock the full observability architecture — stack diagrams, port maps, metric namespaces, token economics, and fleet orchestration.</p>
+      <input type="email" id="gate-email" placeholder="you@company.com" required>
+      <button onclick="unlockContent()">Unlock Full Paper</button>
+      <p class="gate-note">We'll send you updates on Organized AI infrastructure. No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+</div>
+
+<div class="container footer">
+  <a href="/">← Organized AI</a>
+</div>
+
+<script>
+function unlockContent() {
+  const email = document.getElementById('gate-email').value.trim();
+  if (!email || !email.includes('@')) { document.getElementById('gate-email').style.borderColor = '#c44'; return; }
+
+  fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Gated Content Unlock',
+      email: email,
+      company: 'Paper — Observability Architecture',
+      message: 'User unlocked the Observability Architecture paper.'
+    })
+  });
+
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+  localStorage.setItem('paper-otel-unlocked', '1');
+}
+
+if (localStorage.getItem('paper-otel-unlocked') === '1') {
+  document.getElementById('blur-content').classList.remove('gate-blur');
+  document.getElementById('gate-overlay').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

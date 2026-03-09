@@ -267,6 +267,11 @@ ul li::before {
     <h3>ClawBox GUI</h3>
     <p>Local instance of the management dashboard. Monitor agent activity, review task queues, adjust resource allocation, and manage the agent fleet — all through a browser interface running on localhost. No cloud dashboard, no external telemetry.</p>
 
+    <h3>Observability Stack</h3>
+    <p>Full OTEL-based observability running locally. Claude Code Hooks (or OpenCode equivalents) emit spans to a local OTEL Collector. Prometheus captures infrastructure metrics. Grafana dashboards visualize token usage, task completion rates, model routing decisions, and resource utilization — all on localhost.</p>
+    <p>Langfuse runs self-hosted for LLM trace exploration, prompt management, and evaluation scoring. FrawdBot monitors all agent activity patterns locally. No telemetry leaves the device. The same seven metric namespaces available in the Cloud deployment run entirely on your hardware.</p>
+    <p><a href="/papers/observability-architecture.html">Read the full Observability Architecture paper →</a></p>
+
     <h2>Hardware Requirements</h2>
     <div class="arch-diagram">Recommended:
   Mac Mini M3 Pro (36GB)     — 3-5 agents, mid-size models

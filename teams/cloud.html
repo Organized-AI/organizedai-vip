@@ -252,6 +252,11 @@ ul li::before {
     <p>One command to launch your entire agent infrastructure. EasyClaw provisions a Hetzner cloud server, hardens SSH with key-only authentication, configures UFW firewall and fail2ban, installs OpenClaw, and sets up Tailscale mesh networking. From zero to production agent team in under an hour.</p>
     <p>Auto-rotating API keys ensure credential hygiene without manual intervention. Systemd manages agent processes. Automated cleanup prevents resource bloat.</p>
 
+    <h3>Observability Stack</h3>
+    <p>Every agent action is instrumented. Claude Code Hooks capture tool usage, task completions, and session metrics. OpenTelemetry pipelines route telemetry to Prometheus (infrastructure), Grafana Tempo (traces), Langfuse (LLM observability), and PostHog (product analytics). Grafana dashboards surface cost savings, token burn rate, routing tier distribution, cache hit rates, and SLA uptime in real time.</p>
+    <p>The Token Float Caching Layer eliminates redundant inference costs through semantic caching (Redis) and provider arbitrage (Token Broker). Cache hits cost $0 — pure margin that funds infrastructure expansion. Seven metric namespaces cover the full stack from OpenClaw runtime to FrawdBot security.</p>
+    <p><a href="/papers/observability-architecture.html">Read the full Observability Architecture paper →</a></p>
+
     <h2>Deployment Flow</h2>
     <div class="arch-diagram">1. Run EasyClaw          →  Server provisioned &amp; secured
 2. Configure Paperclip   →  Org chart, goals, budgets set
