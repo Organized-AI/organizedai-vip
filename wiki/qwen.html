@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Alibaba's Qwen family. Covers Qwen3, Qwen3-Coder, the Qwen-Agent framework, and where Qwen fits in managed agent infrastructure.">
+<meta property="og:title" content="Qwen — LLM Wiki — Organized AI">
+<meta property="og:description" content="Alibaba's Qwen open-weights model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Qwen</h1>
+    <div class="subtitle">Alibaba's open-weights family — Qwen3, Qwen3-Coder — paired with the Qwen-Agent framework. The reference open model for coding agents.</div>
+    <div class="abstract">
+      Qwen is the open-weights family that consistently ships strongest on tool use and coding. Qwen3-Coder rivals closed frontier models on code benchmarks, and the Qwen-Agent framework bundles tool calling, MCP support, and browser / code-interpreter primitives. Apache 2.0 licensing removes the scale restrictions that ship with Llama.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Alibaba</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Agent Framework</span>
+      <span class="wiki-tag">Coder</span>
+      <span class="wiki-tag">Apache 2.0</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Alibaba Cloud (Hangzhou)</dd>
+      <dt>Released</dt><dd>Qwen (2023); Qwen3 (2025)</dd>
+      <dt>Current line</dt><dd>Qwen3 (0.6B–235B) &middot; Qwen3-Coder &middot; Qwen-Agent</dd>
+      <dt>License</dt><dd>Apache 2.0 (most variants)</dd>
+      <dt>Hosting</dt><dd>Self-hosted (vLLM, Ollama); hosted via DashScope, Together, Fireworks</dd>
+      <dt>Context window</dt><dd>32K–1M tokens depending on variant</dd>
+      <dt>Modalities</dt><dd>Text, vision (Qwen-VL), audio (Qwen-Audio)</dd>
+      <dt>Architecture</dt><dd>Dense and MoE variants</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Qwen is Alibaba's open-weights LLM family, first released in 2023. Qwen3 (2025) shipped a tiered lineup from 0.6B to 235B parameters, with mixture-of-experts at the top and dense models filling out the smaller tiers. Qwen3-Coder is the specialized coding variant and, on most benchmarks, the strongest open model for agentic code tasks.</p>
+    <p>The Qwen-Agent framework is as important as the weights. It wraps tool calling, MCP server integration, a Python code interpreter, a browsing agent, and retrieval into a cohesive agent primitive — the same design patterns Claude Agent SDK and Stripe's Minions use, but on open infrastructure. For teams building managed AI services that can't rely on closed APIs, Qwen + Qwen-Agent is the closest thing to a turnkey stack.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Qwen3-235B-A22B</strong> — flagship MoE. Frontier-competitive general model.</li>
+      <li><strong>Qwen3-Coder</strong> — code-specialized variant. The reference open model for coding agents; Aider and SWE-bench scores rival closed frontier.</li>
+      <li><strong>Qwen3 7B / 14B / 32B</strong> — dense tiers. Sweet spot for self-hosted edge deployments.</li>
+      <li><strong>Qwen-Agent</strong> — agent framework. Tool calling, MCP, browser, code interpreter, RAG.</li>
+      <li><strong>Qwen-VL / Qwen-Audio</strong> — multimodal variants.</li>
+    </ul>
+
+    <h2>Where Qwen Fits</h2>
+    <p>Qwen is the default open model for coding agents and for workloads where tool-use reliability matters more than raw benchmark scores. Apache 2.0 licensing sidesteps the enterprise-scale restrictions in Llama's license. Within the Claw ecosystem, Qwen3-Coder powers OpenClaw and NanoClaw — the agent runtimes that handle interior code loops on customer hardware. Qwen-Agent is the framework the ecosystem is named after.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Provenance.</strong> Some regulated and government customers have restrictions on Chinese-origin models. Check procurement policy.</li>
+      <li><strong>Documentation.</strong> English documentation is solid but lags the Chinese docs. Some framework features are easier to discover by reading the source.</li>
+      <li><strong>Tool-use reliability</strong> is the best in the open-weights tier but still below Claude at frontier scale. Plan for retry logic on long tool chains.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Qwen3-Coder is the engine behind OpenClaw and NanoClaw. It runs on customer Mac Minis via vLLM or llama.cpp, with Qwen-Agent wrapping the agent loop and MCP bridges connecting to Claude Code Slack, FrawdBot, and the observability stack. For teams that want a pure-open stack — no closed API calls — Qwen is typically the highest-capability choice. See <a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack</a> for the full topology.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://qwen.ai" target="_blank">Qwen — Alibaba</a></li>
+      <li><a href="https://github.com/QwenLM" target="_blank">QwenLM on GitHub</a></li>
+      <li><a href="https://github.com/QwenLM/Qwen-Agent" target="_blank">Qwen-Agent framework</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepSeek — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for DeepSeek. Covers DeepSeek-V3, DeepSeek-R1, MIT-licensed open reasoning weights, and where DeepSeek fits in managed agent infrastructure.">
+<meta property="og:title" content="DeepSeek — LLM Wiki — Organized AI">
+<meta property="og:description" content="DeepSeek's open-weights reasoning model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>DeepSeek</h1>
+    <div class="subtitle">The open-weights reasoning family — DeepSeek-V3 and DeepSeek-R1. MIT-licensed weights and aggressive hosted pricing.</div>
+    <div class="abstract">
+      DeepSeek-R1 was the first open-weights model to match o1-class reasoning performance, released with MIT-licensed weights and a paper describing the pure-RL training approach. The hosted API sits well below frontier pricing. For reasoning-heavy workloads that need to be self-hostable, DeepSeek is the current default.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">DeepSeek</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Reasoning</span>
+      <span class="wiki-tag">MIT License</span>
+      <span class="wiki-tag">Low Cost</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>DeepSeek (Hangzhou)</dd>
+      <dt>Released</dt><dd>DeepSeek LLM (2023); DeepSeek-R1 (January 2025)</dd>
+      <dt>Current line</dt><dd>DeepSeek-V3 &middot; DeepSeek-R1 &middot; DeepSeek-Coder</dd>
+      <dt>License</dt><dd>MIT (weights); DeepSeek License for some variants</dd>
+      <dt>Hosting</dt><dd>DeepSeek API, Together, Fireworks, self-hosted via vLLM</dd>
+      <dt>Context window</dt><dd>128K tokens</dd>
+      <dt>Modalities</dt><dd>Text; DeepSeek-VL for vision</dd>
+      <dt>Architecture</dt><dd>Mixture-of-experts with multi-head latent attention</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>DeepSeek is a Chinese research lab spun out of the High-Flyer quant hedge fund. It rose to global attention in January 2025 with DeepSeek-R1 — the first open-weights model to match OpenAI's o1 on reasoning benchmarks. The paper documented a pure reinforcement-learning approach to reasoning (no supervised fine-tuning on chain-of-thought traces) that reshaped the research conversation about how reasoning emerges.</p>
+    <p>Beyond the reasoning story, DeepSeek-V3 is a strong general model at roughly one-tenth the hosted price of US frontier labs. The combination of MIT-licensed weights and cheap API access has made DeepSeek the pragmatic choice for teams that want reasoning capability either in-house or at scale without frontier pricing.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>DeepSeek-R1</strong> — reasoning. Open-weights equivalent to the o-series. Use when correctness on math / code / logic matters more than latency.</li>
+      <li><strong>DeepSeek-V3</strong> — general. MoE architecture, ~671B parameters with 37B active. Frontier-adjacent quality.</li>
+      <li><strong>DeepSeek-Coder V2</strong> — code-specialized. Competitive with Qwen3-Coder on many benchmarks.</li>
+      <li><strong>Distilled variants</strong> — R1 distilled into smaller dense models (Llama, Qwen bases) for edge deployment.</li>
+    </ul>
+
+    <h2>Where DeepSeek Fits</h2>
+    <p>DeepSeek is the default when reasoning quality matters and self-hosting or low-cost API access is a requirement. The distilled variants (R1-Distill-Qwen-32B, R1-Distill-Llama-70B) are particularly useful for edge deployments that need reasoning without the operational weight of running V3 / R1 at full scale. For teams that are API-bound but price-sensitive, DeepSeek's hosted tier is often a 5–10x cost reduction vs. frontier US labs.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Provenance.</strong> Same caveat as Qwen — some regulated and government customers restrict Chinese-origin models. Check procurement policy.</li>
+      <li><strong>Hosted API data policies.</strong> Anything sensitive should be run on self-hosted weights, not through the DeepSeek-operated API.</li>
+      <li><strong>Tool use</strong> is improving but still below Claude and GPT. Plan for prompt engineering and retry logic on complex tool chains.</li>
+      <li><strong>Full-scale hosting</strong> of V3 / R1 requires serious GPU capacity. Most edge deployments use the distilled variants.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, DeepSeek R1 distilled variants are deployed for reasoning-heavy interior loops — planning, hard refactoring, complex test failure diagnosis. Qwen3-Coder handles most interactive coding; DeepSeek steps in when the task needs deliberation. For hosted API access, DeepSeek is integrated into the provider arbitrage layer as a cost-optimized fallback.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://www.deepseek.com" target="_blank">DeepSeek</a></li>
+      <li><a href="https://github.com/deepseek-ai" target="_blank">DeepSeek on GitHub</a></li>
+      <li><a href="https://arxiv.org/abs/2501.12948" target="_blank">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

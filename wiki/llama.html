@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Llama — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Meta's Llama family. Covers Llama 4, Llama 3.3, Llama Guard, self-hosting on edge hardware, and where Llama fits in managed agent infrastructure.">
+<meta property="og:title" content="Llama — LLM Wiki — Organized AI">
+<meta property="og:description" content="Meta's Llama open-weights model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Llama</h1>
+    <div class="subtitle">Meta's open-weights model family — the reference point for self-hosted LLM deployments.</div>
+    <div class="abstract">
+      Llama defined what "open-weights frontier" means. The family spans small models that quantize down to a Mac Mini up to Maverick / Behemoth scale that rivals closed frontier labs. For any workload where you need the weights on your own hardware — regulated industries, air-gapped environments, or edge deployment — Llama is the baseline.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Meta</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Self-Host</span>
+      <span class="wiki-tag">Edge</span>
+      <span class="wiki-tag">Llama License</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Meta (Menlo Park)</dd>
+      <dt>Released</dt><dd>LLaMA (February 2023); Llama 4 (2025)</dd>
+      <dt>Current line</dt><dd>Llama 4 (Scout, Maverick, Behemoth) &middot; Llama 3.3 &middot; Llama Guard 4</dd>
+      <dt>License</dt><dd>Llama Community License (bespoke; permissive for most commercial use, with scale-based restrictions)</dd>
+      <dt>Hosting</dt><dd>Self-hosted (vLLM, llama.cpp, Ollama); hosted via Together, Groq, Fireworks, Bedrock, Vertex</dd>
+      <dt>Context window</dt><dd>128K–10M tokens (Scout), depending on variant</dd>
+      <dt>Modalities</dt><dd>Text; native image in Llama 4</dd>
+      <dt>Architecture</dt><dd>Dense and MoE variants</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Llama is Meta's open-weights LLM family, first released in February 2023. The Llama 2 release in July 2023 made open-weights frontier usable for commercial applications, and Llama 3 closed much of the gap with closed-weights competitors. Llama 4 (2025) moved to mixture-of-experts architectures and adds native multimodality, with the Scout variant pushing context windows to 10M tokens.</p>
+    <p>For infrastructure teams, Llama's value is the combination of weights you can run anywhere and an ecosystem that is measured in years rather than months. Every inference runtime, quantization tool, and fine-tuning framework supports Llama first. Llama Guard — a small classifier model trained alongside the main family — is the de facto standard for open-source content moderation.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Llama 4 Scout</strong> — compact MoE. 10M-token context, single-GPU inference. Long-document workloads on self-hosted hardware.</li>
+      <li><strong>Llama 4 Maverick</strong> — mid-size MoE. Frontier-competitive on general tasks, multimodal.</li>
+      <li><strong>Llama 4 Behemoth</strong> — flagship scale. Benchmarks-competitive with top closed models; requires multi-GPU / cluster hosting.</li>
+      <li><strong>Llama 3.3 70B / 8B</strong> — dense. Still widely deployed; the 8B variant is a sweet spot for Mac Mini edge deployments.</li>
+      <li><strong>Llama Guard</strong> — small moderation classifier. Screens inputs and outputs for policy violations.</li>
+    </ul>
+
+    <h2>Where Llama Fits</h2>
+    <p>Llama is the default when you need weights on your own hardware. On-premise regulated deployments, air-gapped environments, customer-owned infrastructure (Mac Mini edge compute), and any workload where sending data to a third-party API is a non-starter. Quantized Llama 3.3 8B variants run comfortably on a Mac Mini and are the backbone of the ZeroClaw and PicoClaw runtimes in the Claw ecosystem.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>License is not pure open source.</strong> The Llama Community License is permissive for most uses but restricts deployments above 700M monthly active users and carries naming / attribution requirements. Large enterprises need legal review.</li>
+      <li><strong>Tool use and structured output</strong> are less reliable than Claude or GPT at similar scale. Plan for more prompting, validation, and retry logic.</li>
+      <li><strong>Operational cost of self-hosting.</strong> GPUs, quantization, vLLM tuning, and the observability stack are all on you. See <a href="/papers/edge-compute-economics.html">Edge Compute Economics</a> for when it pays off.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Llama is the backbone of PicoClaw and ZeroClaw — the edge runtimes that live on customer Mac Minis. vLLM handles higher-end inference; llama.cpp and Ollama cover the laptop and Mac Mini tiers. Llama Guard sits in front of open-model endpoints as a lightweight moderation filter. For workloads that exceed the edge envelope, we route to hosted Llama endpoints (Together, Groq) via the provider arbitrage layer.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://www.llama.com/" target="_blank">Meta — Llama</a></li>
+      <li><a href="https://github.com/meta-llama" target="_blank">Meta Llama on GitHub</a></li>
+      <li><a href="https://www.llama.com/llama4/" target="_blank">Llama 4 announcement</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

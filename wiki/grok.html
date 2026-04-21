@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grok — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for xAI's Grok family. Covers Grok 4, Grok Code Fast, real-time X integration, and where Grok fits in managed agent infrastructure.">
+<meta property="og:title" content="Grok — LLM Wiki — Organized AI">
+<meta property="og:description" content="xAI's Grok model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Partial Open Weights</div>
+    <h1>Grok</h1>
+    <div class="subtitle">xAI's model family — Grok 4 and Grok Code Fast. Real-time X integration and an aggressive release cadence.</div>
+    <div class="abstract">
+      Grok is xAI's model family, differentiated by real-time X (formerly Twitter) search integration, a large context window, and increasingly competitive reasoning and coding variants. Grok Code Fast specifically targets agentic coding with low-latency, high-throughput characteristics. Older Grok versions have had weights released under Apache-style terms.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">xAI</span>
+      <span class="wiki-tag">Real-time</span>
+      <span class="wiki-tag">Coder</span>
+      <span class="wiki-tag">API</span>
+      <span class="wiki-tag">Partial Open</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>xAI (Palo Alto)</dd>
+      <dt>Released</dt><dd>Grok-1 (2023, weights released March 2024); Grok 4 (2025)</dd>
+      <dt>Current line</dt><dd>Grok 4 &middot; Grok Code Fast &middot; Grok 3</dd>
+      <dt>License</dt><dd>Current flagship: proprietary API. Grok-1 weights: Apache 2.0.</dd>
+      <dt>Hosting</dt><dd>xAI API, X Premium integration</dd>
+      <dt>Context window</dt><dd>128K–256K tokens</dd>
+      <dt>Modalities</dt><dd>Text, image; real-time X search as a first-class tool</dd>
+      <dt>Training</dt><dd>Colossus supercomputer (Memphis, TN)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Grok is xAI's LLM family, launched in late 2023 and positioned as an alternative to the incumbent frontier labs. The defining differentiator is <strong>first-party real-time search</strong> over X — the model can retrieve posts, threads, and trending context directly, without a separate retrieval pipeline. For workloads where current events and social signal matter, this is unique among frontier models.</p>
+    <p>The Grok Code Fast variant specifically targets agentic coding: lower latency and higher throughput than the flagship, with a pricing structure designed for high-volume IDE and agent usage. xAI has also released weights for older Grok versions (Grok-1 under Apache 2.0 in March 2024), though current flagship models remain API-only.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Grok 4</strong> — current flagship. Long context, reasoning-capable, strong on benchmark leaderboards.</li>
+      <li><strong>Grok Code Fast</strong> — code-specialized, latency-optimized. Targeted at IDE and coding agent integrations.</li>
+      <li><strong>Grok 3</strong> — prior flagship. Still available for stable pipelines.</li>
+      <li><strong>Grok-1 (314B MoE)</strong> — open-weights release from March 2024 under Apache 2.0. Research and self-hosted use.</li>
+    </ul>
+
+    <h2>Where Grok Fits</h2>
+    <p>Grok is the default choice when real-time X data is a first-class requirement — social monitoring, trend analysis, news-reactive agents. Grok Code Fast is worth evaluating for high-volume coding agent workloads where per-token economics dominate. For teams already in the X / X Premium ecosystem, the integration path is shorter than stitching together Claude or GPT with a third-party X retrieval service.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Mostly closed.</strong> Current flagship models are API-only. Only the older Grok-1 weights are open. Most regulated deployments will need to look elsewhere.</li>
+      <li><strong>Ecosystem maturity.</strong> Third-party tool integrations, SDK coverage, and community tooling lag the Anthropic / OpenAI ecosystems.</li>
+      <li><strong>Platform coupling.</strong> The X integration is a feature and a liability — workloads that depend on it are coupled to X's availability and policies.</li>
+      <li><strong>Brand / product risk.</strong> xAI ships quickly and visibly. Pin snapshots and monitor deprecation schedules carefully.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Grok is a specialist provider — integrated for workflows that need real-time X retrieval, or when Grok Code Fast pricing beats alternatives on a specific high-volume agent loop. It sits in the provider arbitrage layer alongside Anthropic, OpenAI, and open-weights endpoints. We don't recommend it as a primary provider for regulated workloads given the API-only posture of current flagship models.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://x.ai" target="_blank">xAI</a></li>
+      <li><a href="https://docs.x.ai" target="_blank">xAI API Documentation</a></li>
+      <li><a href="https://github.com/xai-org/grok-1" target="_blank">Grok-1 open weights on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

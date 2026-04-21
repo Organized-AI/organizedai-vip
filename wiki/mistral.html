@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mistral — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Mistral AI. Covers Mistral Large, Mixtral, Codestral, mixture-of-experts architectures, EU data residency, and where Mistral fits in managed agent infrastructure.">
+<meta property="og:title" content="Mistral — LLM Wiki — Organized AI">
+<meta property="og:description" content="Mistral AI's open-weights model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Mistral</h1>
+    <div class="subtitle">Paris-based Mistral AI's open-weights family — Mistral Large, Mixtral, Codestral. Efficient mixture-of-experts and EU-hosted.</div>
+    <div class="abstract">
+      Mistral is the European frontier lab. The open-weights line (Mixtral, Mistral 7B, Codestral) is the go-to choice for deployments that need EU data residency or a European vendor relationship. MoE architectures keep inference cheap at mid-frontier quality, and Le Chat provides a first-party hosted product.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Mistral AI</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">MoE</span>
+      <span class="wiki-tag">EU Hosting</span>
+      <span class="wiki-tag">Apache 2.0</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Mistral AI (Paris)</dd>
+      <dt>Released</dt><dd>Mistral 7B (September 2023); Mistral Large 2 (2024)</dd>
+      <dt>Current line</dt><dd>Mistral Large &middot; Mixtral 8x22B &middot; Codestral &middot; Mistral Small</dd>
+      <dt>License</dt><dd>Apache 2.0 (open variants); Mistral Research License / commercial for flagship</dd>
+      <dt>Hosting</dt><dd>La Plateforme, Azure, Vertex, Bedrock; self-hosted (vLLM)</dd>
+      <dt>Context window</dt><dd>32K–128K tokens</dd>
+      <dt>Modalities</dt><dd>Text; Pixtral for vision</dd>
+      <dt>Architecture</dt><dd>Dense and mixture-of-experts</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Mistral AI was founded in 2023 by former Meta and DeepMind researchers, and quickly became the reference European frontier lab. The September 2023 Mistral 7B release set a new efficiency bar for small dense models. Mixtral 8x7B and 8x22B popularized sparse mixture-of-experts for open-weights inference — high quality at roughly the cost of a mid-sized dense model.</p>
+    <p>Mistral's product split mirrors the open/closed tension in the industry. The <strong>open-weights</strong> line (Mistral 7B, Mixtral variants, Codestral) is Apache 2.0. The <strong>flagship tier</strong> (Mistral Large) is served through La Plateforme and cloud marketplaces under a commercial license. For EU customers, the combination of EU hosting, French jurisdiction, and GDPR-native tooling is a material advantage over US-based labs.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Mistral Large</strong> — flagship proprietary model. Hosted only; strong tool use and multilingual.</li>
+      <li><strong>Mixtral 8x22B / 8x7B</strong> — open MoE. Frontier-adjacent at mid-tier inference cost.</li>
+      <li><strong>Mistral 7B / Small</strong> — dense, efficient. Strong baselines for self-hosted edge.</li>
+      <li><strong>Codestral</strong> — code-specialized. Targets IDE integration and code agents.</li>
+      <li><strong>Pixtral</strong> — multimodal variant with vision.</li>
+    </ul>
+
+    <h2>Where Mistral Fits</h2>
+    <p>Mistral is the default when EU data residency, European vendor relationships, or GDPR-native tooling are hard requirements. Mixtral variants are also a strong pick when self-hosting economics favor MoE (sparse activation means lower GPU-hours per token at a given quality tier). Codestral slots into code agents for teams that prefer European tooling.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Split licensing.</strong> Not all Mistral models are open. Check the license per model — Large and some Codestral tiers are commercial.</li>
+      <li><strong>Benchmarks lag.</strong> Mistral's flagship tier is competitive but not always on the leaderboard frontier. Evaluate on your actual workload.</li>
+      <li><strong>MoE operational complexity.</strong> Sparse routing is cheaper to run but harder to tune than dense inference. vLLM handles it, but expect more iteration on quantization.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Mistral is the preferred provider for EU-scoped deployments and for customers with explicit European vendor requirements. La Plateforme and Azure EU regions both slot into the provider arbitrage layer. Mixtral variants run well on higher-end Mac Studio edge nodes, and Codestral is a credible open alternative to Qwen3-Coder when licensing or provenance matters more than benchmark scores.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://mistral.ai" target="_blank">Mistral AI</a></li>
+      <li><a href="https://docs.mistral.ai" target="_blank">Mistral API Documentation</a></li>
+      <li><a href="https://mistral.ai/news/codestral/" target="_blank">Codestral announcement</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

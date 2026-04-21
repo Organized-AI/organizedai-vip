@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemini — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Google's Gemini family. Covers Gemini 2.5 Pro, Flash, and Nano, native multimodality, the 1M+ token context window, and where Gemini fits in managed agent infrastructure.">
+<meta property="og:title" content="Gemini — LLM Wiki — Organized AI">
+<meta property="og:description" content="Google's Gemini model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Closed Weights</div>
+    <h1>Gemini</h1>
+    <div class="subtitle">Google's natively multimodal model family with a 1M+ token context window — Gemini 2.5 Pro, Flash, and Nano.</div>
+    <div class="abstract">
+      Gemini is the only frontier family built multimodal from pre-training rather than bolted on afterward. The 1M+ token context window makes it the first-choice model for document-heavy workloads: entire codebases, video transcripts, long research corpora. Deep integration with Vertex AI and Google Workspace gives enterprise customers an unusually clean compliance and data story.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Google</span>
+      <span class="wiki-tag">1M ctx</span>
+      <span class="wiki-tag">Multimodal</span>
+      <span class="wiki-tag">Vertex AI</span>
+      <span class="wiki-tag">Workspace</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Google DeepMind</dd>
+      <dt>Released</dt><dd>Gemini 1.0 (December 2023); Gemini 2.5 (2025)</dd>
+      <dt>Current line</dt><dd>Gemini 2.5 Pro &middot; Flash &middot; Flash-Lite &middot; Nano</dd>
+      <dt>License</dt><dd>Proprietary; hosted API only</dd>
+      <dt>Hosting</dt><dd>Google AI Studio, Vertex AI, Workspace integrations</dd>
+      <dt>Context window</dt><dd>1M tokens standard; 2M on select Pro tiers</dd>
+      <dt>Modalities</dt><dd>Text, image, audio, video, code — native</dd>
+      <dt>Alignment approach</dt><dd>RLHF with safety fine-tuning</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Gemini is Google DeepMind's flagship model family, launched in December 2023 as the unification of the Bard and PaLM lines under a single architecture. The defining technical bet is <strong>native multimodality</strong>: the model is pre-trained jointly on text, image, audio, and video rather than composing specialized encoders. This pays off on tasks that blend modalities — video understanding, PDF reasoning with mixed text and diagrams, long audio transcription with reasoning.</p>
+    <p>The second defining feature is context length. Gemini shipped 1M-token windows earlier and more reliably than competitors, with "needle in a haystack" retrieval quality that holds up at scale. For workloads that involve whole codebases, long legal documents, or multi-hour meeting transcripts, Gemini is often the pragmatic choice.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Gemini 2.5 Pro</strong> — flagship tier. Deep reasoning, 1M+ context, multimodal. Use for research and long-document workflows.</li>
+      <li><strong>Gemini 2.5 Flash</strong> — balanced tier. Fast, still long-context, significantly cheaper. The workhorse for high-throughput agent workloads.</li>
+      <li><strong>Flash-Lite</strong> — cost-optimized. Routing, classification, extraction at volume.</li>
+      <li><strong>Nano</strong> — on-device variant. Ships inside Pixel and select Android devices for local inference.</li>
+    </ul>
+
+    <h2>Where Gemini Fits</h2>
+    <p>Gemini is the default choice when any of the following dominate: Google Cloud / Vertex AI footprint, Workspace integration (Docs, Gmail, Meet), multimodal inputs that include video or audio, or long-context workloads where 1M tokens materially simplifies the architecture. Flash variants are particularly well-suited to high-volume agent loops where Claude Opus and GPT-5 would be overkill.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Closed weights.</strong> No self-hosted option. Vertex AI regions cover most compliance needs but not all.</li>
+      <li><strong>Tool-use maturity.</strong> Function calling works, but the ecosystem of tools targeting Gemini's protocol lags Claude and GPT. Plan for more custom glue.</li>
+      <li><strong>Consumer-API split.</strong> Gemini via AI Studio, Vertex, and the consumer Gemini app have different capabilities, rate limits, and data policies. Know which endpoint you're on.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Gemini is the preferred provider for long-context RAG workloads and multimodal tasks (video review, screenshot-heavy support flows). Vertex AI endpoints slot cleanly into the provider arbitrage layer alongside Bedrock and direct API providers. For enterprise customers already on Google Cloud, Vertex is usually the path of least friction.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://deepmind.google/technologies/gemini/" target="_blank">Google DeepMind — Gemini</a></li>
+      <li><a href="https://ai.google.dev/gemini-api/docs" target="_blank">Gemini API Documentation</a></li>
+      <li><a href="https://cloud.google.com/vertex-ai" target="_blank">Vertex AI</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

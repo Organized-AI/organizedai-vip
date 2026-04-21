@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPT — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for OpenAI's GPT family. Covers GPT-5, GPT-4.1, the o-series reasoning models, function calling, and where GPT fits in managed agent infrastructure.">
+<meta property="og:title" content="GPT — LLM Wiki — Organized AI">
+<meta property="og:description" content="OpenAI's GPT model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Closed Weights</div>
+    <h1>GPT</h1>
+    <div class="subtitle">OpenAI's flagship model family — GPT-5, GPT-4.1, and the o-series reasoning models. The baseline most other LLMs are measured against.</div>
+    <div class="abstract">
+      GPT is the most widely integrated LLM family in commercial software. Two lines coexist: the GPT line for general-purpose chat and tool use, and the o-series for dedicated reasoning. Function calling, structured outputs, and a mature Assistants / Responses API make it the path of least resistance for new AI features.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">OpenAI</span>
+      <span class="wiki-tag">128K+ ctx</span>
+      <span class="wiki-tag">Reasoning</span>
+      <span class="wiki-tag">Function Calling</span>
+      <span class="wiki-tag">Multimodal</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>OpenAI (San Francisco)</dd>
+      <dt>Released</dt><dd>GPT-1 (2018); GPT-4 (March 2023); GPT-5 (2025)</dd>
+      <dt>Current line</dt><dd>GPT-5 &middot; GPT-4.1 &middot; o-series (reasoning)</dd>
+      <dt>License</dt><dd>Proprietary; hosted API only</dd>
+      <dt>Hosting</dt><dd>OpenAI API, Azure OpenAI Service</dd>
+      <dt>Context window</dt><dd>128K–400K tokens depending on tier</dd>
+      <dt>Modalities</dt><dd>Text, image, audio, video (model-dependent)</dd>
+      <dt>Alignment approach</dt><dd>RLHF / deliberative alignment (o-series)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>GPT is the model family that made LLMs a mainstream developer tool. The post-GPT-4 generation split the line into two branches. The <strong>GPT line</strong> (GPT-4o, GPT-4.1, GPT-5) optimizes for latency, multimodality, and broad capability. The <strong>o-series</strong> (o1, o3, o4) optimizes for deliberate reasoning — the model produces a hidden chain of thought before answering, trading latency for correctness on math, code, and logic benchmarks.</p>
+    <p>For infrastructure teams, GPT's advantages are ecosystem breadth and the structured-output / function-calling protocol that nearly every agent framework supports natively. Azure OpenAI gives regulated customers a familiar compliance story (SOC 2, HIPAA, FedRAMP regions). The tradeoffs are closed weights, no self-hosting, and historically aggressive product changes that can break agent pipelines between releases.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>GPT-5</strong> — flagship general-purpose model. Strong across modalities, long context, fast enough for interactive agent loops.</li>
+      <li><strong>GPT-4.1 / mini / nano</strong> — tiered cost/latency variants. Nano targets routing and high-volume classification.</li>
+      <li><strong>o-series (o3, o4, o4-mini)</strong> — reasoning models. Use when correctness matters more than latency: planning, hard code edits, math.</li>
+      <li><strong>Legacy</strong> — GPT-4o and GPT-4 Turbo remain supported for stable pipelines.</li>
+    </ul>
+
+    <h2>Where GPT Fits</h2>
+    <p>GPT is the default choice when ecosystem integration dominates: existing Azure commitments, third-party tools that only support OpenAI's API, or teams that need Whisper / DALL-E / TTS alongside the LLM. The Assistants and Responses APIs collapse a lot of agent boilerplate for simple use cases. For deep multi-step agent loops, Claude's tool-use protocol is often preferred, but many shops run GPT and Claude side by side on different workloads.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Closed weights.</strong> No self-hosted option outside Azure's managed tenant. On-premise regulated deployments need open-weights alternatives.</li>
+      <li><strong>Breaking changes.</strong> Model deprecations and behavioral shifts between snapshots are more frequent than with Claude. Pin snapshot IDs in production.</li>
+      <li><strong>Reasoning latency.</strong> o-series models can take 30s–several minutes on hard prompts. Not suited for interactive chat without UX adaptation.</li>
+      <li><strong>Rate limits.</strong> Enterprise tiers required for serious agent throughput.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, GPT is typically used as a secondary provider for provider arbitrage — routing requests between Anthropic and OpenAI based on cost, latency, and capacity. The semantic caching layer sits in front of both. Azure OpenAI is the preferred endpoint for enterprise deployments that already have an Azure footprint.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://openai.com" target="_blank">OpenAI</a></li>
+      <li><a href="https://platform.openai.com/docs" target="_blank">OpenAI API Documentation</a></li>
+      <li><a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/" target="_blank">Azure OpenAI Service</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

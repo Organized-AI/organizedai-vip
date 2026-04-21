@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Claude, Anthropic's large language model family. Covers the Opus / Sonnet / Haiku lineup, context windows, tool use, prompt caching, and where Claude fits in managed agent infrastructure.">
+<meta property="og:title" content="Claude — LLM Wiki — Organized AI">
+<meta property="og:description" content="Anthropic's Claude model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Closed Weights</div>
+    <h1>Claude</h1>
+    <div class="subtitle">Anthropic's model family — Opus, Sonnet, Haiku — built around Constitutional AI, long-context reasoning, and tool-use reliability.</div>
+    <div class="abstract">
+      Claude is the reference model for agentic workloads at Organized AI. The family is organized by capability tier (Opus for depth, Sonnet for balance, Haiku for speed), shares a common tool-use protocol, and supports prompt caching and extended thinking — three features that materially change the unit economics of production agents.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Anthropic</span>
+      <span class="wiki-tag">200K–1M ctx</span>
+      <span class="wiki-tag">Tool Use</span>
+      <span class="wiki-tag">Prompt Caching</span>
+      <span class="wiki-tag">Extended Thinking</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Anthropic (San Francisco)</dd>
+      <dt>Released</dt><dd>Claude 1 (March 2023); Claude 4 family (2025–2026)</dd>
+      <dt>Current line</dt><dd>Opus 4.7 &middot; Sonnet 4.6 &middot; Haiku 4.5</dd>
+      <dt>License</dt><dd>Proprietary; hosted API only</dd>
+      <dt>Hosting</dt><dd>Anthropic API, Amazon Bedrock, Google Vertex AI</dd>
+      <dt>Context window</dt><dd>200K tokens standard; 1M tokens on select Opus tiers</dd>
+      <dt>Modalities</dt><dd>Text, image (vision), PDF, code</dd>
+      <dt>Alignment approach</dt><dd>Constitutional AI / RLHF</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Claude is Anthropic's general-purpose LLM family, launched in 2023 as a direct competitor to OpenAI's GPT series. The defining design choice is <strong>Constitutional AI</strong>: an alignment technique that trains the model against a written set of principles rather than relying solely on human feedback. In practice this produces a model that refuses fewer legitimate requests, explains its reasoning more readily, and degrades more gracefully on ambiguous edge cases.</p>
+    <p>For agent infrastructure, three features matter most: (1) structured <strong>tool use</strong> with a well-defined JSON protocol that agent frameworks can target; (2) <strong>prompt caching</strong>, which drops the cost of long system prompts and repeated context by up to 90% — turning otherwise uneconomical agent loops into viable workloads; and (3) <strong>extended thinking</strong>, a reasoning mode that lets the model think before responding, closing the gap with dedicated reasoning models on math and code benchmarks.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Opus</strong> — flagship tier. Highest capability, longest context, slowest and most expensive. Use for planning, deep code edits, and agent orchestration.</li>
+      <li><strong>Sonnet</strong> — balanced tier. The workhorse for most production agents. Claude Code defaults to Sonnet for most interactive tasks.</li>
+      <li><strong>Haiku</strong> — speed tier. Sub-second latency on short prompts. Use for classification, routing, tool-call dispatch, and high-volume summarization.</li>
+    </ul>
+
+    <h2>Where Claude Fits</h2>
+    <p>Claude is the default choice when any of the following dominate your requirements: long-running coding agents, multi-step tool loops with strict reliability requirements, or workloads that benefit from prompt caching (long system prompts, RAG pipelines, document-grounded Q&amp;A). The Claude Code CLI and the Claude Agent SDK are built on the same tool-use protocol, so infrastructure built around one transfers cleanly to the other.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Closed weights.</strong> No self-hosted option. Data residency is constrained to Anthropic, Bedrock, or Vertex regions. Regulated workloads with on-premise requirements need a different family (Llama, Qwen, Mistral).</li>
+      <li><strong>Rate limits on Opus.</strong> Flagship tiers are capacity-constrained. Production deployments should plan for multi-provider fallback via Bedrock or Vertex.</li>
+      <li><strong>Pricing at the top tier.</strong> Opus token pricing is premium. Prompt caching and tiered routing (Opus → Sonnet → Haiku) are essential for cost control.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Claude powers the human-facing control plane: Claude Code Slack for operator conversations, Claude Agent SDK for bespoke agent loops, and the observability layer that turns agent traces into KPIs. Open-weights models (Qwen, Llama) handle the high-volume interior loops where self-hosting on Mac Mini edge hardware beats API economics. See <a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack</a> for the full architecture.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://www.anthropic.com/claude" target="_blank">Anthropic — Claude</a></li>
+      <li><a href="https://docs.anthropic.com" target="_blank">Anthropic API Documentation</a></li>
+      <li><a href="https://www.anthropic.com/research/constitutional-ai-harmlessness-from-ai-feedback" target="_blank">Constitutional AI: Harmlessness from AI Feedback</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

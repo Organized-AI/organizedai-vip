@@ -357,6 +357,69 @@ nav .container { display: flex; justify-content: space-between; align-items: cen
   letter-spacing: 0.05em; text-transform: uppercase;
 }
 
+/* ========== LLM WIKI ========== */
+.wiki-intro {
+  background: var(--gold-glow); border-left: 2px solid var(--gold-dim);
+  padding: 1.25rem 1.5rem; margin-bottom: 3rem;
+  font-size: 0.92rem; color: var(--text-secondary);
+}
+.wiki-intro strong { color: var(--text-primary); }
+.wiki-family-label {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase;
+  margin: 2.5rem 0 1rem;
+}
+.wiki-family-label:first-child { margin-top: 0; }
+.wiki-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+}
+.wiki-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 1.5rem; transition: border-color 0.25s, background 0.25s;
+  display: flex; flex-direction: column;
+}
+.wiki-card:hover { border-color: var(--gold-dim); background: var(--bg-card-hover); }
+.wiki-card-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 0.5rem; gap: 0.75rem;
+}
+.wiki-name {
+  font-family: var(--font-mono); font-size: 1rem; font-weight: 700;
+  color: var(--gold); line-height: 1.2;
+}
+.wiki-vendor {
+  font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+  border: 1px solid var(--border); padding: 0.15rem 0.5rem;
+  letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+}
+.wiki-latest {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--rust);
+  margin-bottom: 0.75rem; letter-spacing: 0.03em;
+}
+.wiki-desc {
+  font-size: 0.87rem; color: var(--text-secondary); line-height: 1.55;
+  margin-bottom: 1rem; flex: 1;
+}
+.wiki-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: auto;
+}
+.wiki-tag {
+  font-family: var(--font-mono); font-size: 0.58rem; color: var(--text-muted);
+  border: 1px solid var(--border); padding: 0.12rem 0.45rem;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.wiki-read {
+  display: inline-block; margin-top: 0.85rem;
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold);
+}
+@media (max-width: 900px) {
+  .wiki-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .wiki-grid { grid-template-columns: 1fr; }
+}
+
 /* ========== CLAW ECOSYSTEM ========== */
 .claw-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
@@ -561,6 +624,7 @@ footer .container {
       <li><a href="#" onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
       <li><a href="#" onclick="showPage('services')" id="nav-services">Services</a></li>
       <li><a href="#" onclick="showPage('papers')" id="nav-papers">Papers</a></li>
+      <li><a href="#" onclick="showPage('wiki')" id="nav-wiki">LLM Wiki</a></li>
       <li><a href="#" onclick="showPage('about')" id="nav-about">About</a></li>
       <li><a href="#" onclick="showPage('contact')" id="nav-contact">Contact</a></li>
     </ul>
@@ -965,6 +1029,167 @@ footer .container {
         </div>
 
       </div>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================================ -->
+<!-- LLM WIKI -->
+<!-- ================================================================ -->
+<div id="page-wiki" class="page">
+  <section style="margin-top:80px;">
+    <div class="container">
+      <div class="section-header">
+        <h2>LLM Wiki</h2>
+        <p>A field guide to the large language models that power the agent era. Vendor, lineage, context windows, and where each model fits in a production stack.</p>
+      </div>
+
+      <div class="wiki-intro">
+        <strong>Why this exists.</strong> Choosing an LLM is an infrastructure decision: context window, tool-use reliability, hosting model, and licensing shape everything downstream. These entries are curated from production deployments, not launch announcements.
+      </div>
+
+      <div class="wiki-family-label">Frontier &middot; Closed Weights</div>
+      <div class="wiki-grid">
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Claude</div>
+            <div class="wiki-vendor">Anthropic</div>
+          </div>
+          <div class="wiki-latest">Opus 4.7 &middot; Sonnet 4.6 &middot; Haiku 4.5</div>
+          <div class="wiki-desc">Anthropic's model family, built around Constitutional AI and tool-use reliability. Strong on long-context reasoning, code editing, and multi-step agent loops. Default choice for Claude Code and most agent frameworks in the Claw ecosystem.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">200K–1M ctx</span>
+            <span class="wiki-tag">Tool Use</span>
+            <span class="wiki-tag">Prompt Caching</span>
+            <span class="wiki-tag">API</span>
+          </div>
+          <a href="/wiki/claude.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">GPT</div>
+            <div class="wiki-vendor">OpenAI</div>
+          </div>
+          <div class="wiki-latest">GPT-5 &middot; GPT-4.1 &middot; o-series</div>
+          <div class="wiki-desc">OpenAI's flagship line. Strong general reasoning, function calling, and the broadest third-party tooling. The o-series reasoning models trade latency for deeper chain-of-thought. Widely used as a baseline for comparison.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">128K+ ctx</span>
+            <span class="wiki-tag">Reasoning</span>
+            <span class="wiki-tag">Function Calling</span>
+            <span class="wiki-tag">API</span>
+          </div>
+          <a href="/wiki/gpt.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Gemini</div>
+            <div class="wiki-vendor">Google</div>
+          </div>
+          <div class="wiki-latest">Gemini 2.5 Pro &middot; Flash &middot; Nano</div>
+          <div class="wiki-desc">Google's multimodal family with a native 1M+ token context window. Deep integration with Google Cloud, Vertex AI, and Workspace. Flash variants target high-throughput, low-latency agent workloads.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">1M ctx</span>
+            <span class="wiki-tag">Multimodal</span>
+            <span class="wiki-tag">Vertex AI</span>
+            <span class="wiki-tag">API</span>
+          </div>
+          <a href="/wiki/gemini.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+      </div>
+
+      <div class="wiki-family-label">Open Weights &middot; Self-Hostable</div>
+      <div class="wiki-grid">
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Llama</div>
+            <div class="wiki-vendor">Meta</div>
+          </div>
+          <div class="wiki-latest">Llama 4 &middot; Llama 3.3 &middot; Llama Guard</div>
+          <div class="wiki-desc">Meta's open-weights family — the reference open model for self-hosted deployments. Strong community ecosystem, quantized variants run on Mac Mini edge hardware, permissive license for most commercial use.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Open Weights</span>
+            <span class="wiki-tag">Self-Host</span>
+            <span class="wiki-tag">Edge</span>
+            <span class="wiki-tag">Llama License</span>
+          </div>
+          <a href="/wiki/llama.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Qwen</div>
+            <div class="wiki-vendor">Alibaba</div>
+          </div>
+          <div class="wiki-latest">Qwen3 &middot; Qwen3-Coder &middot; Qwen-Agent</div>
+          <div class="wiki-desc">Alibaba's open-weights family, paired with the Qwen-Agent framework. Qwen3-Coder is the reference open model for coding agents. Strong tool-use and multilingual capabilities. Powers OpenClaw and NanoClaw in the Claw ecosystem.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Open Weights</span>
+            <span class="wiki-tag">Agent Framework</span>
+            <span class="wiki-tag">Coder</span>
+            <span class="wiki-tag">Apache 2.0</span>
+          </div>
+          <a href="/wiki/qwen.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Mistral</div>
+            <div class="wiki-vendor">Mistral AI</div>
+          </div>
+          <div class="wiki-latest">Mistral Large &middot; Mixtral &middot; Codestral</div>
+          <div class="wiki-desc">European open-weights family from Paris-based Mistral AI. Mixture-of-experts architectures, efficient inference, and EU data residency. Codestral targets code-specific workloads. Popular for regulated deployments.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Open Weights</span>
+            <span class="wiki-tag">MoE</span>
+            <span class="wiki-tag">EU Hosting</span>
+            <span class="wiki-tag">Apache 2.0</span>
+          </div>
+          <a href="/wiki/mistral.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">DeepSeek</div>
+            <div class="wiki-vendor">DeepSeek</div>
+          </div>
+          <div class="wiki-latest">DeepSeek-V3 &middot; DeepSeek-R1</div>
+          <div class="wiki-desc">Chinese open-weights lab that shipped DeepSeek-R1, the first open reasoning model to match o1-class performance. Aggressive pricing on the hosted API, MIT-licensed weights, strong on math and code.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Open Weights</span>
+            <span class="wiki-tag">Reasoning</span>
+            <span class="wiki-tag">MIT License</span>
+            <span class="wiki-tag">Low Cost</span>
+          </div>
+          <a href="/wiki/deepseek.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Grok</div>
+            <div class="wiki-vendor">xAI</div>
+          </div>
+          <div class="wiki-latest">Grok 4 &middot; Grok Code Fast</div>
+          <div class="wiki-desc">xAI's model family with real-time X integration and a large context window. Grok Code Fast targets agentic coding with competitive latency. Weights for older Grok versions released under Apache-style terms.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Real-time</span>
+            <span class="wiki-tag">Coder</span>
+            <span class="wiki-tag">API</span>
+            <span class="wiki-tag">Partial Open</span>
+          </div>
+          <a href="/wiki/grok.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+      </div>
+
+      <div style="margin-top:3rem; padding:1.5rem; border:1px dashed var(--border); text-align:center;">
+        <p style="font-family:var(--font-mono); font-size:0.78rem; color:var(--text-muted); letter-spacing:0.04em;">More entries landing soon &middot; Kimi &middot; Command &middot; Phi &middot; Gemma &middot; Nova &middot; Olmo</p>
+      </div>
+
     </div>
   </section>
 </div>
