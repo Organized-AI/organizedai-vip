@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi × LLM — LLM Wiki — Organized AI</title>
+<meta name="description" content="Integration guide: Raspberry Pi as an always-on client to the Hermes agent gateway running on a Claw Mac Mini. Covers architecture, network setup, authentication, wiki access, and example use cases.">
+<meta property="og:title" content="Pi × LLM — LLM Wiki — Organized AI">
+<meta property="og:description" content="Pairing a Raspberry Pi with the Claw Mac Mini via the Hermes agent gateway.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Integration Recipe &middot; Claw Mac Mini + Raspberry Pi</div>
+    <h1>Pi × LLM</h1>
+    <div class="subtitle">Raspberry Pi as an always-on client to the Hermes agent gateway on a Claw Mac Mini. Wiki-aware Q&amp;A, tool-capable, Tailscale-secured, airgap-friendly.</div>
+    <div class="abstract">
+      The Pi is the cheapest way to put a dedicated agent terminal next to a workstation, in a meeting room, on a factory floor, or inside a vehicle. The Mac Mini runs OpenClaw and hosts a Hermes-backed agent gateway; the Pi speaks to the gateway over Tailscale, gets streaming responses, renders them on a small display, and forwards physical I/O (buttons, mic, camera) back to the agent. The entire LLM Wiki is served by the same gateway as a tool the agent can cite.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Integration Recipe</span>
+      <span class="wiki-tag">Raspberry Pi</span>
+      <span class="wiki-tag">Hermes Gateway</span>
+      <span class="wiki-tag">OpenClaw</span>
+      <span class="wiki-tag">Tailscale</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Client</dt><dd>Raspberry Pi 4 / Pi 5 / Pi Zero 2 W</dd>
+      <dt>Server</dt><dd>Claw Mac Mini (M-series) running OpenClaw</dd>
+      <dt>Gateway</dt><dd>Hermes agent gateway (HTTP + WebSocket, OpenAI-compatible + streaming)</dd>
+      <dt>Gateway model</dt><dd>Hermes 4 (default) or Hermes 3 — self-hosted via vLLM on the Mini</dd>
+      <dt>Transport</dt><dd>Tailscale mesh (default) &middot; LAN mDNS (airgapped)</dd>
+      <dt>Auth</dt><dd>Tailscale identity + scoped API key per Pi device</dd>
+      <dt>Wiki access</dt><dd>Exposed as a tool on the gateway — Hermes retrieves + cites entries</dd>
+      <dt>Footprint on Pi</dt><dd>&lt;50MB RAM (ZeroClaw client binary) or Python script</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Why This Recipe</h2>
+    <p>OpenClaw on a Mac Mini is powerful but not <em>portable</em>. Walking over to the Mini, opening Slack, and typing a prompt is a bad user story for most physical contexts — a shop floor with greasy hands, a meeting room without a laptop, a kiosk in a hallway, an always-on display next to a rack. The Pi closes that gap: $35–$80 of hardware, a dedicated screen or speaker, and a direct line to the full OpenClaw agent running on the Mini.</p>
+    <p>The Hermes model choice is deliberate. Hermes's steerable alignment — system prompt as source of truth — is what makes it usable as a <strong>gateway</strong> model. Different Pi terminals can speak to the same Mini with different personas, tool allow-lists, and response styles without needing separate model deployments. One gateway, many physical surfaces.</p>
+
+    <h2>Architecture</h2>
+    <pre>
+  ┌─────────────────────┐      Tailscale (wg)      ┌──────────────────────────────┐
+  │  Raspberry Pi       │ ───────────────────────► │  Claw Mac Mini               │
+  │  - client binary    │                          │  ┌────────────────────────┐  │
+  │  - screen / mic /   │ ◄─── WebSocket stream ── │  │ Hermes Agent Gateway   │  │
+  │    buttons / GPIO   │                          │  │  (HTTP + WebSocket)    │  │
+  │  - local cache      │                          │  └──────────┬─────────────┘  │
+  └─────────────────────┘                          │             │                │
+                                                   │             ▼                │
+                                                   │  ┌────────────────────────┐  │
+                                                   │  │ OpenClaw agent loop    │  │
+                                                   │  │  - Hermes 4 (vLLM)     │  │
+                                                   │  │  - Wiki retrieval tool │  │
+                                                   │  │  - Claw tools          │  │
+                                                   │  │  - FrawdBot inline     │  │
+                                                   │  └────────────────────────┘  │
+                                                   └──────────────────────────────┘
+    </pre>
+    <ul>
+      <li><strong>Hermes gateway</strong> — a small HTTP + WebSocket service exposed on the Mini at <code>http://claw-mini.tailnet:7820</code>. Speaks the OpenAI chat-completions protocol (for client compatibility) plus a streaming <code>/agent/stream</code> WebSocket for tool-capable sessions.</li>
+      <li><strong>Inference</strong> — Hermes 4 (or 3) running in vLLM on the Mac Mini M-series GPU. Quantized variants (AWQ / GPTQ) are used on Mini configurations with less than 32GB unified memory.</li>
+      <li><strong>Wiki as a tool</strong> — the Mini exposes <code>wiki.lookup(slug)</code> and <code>wiki.search(query)</code> as agent tools. The gateway's system prompt teaches Hermes to cite LLM Wiki entries by slug (e.g. <code>/wiki/qwen.html</code>) when answering infra questions.</li>
+      <li><strong>Tools inherited from OpenClaw</strong> — if the Pi's scoped API key permits, the same agent session can invoke Slack, Gmail, Linear, GitHub, and the rest of the OpenClaw integration surface.</li>
+      <li><strong>FrawdBot</strong> — sits inline on the gateway, scoring every turn and tool call. Pi devices are just another attack surface to FrawdBot; it doesn't trust them implicitly.</li>
+    </ul>
+
+    <h2>Setup — Mac Mini Side</h2>
+    <ol>
+      <li><strong>Hermes weights</strong> — pull the chosen variant (Hermes 4 70B AWQ is the default on a 64GB Mini; Hermes 3 8B on smaller configurations). vLLM launches with <code>--served-model-name hermes --api-key-header X-Claw-Key</code>.</li>
+      <li><strong>Gateway service</strong> — OpenClaw ships the gateway as a first-party service. Enable with <code>openclaw services enable hermes-gateway</code>. Bind to the Tailscale interface only; LAN binding is optional for airgapped use.</li>
+      <li><strong>Wiki retrieval tool</strong> — the Mini already serves the wiki as static HTML. Register <code>wiki.lookup</code> and <code>wiki.search</code> in the gateway's <code>tools.yaml</code>. Search uses a small local embedding index (bge-small + FAISS).</li>
+      <li><strong>Device scoping</strong> — for each Pi, run <code>openclaw devices add pi-<em>name</em> --scope wiki,chat,claw-read</code>. This mints an API key and records the Tailscale identity the key is bound to.</li>
+      <li><strong>FrawdBot</strong> — already in the OpenClaw default install. Confirm the gateway is behind it with <code>frawdbot status hermes-gateway</code>.</li>
+    </ol>
+
+    <h2>Setup — Raspberry Pi Side</h2>
+    <ol>
+      <li><strong>Tailscale</strong> — <code>curl -fsSL https://tailscale.com/install.sh | sh &amp;&amp; sudo tailscale up --ssh</code>. Accept into the same tailnet as the Mini.</li>
+      <li><strong>Client</strong> — two options:
+        <ul>
+          <li><em>Lightweight</em>: ZeroClaw client binary (3.4MB, Rust). <code>curl -fsSL https://<em>your-mini</em>/zeroclaw/install.sh | sh</code>. Config lives at <code>~/.zeroclaw/config.toml</code>.</li>
+          <li><em>Scripted</em>: a ~40-line Python script using <code>httpx</code> and <code>websockets</code> against the OpenAI-compatible endpoint. Useful for custom kiosks.</li>
+        </ul>
+      </li>
+      <li><strong>Config</strong> — set <code>base_url = "http://claw-mini.tailnet:7820/v1"</code>, <code>model = "hermes"</code>, <code>api_key_env = "CLAW_KEY"</code>.</li>
+      <li><strong>Secrets</strong> — put the device API key in <code>/etc/claw/key</code> with <code>0400</code> perms. Systemd unit reads it at boot.</li>
+      <li><strong>I/O</strong> — wire the display / mic / buttons via whatever driver stack the use case needs (DSI touchscreen, USB mic, GPIO buttons).</li>
+    </ol>
+
+    <h2>Talking to the Gateway</h2>
+    <p>The simplest call from the Pi — a curl that works as soon as Tailscale is up:</p>
+    <pre>
+  curl -N http://claw-mini.tailnet:7820/v1/chat/completions \
+    -H "X-Claw-Key: $CLAW_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "hermes",
+      "stream": true,
+      "messages": [
+        {"role": "system", "content": "You are the Pi kiosk in the lab. Keep answers under 60 words. Cite LLM Wiki entries when relevant."},
+        {"role": "user", "content": "Which open-weights model should I pick for a coding agent on a 32GB Mac Mini?"}
+      ]
+    }'
+    </pre>
+    <p>Hermes will stream a short answer and — because the system prompt authorized it — call <code>wiki.lookup("qwen")</code> and return a citation like <code>[wiki: /wiki/qwen.html#model-lineup]</code>. The client renders citations inline.</p>
+
+    <h2>Use Cases</h2>
+    <ul>
+      <li><strong>Shop-floor terminal.</strong> 7" touchscreen Pi in the production area. Tech asks "what's the failure mode when ExoClaw returns 503?" — the Pi shows the answer, cites <a href="/wiki/exoclaw.html">/wiki/exoclaw.html</a>, and optionally pages on-call via the Claw tools.</li>
+      <li><strong>Meeting-room research assistant.</strong> Pi with mic on the table. Whisper on the Pi transcribes; gateway answers in real time with wiki citations and can push notes to Linear / Notion via OpenClaw tools.</li>
+      <li><strong>Always-on wiki display.</strong> Pi Zero 2 W driving an e-ink or small OLED display. Rotates through the latest updated wiki entries. No user input; pure display surface.</li>
+      <li><strong>Physical button to agent.</strong> Hardware button wired to GPIO triggers a preset prompt — "summarize the last 24h of FrawdBot events." Hermes runs the query through the OpenClaw tool layer, returns a spoken summary via the Pi's speaker.</li>
+      <li><strong>Lab / airgap.</strong> No Tailscale; Pi and Mini on the same LAN, mDNS discovery, same gateway. Useful for secure facilities where outbound network is disabled.</li>
+    </ul>
+
+    <h2>Scoping and Security</h2>
+    <ul>
+      <li><strong>Per-device API keys.</strong> Each Pi gets its own key with the minimum scope it needs — <code>wiki</code> for a read-only display, <code>wiki,chat</code> for a Q&amp;A terminal, <code>wiki,chat,claw-read,claw-write</code> for an operator terminal. Keys are revocable individually.</li>
+      <li><strong>Tailscale ACLs.</strong> The gateway port (<code>7820</code>) is allow-listed to only the <code>pi</code> tag on the tailnet. Other nodes can't reach it.</li>
+      <li><strong>FrawdBot.</strong> Every turn is scored. A Pi kiosk suddenly asking for a list of customer records triggers an alert regardless of what scope it holds.</li>
+      <li><strong>Gateway system prompt.</strong> Centralized. Changing the persona, tool allow-list, or citation policy is a Mini-side change — no need to reflash Pis.</li>
+      <li><strong>Rate limits.</strong> Per-device limits on tokens-per-minute and tool-calls-per-minute. Prevents a misbehaving Pi (compromised or stuck in a loop) from eating Mini capacity.</li>
+    </ul>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Latency.</strong> The Pi is a thin client. Every prompt round-trips to the Mini. On a local Tailscale mesh this is &lt;20ms overhead; on a bad network it's visible.</li>
+      <li><strong>Mini availability.</strong> The Pi has no inference of its own. If the Mini is down or unreachable, the Pi is mute (or serves a cached stale wiki snapshot, depending on how you configure it). For zero-downtime use cases, pair two Minis or fall back to a hosted Hermes endpoint.</li>
+      <li><strong>Gateway model limits.</strong> Hermes is an excellent gateway model but not a frontier generalist. Route hard reasoning (complex code, deep analysis) to the OpenClaw Claude tool path, not directly to the gateway LLM.</li>
+      <li><strong>Operational overhead of fleets.</strong> Ten Pis is easy. A thousand Pis is a device-management problem — use PicoClaw's OTA hooks and fleet primitives rather than ad-hoc scripts once you're beyond a handful.</li>
+    </ul>
+
+    <h2>Variants</h2>
+    <ul>
+      <li><strong>Pi Zero 2 W + e-ink display.</strong> 10-second updates, read-only wiki ticker. Under $30 total.</li>
+      <li><strong>Pi 5 + 7" touchscreen + USB mic.</strong> Full interactive kiosk. The default recipe.</li>
+      <li><strong>Pi 5 + Hailo AI HAT.</strong> On-device speech-to-text (Whisper small). Gateway handles the LLM only. Good for high-privacy voice use.</li>
+      <li><strong>Pi + CM4 carrier in industrial enclosure.</strong> DIN-rail mounting for factory contexts. Same gateway; harder hardware.</li>
+      <li><strong>Pi as PicoClaw upstream-bridge.</strong> A Pi 5 acts as the inference upstream for a cluster of even smaller PicoClaw devices, talking to the Mini's Hermes gateway on their behalf.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/hermes.html">Hermes</a> — the model family powering the gateway.</li>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — the runtime hosting the gateway on the Mini.</li>
+      <li><a href="/wiki/picoclaw.html">PicoClaw</a> — smaller-than-Pi embedded client that uses the same gateway pattern.</li>
+      <li><a href="/wiki/zeroclaw.html">ZeroClaw</a> — the 3.4MB client binary typically deployed to the Pi.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="https://tailscale.com/kb/1017/install" target="_blank">Tailscale — install on Raspberry Pi</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
