@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for OpenClaw — the flagship agent runtime in the Claw ecosystem. Covers the Qwen-Agent foundation, plugin system, department loadouts, edge deployment on Mac Mini, and the Claude Code Slack control plane.">
+<meta property="og:title" content="OpenClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="OpenClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>OpenClaw</h1>
+    <div class="subtitle">The flagship agent runtime in the Claw ecosystem. TypeScript, 50+ integrations, plugin-based, and designed to run on customer-owned edge hardware.</div>
+    <div class="abstract">
+      OpenClaw is not an LLM — it is the runtime that turns an LLM into a deployable agent. Built on Qwen-Agent for the inner loop and wrapped in a TypeScript control plane, it ships with department-specific loadouts, 50+ first-party integrations, and a plugin system for everything else. The target form factor is a Mac Mini on the customer's desk: data sovereignty first, cloud economics as a fallback.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">TypeScript</span>
+      <span class="wiki-tag">Qwen-Agent</span>
+      <span class="wiki-tag">Edge Deploy</span>
+      <span class="wiki-tag">On-Premise</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Language</dt><dd>TypeScript</dd>
+      <dt>Inner loop</dt><dd>Qwen-Agent &middot; Qwen3-Coder (default) &middot; any OpenAI-compatible endpoint</dd>
+      <dt>Control plane</dt><dd>Claude Code Slack (operator conversations)</dd>
+      <dt>Security layer</dt><dd>FrawdBot (behavioral analysis, 21K lines of detection)</dd>
+      <dt>Integrations</dt><dd>50+ first-party; plugin system for the rest</dd>
+      <dt>Target hardware</dt><dd>Mac Mini &middot; MacBook Pro &middot; on-prem Linux</dd>
+      <dt>Deployment time</dt><dd>6–12 hours end-to-end</dd>
+      <dt>License</dt><dd>Open source (see Claw ecosystem on GitHub)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>OpenClaw is the enterprise-tier runtime in the Claw ecosystem — the flagship among six sibling runtimes (NanoClaw, MicroClaw, PicoClaw, ZeroClaw, ExoClaw) that share a common architecture and differ on form factor and host environment. Where OpenClaw fits is the largest envelope: a managed agent that runs on customer-owned Mac hardware, connects to internal tools via 50+ first-party integrations and a plugin system, and is operated through a Slack-based control plane.</p>
+    <p>The design philosophy is <strong>on-premise first</strong>. The inference engine and all tool calls live on the customer's hardware. The LLM (Qwen3-Coder by default, but pluggable) is self-hosted. FrawdBot behavioral analysis is bundled in — not an upsell — so insider-threat detection runs against every agent action. Only the operator interface (Claude Code Slack) touches the outside world.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Agent loop</strong> — Qwen-Agent wraps the inner tool-use cycle: model call, tool dispatch, result integration, repeat. Uses the MCP protocol for tool extensibility.</li>
+      <li><strong>Inference runtime</strong> — vLLM or Ollama hosting Qwen3-Coder (or the customer's chosen weights) on Mac Mini M-series hardware. Provider abstraction allows falling back to hosted Anthropic, OpenAI, or Bedrock endpoints.</li>
+      <li><strong>Integration layer</strong> — 50+ first-party connectors (Slack, Gmail, Google Drive, Linear, GitHub, Notion, etc.). Plugin system for everything else.</li>
+      <li><strong>Department loadouts</strong> — preset tool bundles, system prompts, and guardrails scoped to a department: SRE, RevOps, Legal, Finance, Support. Faster time-to-value than a blank agent.</li>
+      <li><strong>Control plane</strong> — Claude Code Slack. Operators approve high-impact actions, view traces, and tune behavior from within Slack threads.</li>
+      <li><strong>Observability</strong> — OpenTelemetry traces, Langfuse traces, ClickHouse for analytics. Seven metric namespaces exposed to the SRE dashboard. See <a href="/papers/observability-architecture.html">The Observability Architecture</a>.</li>
+      <li><strong>Security</strong> — FrawdBot sits inline with every tool call, running behavioral analysis for prompt injection, data exfiltration, and insider threats at machine velocity.</li>
+    </ul>
+
+    <h2>Deployment Model</h2>
+    <p>A typical OpenClaw deployment takes 6–12 hours from first call to production-ready agent:</p>
+    <ol>
+      <li><strong>Hardware</strong> — Mac Mini M-series delivered or provided by the customer. Tailscale tunnel established for management.</li>
+      <li><strong>Base install</strong> — OpenClaw runtime, Qwen-Agent, chosen LLM weights (Qwen3-Coder default), FrawdBot, observability stack (OTEL + Langfuse + ClickHouse).</li>
+      <li><strong>Department loadout</strong> — select one or more loadouts. Customize system prompt, tool allowlist, and approval policies.</li>
+      <li><strong>Integrations</strong> — OAuth or service-account setup for Slack, Gmail, Linear, etc. Plugin installs for anything beyond the 50+ first-party list.</li>
+      <li><strong>Control plane</strong> — Claude Code Slack channel provisioned. Operators added.</li>
+      <li><strong>Ship</strong> — agent goes live. SRE dashboard accessible via Tailscale.</li>
+    </ol>
+
+    <h2>When to Choose OpenClaw</h2>
+    <p>OpenClaw is the default pick when any of the following apply: the deployment must stay on customer-owned hardware, the workload benefits from department-specific tool bundles, the customer wants Slack as the agent control plane, or regulatory requirements preclude a cloud-managed agent. For other profiles, another Claw runtime is typically a better fit:</p>
+    <ul>
+      <li><strong>NanoClaw</strong> — when security isolation matters more than integrations (containerized, Anthropic Agent SDK inner loop).</li>
+      <li><strong>MicroClaw</strong> — when multi-channel chat workflows (Slack + Discord + WhatsApp) with durable session state dominate.</li>
+      <li><strong>PicoClaw</strong> — IoT, embedded, sensor networks (&lt;10MB RAM, Go).</li>
+      <li><strong>ZeroClaw</strong> — minimal footprint with maximum LLM provider flexibility (3.4MB binary, Rust).</li>
+      <li><strong>ExoClaw</strong> — when cloud hosting is acceptable and zero-config matters more than data sovereignty.</li>
+    </ul>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>On-premise operations cost.</strong> Mac Mini hardware, edge inference tuning, Tailscale management, and local observability all live with the customer (and Organized AI as managed-service provider). Cloud-first teams should consider ExoClaw instead.</li>
+      <li><strong>Inference ceiling.</strong> Edge hardware caps model size. Qwen3-Coder at the scales Mac Minis can host is strong but not frontier. Heavy reasoning workloads route to hosted Claude or DeepSeek-R1 via the provider arbitrage layer.</li>
+      <li><strong>Plugin ecosystem maturity.</strong> 50+ first-party integrations cover the common cases; the plugin system handles the long tail but may require custom work for niche systems.</li>
+      <li><strong>Operator Slack coupling.</strong> The control plane assumes Slack. Non-Slack shops can switch to MicroClaw or integrate a different channel, but OpenClaw's defaults are Slack-first.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/qwen.html">Qwen</a> — the LLM family powering the default OpenClaw inner loop.</li>
+      <li><a href="/wiki/hermes.html">Hermes</a> — alternative open-weights fine-tune for system-prompt-driven agent loops.</li>
+      <li><a href="/wiki/claude.html">Claude</a> — the model family behind Claude Code Slack and the operator-facing control plane.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+      <li><a href="/papers/infrastructure-playbook.html">The Infrastructure Playbook — Organized AI</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+      <li><a href="/papers/observability-architecture.html">The Observability Architecture — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

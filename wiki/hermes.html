@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Nous Research's Hermes family. Covers Hermes 2, Hermes 2 Pro, Hermes 3, Hermes 4, function calling, agentic fine-tunes, and where Hermes fits in managed agent infrastructure.">
+<meta property="og:title" content="Hermes — LLM Wiki — Organized AI">
+<meta property="og:description" content="Nous Research's Hermes model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Hermes</h1>
+    <div class="subtitle">Nous Research's Hermes series — open-weights fine-tunes with best-in-class function calling, steerable alignment, and an agent-native training stance.</div>
+    <div class="abstract">
+      Hermes is the reference open-weights fine-tune for agent and tool-use workloads. Built on Llama, Qwen, and Mistral bases, the series is trained with heavy emphasis on instruction following, structured output, and long-form reasoning — with alignment tuned to respect the system prompt rather than override it. Hermes 2 Pro and Hermes 4 are widely deployed as drop-in replacements for closed-API function calling.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Nous Research</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Function Calling</span>
+      <span class="wiki-tag">Agentic</span>
+      <span class="wiki-tag">Steerable</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Nous Research (independent lab; Teknium, Karan, interstellarninja, others)</dd>
+      <dt>Released</dt><dd>OpenHermes / Hermes 2 (2023–2024); Hermes 3 (August 2024); Hermes 4 (2025)</dd>
+      <dt>Current line</dt><dd>Hermes 4 &middot; Hermes 3 (405B, 70B, 8B) &middot; Hermes 2 Pro &middot; DeepHermes</dd>
+      <dt>Base models</dt><dd>Llama 3.x, Qwen 2.5, Mistral, Phi (variant-dependent)</dd>
+      <dt>License</dt><dd>Inherited from base — Llama Community License, Apache 2.0, or Qwen license per variant</dd>
+      <dt>Hosting</dt><dd>Self-hosted (vLLM, Ollama); hosted via Nous Chat, Hyperbolic, Together, Fireworks, OpenRouter</dd>
+      <dt>Context window</dt><dd>128K+ tokens via YaRN extensions</dd>
+      <dt>Training approach</dt><dd>SFT + DPO on curated agentic / function-calling / reasoning data</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Hermes is the flagship fine-tune line from <strong>Nous Research</strong>, an independent research collective that has shipped more high-signal open-weights work than most well-funded labs. The design stance is "neutrally aligned" — Hermes respects the system prompt as the source of truth for persona and behavior rather than overriding it with safety layers baked deep into the weights. For agent infrastructure this is the point: if you need the model to adopt a role, use a tool, or produce structured output, Hermes is built for that.</p>
+    <p>Three technical contributions matter. (1) <strong>Function calling</strong>: Hermes 2 Pro introduced an open-source function-calling format with fine-tunes explicitly trained on it, and <strong>Hermes 4</strong> continues that lineage with competitive tool-call reliability against frontier closed models. (2) <strong>YaRN context extension</strong>: the Nous team authored the YaRN paper and shipped extended-context variants that hold quality past 128K. (3) <strong>Agentic training data</strong>: DPO and SFT mixes include long-horizon reasoning traces, which materially improves multi-step tool loops over stock base-model fine-tunes.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Hermes 4 (405B / 70B / 14B)</strong> — current flagship. Llama 3.1 and Qwen 2.5 bases. Strong function calling, long context, aggressive DPO. The default Nous fine-tune for new agent deployments.</li>
+      <li><strong>Hermes 3 (405B / 70B / 8B)</strong> — prior flagship. Llama 3.1 base. Still widely deployed; the 8B variant is a sweet spot for edge hardware.</li>
+      <li><strong>Hermes 2 Pro</strong> — first open model with a reference function-calling format. Llama 3 8B and Mistral 7B variants.</li>
+      <li><strong>DeepHermes</strong> — reasoning-oriented variant with explicit chain-of-thought training. Optional "thinking mode" toggle via system prompt.</li>
+      <li><strong>OpenHermes (legacy)</strong> — the 2023 Mistral 7B fine-tune that established the series.</li>
+    </ul>
+
+    <h2>Where Hermes Fits</h2>
+    <p>Hermes is the default choice when you need open-weights function calling at the quality tier agent frameworks assume. Pick Hermes over a stock base model when the workload involves: structured JSON output under strict schemas, multi-step tool loops with retries, or personas driven by the system prompt rather than fine-tuned in. The 8B / 14B variants run comfortably on Mac Mini edge hardware, making Hermes a credible self-hosted alternative to hosted function-calling APIs.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Base-model inheritance.</strong> License and capability ceilings track the base model. Hermes 4 on Llama 3.1 carries the Llama Community License and its scale clause; Hermes on Qwen or Mistral bases can be Apache 2.0. Audit per variant.</li>
+      <li><strong>Alignment posture.</strong> Hermes is deliberately less risk-averse than base Llama / Qwen instruct tunes. This is a feature for agent builders and a liability for consumer-facing products without a moderation layer (Llama Guard, FrawdBot) in front.</li>
+      <li><strong>Benchmark gap at the top.</strong> Frontier closed models still win head-to-head on the hardest reasoning and coding benchmarks. Hermes closes enough of the gap for most agent work, but not all.</li>
+      <li><strong>Ecosystem fragmentation.</strong> Multiple concurrent lines (Hermes 3, Hermes 4, DeepHermes) with different bases. Choose one and pin it for production.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Hermes variants are a first-class alternative to stock Qwen3-Coder for agent loops where system-prompt fidelity matters more than raw coding ability — ops agents, research agents, long-running orchestrators. Hermes 3 8B and Hermes 4 14B run well on Mac Mini edge nodes via vLLM or Ollama. Function-calling-heavy workloads that hit reliability ceilings on stock base models are usually fixed by switching to Hermes Pro or Hermes 4 with no other code changes.</p>
+    <p>FrawdBot still sits in front as a moderation layer — given Hermes's steerable alignment, the policy boundary lives in infrastructure, not in the weights.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://nousresearch.com" target="_blank">Nous Research</a></li>
+      <li><a href="https://huggingface.co/NousResearch" target="_blank">Nous Research on Hugging Face</a></li>
+      <li><a href="https://arxiv.org/abs/2309.00071" target="_blank">YaRN: Efficient Context Window Extension of Large Language Models</a></li>
+      <li><a href="/wiki/llama.html">Llama — LLM Wiki</a></li>
+      <li><a href="/wiki/qwen.html">Qwen — LLM Wiki</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
