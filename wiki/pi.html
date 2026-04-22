@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Inflection AI's Pi — the 'personal intelligence' agent and the Inflection model family behind it. Covers Inflection-2.5, enterprise positioning post-Microsoft acquihire, and where Pi fits in managed agent infrastructure.">
+<meta property="og:title" content="Pi — LLM Wiki — Organized AI">
+<meta property="og:description" content="Inflection AI's Pi agent and Inflection model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Closed Weights</div>
+    <h1>Pi</h1>
+    <div class="subtitle">Inflection AI's personal-intelligence agent and the Inflection model family that powers it. Conversational warmth and durable memory as the core product thesis.</div>
+    <div class="abstract">
+      Pi — short for "personal intelligence" — is Inflection AI's agent product, differentiated from Claude and GPT by a deliberate bet on emotional intelligence, supportive conversation, and a persistent sense of relationship with the user. After Microsoft's 2024 acquihire of Inflection's leadership, the public Pi product persists in maintenance mode while the underlying model line (Inflection-1 → 2 → 2.5 → 3) is available through Inflection's enterprise API and through licensed deployments.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Inflection AI</span>
+      <span class="wiki-tag">Conversational</span>
+      <span class="wiki-tag">Empathic</span>
+      <span class="wiki-tag">Long Memory</span>
+      <span class="wiki-tag">Voice-Forward</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Inflection AI (Palo Alto)</dd>
+      <dt>Founded</dt><dd>2022 — Mustafa Suleyman, Karén Simonyan, Reid Hoffman</dd>
+      <dt>Current state</dt><dd>Post-March 2024 Microsoft acquihire; pivoted to enterprise. Model line continues as Inflection for Enterprise.</dd>
+      <dt>Product</dt><dd>Pi (consumer personal AI); Inflection for Enterprise (B2B API)</dd>
+      <dt>Model line</dt><dd>Inflection-1 (2023) &middot; Inflection-2 &middot; Inflection-2.5 (2024) &middot; Inflection-3</dd>
+      <dt>License</dt><dd>Proprietary; hosted API only</dd>
+      <dt>Hosting</dt><dd>Inflection API; licensed deployments for enterprise customers</dd>
+      <dt>Context window</dt><dd>~32K tokens (varies by tier); persistent cross-session memory at product layer</dd>
+      <dt>Modalities</dt><dd>Text and voice (real-time conversational voice is a product differentiator)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Inflection was one of the most well-funded 2022-era frontier labs, raising $1.3B by mid-2023 on the thesis that personal, emotionally-intelligent conversation was an underserved product wedge distinct from OpenAI's assistant framing or Anthropic's safety-first positioning. The flagship product — <strong>Pi</strong> — launched in 2023 with a tuned-for-warmth voice, a persistent memory of the user's ongoing context, and a real-time voice mode that was materially ahead of competitors at the time.</p>
+    <p>In March 2024 Microsoft struck a deal that moved Mustafa Suleyman and most of Inflection's research staff to lead Microsoft AI, licensed Inflection's models for Microsoft's use, and left Inflection itself as a going concern refocused on enterprise B2B. The consumer Pi product still runs, but Inflection's forward roadmap is now "Inflection for Enterprise" — licensing the model and the conversational agent stack to enterprises that want a supportive, non-technical-feeling AI layer on top of existing workflows.</p>
+    <p>For infrastructure teams, Pi's interesting properties are (1) the baseline conversational style — warmer and more naturally supportive than stock Claude or GPT without prompt-engineering effort — and (2) the product-layer memory model, where the agent remembers facts about the user across sessions without a separate RAG pipeline. These matter for workloads where the LLM faces humans, not other services.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Inflection-3</strong> — current enterprise tier. Competitive on general benchmarks; optimized for sustained conversation rather than one-shot completion.</li>
+      <li><strong>Inflection-2.5</strong> — released March 2024, the line's benchmark breakthrough. Claimed near-GPT-4-class performance on several evals at Inflection's inference efficiency targets.</li>
+      <li><strong>Inflection-2</strong> — mid-2023. The jump that made Inflection a credible frontier peer.</li>
+      <li><strong>Inflection-1</strong> — initial model behind consumer Pi at launch.</li>
+      <li><strong>Pi (product)</strong> — the consumer personal-AI product. Wraps the Inflection model line with Inflection's memory system, voice stack, and persona tuning.</li>
+    </ul>
+
+    <h2>Where Pi Fits</h2>
+    <p>Pi is the default pick when the agent faces end users and the quality bar is <em>feel</em> before it's capability — customer support, wellness / coaching products, concierge assistants, consumer onboarding flows. Out of the box, Pi is less likely to produce terse, detached, or robotic output than any of the technical-first frontier models. For workloads where the human on the other side is paying per minute of attention, that baseline matters.</p>
+    <p>It is <em>not</em> the default pick for coding, technical analysis, long-document reasoning, or any agent loop where tool-use reliability is the bottleneck. For those, Claude, Qwen3-Coder, or Hermes remain better picks.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Hosted-only.</strong> No self-hosting. Licensed deployments exist for large enterprises but are not a standard product.</li>
+      <li><strong>Post-acquihire uncertainty.</strong> Inflection's research bench moved to Microsoft. The enterprise Inflection continues, but forward model velocity is an open question vs. Anthropic / OpenAI / Google.</li>
+      <li><strong>Tool use.</strong> Pi is tuned for conversation, not for dispatching tool calls. Agent frameworks that depend on structured tool output work better on Claude, GPT, or Hermes Pro.</li>
+      <li><strong>Context window.</strong> Shorter than frontier peers. Pi compensates at the product layer with memory, but raw context for long-document work is smaller.</li>
+      <li><strong>Ecosystem.</strong> Third-party tooling and community integrations are a fraction of Claude / GPT / Llama. Most things require custom glue.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Pi is routed through the provider arbitrage layer as a <strong>specialist empathic tier</strong> — requests that match human-facing support, coaching, or onboarding patterns get routed to Pi; everything else goes to Claude, Qwen, or the usual providers. On a Claw Mac Mini, Pi is reachable via the <a href="/wiki/hermes.html">Hermes agent gateway</a> as a delegated tool: the Hermes gateway fronts all agent traffic (including traffic from Raspberry Pi terminals — see <a href="/wiki/pi-llm.html">Pi × LLM</a>), and when a turn is classified as emotion- or support-heavy, Hermes routes it to the Pi backend rather than answering directly.</p>
+    <p>This "Hermes front door, Pi specialist behind it" pattern gives deployments a single consistent gateway while still using the right model per turn. FrawdBot sits inline on the gateway regardless of which backend handles the request.</p>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/hermes.html">Hermes</a> — the gateway model that fronts Pi in Claw deployments.</li>
+      <li><a href="/wiki/pi-llm.html">Pi × LLM</a> — the Raspberry Pi hardware recipe (same gateway, different "Pi").</li>
+      <li><a href="/wiki/claude.html">Claude</a> — technical counterpart; typical backend for non-conversational turns.</li>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — the runtime hosting the gateway on the Mac Mini.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://inflection.ai" target="_blank">Inflection AI</a></li>
+      <li><a href="https://pi.ai" target="_blank">Pi — Personal AI</a></li>
+      <li><a href="https://inflection.ai/inflection-2-5" target="_blank">Inflection-2.5 announcement</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
