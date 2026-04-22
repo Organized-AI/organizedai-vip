@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExoClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for ExoClaw — the managed cloud runtime in the Claw ecosystem. WASM-sandboxed tool execution, deploy in under 60 seconds, 100+ AgentSkills, real-time monitoring.">
+<meta property="og:title" content="ExoClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="ExoClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>ExoClaw</h1>
+    <div class="subtitle">The managed cloud runtime in the Claw ecosystem. WASM-sandboxed tool execution, deploy in under 60 seconds, 100+ AgentSkills, real-time monitoring, team workspaces.</div>
+    <div class="abstract">
+      ExoClaw is the cloud-hosted sibling of OpenClaw — the same Claw-family architecture, but Organized AI runs it. The differentiator is deployment speed (sub-60-second provisioning), a WASM sandbox for tool execution (faster than containers, safer than in-process), and the AgentSkills marketplace: 100+ prebuilt, sandboxed capability modules you can enable with a toggle.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">Cloud Managed</span>
+      <span class="wiki-tag">WASM Sandbox</span>
+      <span class="wiki-tag">AgentSkills</span>
+      <span class="wiki-tag">Zero-Config</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Deployment model</dt><dd>Organized AI managed cloud</dd>
+      <dt>Tool sandbox</dt><dd>WASM (WebAssembly) — microsecond cold starts, memory-isolated</dd>
+      <dt>Provisioning time</dt><dd>Under 60 seconds workspace-to-agent</dd>
+      <dt>AgentSkills</dt><dd>100+ prebuilt, sandboxed capability modules</dd>
+      <dt>Team features</dt><dd>Workspaces, role-based access, shared agents, audit logs</dd>
+      <dt>Monitoring</dt><dd>Real-time traces, Langfuse integration, SLO dashboards</dd>
+      <dt>License</dt><dd>Managed service — runtime is open source, hosting is commercial</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>ExoClaw is the "just give me an agent" entry point to the Claw ecosystem. Customers who don't want to operate a Mac Mini, don't want to run a Linux host, and don't want to make inference provider choices get a workspace instead — log in, pick an AgentSkills bundle, connect accounts, go. Organized AI runs the infrastructure; the customer sees a dashboard, a chat surface, and an audit log.</p>
+    <p>Under the hood, ExoClaw uses the same agent loop as OpenClaw but swaps the container sandbox for a <strong>WASM sandbox</strong>. WASM tool execution starts in microseconds (vs. hundreds of milliseconds for containers), isolates memory at the module boundary, and makes the tool-skill contract deterministic — every AgentSkill is a WASM module with a declared capability surface.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Control plane</strong> — web dashboard + API. Workspaces, roles, agent definitions, audit logs, billing.</li>
+      <li><strong>Agent loop</strong> — Claw-family, provider-abstract. Multi-tenant; tenant isolation enforced at the workspace boundary.</li>
+      <li><strong>WASM sandbox</strong> — Wasmtime or Wasmer runtime. Each tool call spins a WASM module with a scoped capability set (network allow-list, filesystem slice, key-value store handle).</li>
+      <li><strong>AgentSkills marketplace</strong> — 100+ modules covering the common integrations (Slack, Gmail, Linear, GitHub, Notion, Stripe, Salesforce, etc.) plus utility skills (code interpreter, browser, retrieval). Customer modules can be uploaded and signed.</li>
+      <li><strong>Providers</strong> — Anthropic, OpenAI, Bedrock, Vertex, Groq, DeepSeek and more via the standard provider router. Usage-billed.</li>
+      <li><strong>Observability</strong> — real-time trace viewer, Langfuse integration, SLO dashboards, alerting. Full audit log of every tool call.</li>
+    </ul>
+
+    <h2>When to Choose ExoClaw</h2>
+    <p>ExoClaw is the right choice when: speed-to-first-agent matters more than data sovereignty; the customer doesn't want to operate infrastructure; AgentSkills cover the needed integrations out of the box; or the workload is bursty and serverless billing is a better fit than fixed edge hardware. Teams that are just getting started with agent deployment and want to validate a use case before committing to OpenClaw on-prem often begin on ExoClaw.</p>
+
+    <h2>Tradeoffs vs. OpenClaw</h2>
+    <ul>
+      <li><strong>Data residency.</strong> ExoClaw runs in Organized AI's cloud. OpenClaw runs on customer hardware. Regulated workloads that require on-premise should choose OpenClaw.</li>
+      <li><strong>Tool ceiling.</strong> WASM sandboxes are fast and safe but not as capable as a full container — some OpenClaw integrations that shell out or depend on native binaries are unavailable on ExoClaw.</li>
+      <li><strong>Inference cost visibility.</strong> ExoClaw bills usage directly; OpenClaw customers can self-host inference and pay only hardware and electricity. For high-volume workloads, OpenClaw economics eventually win.</li>
+      <li><strong>Control plane.</strong> ExoClaw uses a web dashboard; OpenClaw uses Claude Code Slack. Different operator ergonomics, same underlying agent.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — on-premise flagship counterpart.</li>
+      <li><a href="/wiki/nanoclaw.html">NanoClaw</a> — self-hosted security-first alternative.</li>
+      <li><a href="/wiki/microclaw.html">MicroClaw</a> — self-hosted multi-channel alternative.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+      <li><a href="/papers/infrastructure-playbook.html">The Infrastructure Playbook — Organized AI</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Amazon's Nova family. Covers Nova Pro, Nova Lite, Nova Micro, Nova Canvas, Nova Reel, Bedrock integration, and where Nova fits in managed agent infrastructure.">
+<meta property="og:title" content="Nova — LLM Wiki — Organized AI">
+<meta property="og:description" content="Amazon's Nova model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Frontier &middot; Closed Weights</div>
+    <h1>Nova</h1>
+    <div class="subtitle">Amazon's first-party model family — Nova Pro, Lite, Micro for text; Canvas and Reel for image and video. Bedrock-native.</div>
+    <div class="abstract">
+      Nova is Amazon's in-house model line, launched at re:Invent 2024 to reduce Bedrock's dependence on Anthropic and Meta for first-party tenancy. The family covers text (Pro / Lite / Micro), image (Canvas), and video (Reel) generation. Pricing and latency are aggressive by design; the strategic play is to keep Bedrock customers inside AWS for more of the stack.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Amazon</span>
+      <span class="wiki-tag">Bedrock</span>
+      <span class="wiki-tag">Multimodal</span>
+      <span class="wiki-tag">Low Cost</span>
+      <span class="wiki-tag">AWS-native</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Amazon (AWS)</dd>
+      <dt>Released</dt><dd>December 2024 (re:Invent)</dd>
+      <dt>Current line</dt><dd>Nova Pro &middot; Nova Lite &middot; Nova Micro &middot; Nova Canvas (image) &middot; Nova Reel (video)</dd>
+      <dt>License</dt><dd>Proprietary; Bedrock-hosted only</dd>
+      <dt>Hosting</dt><dd>Amazon Bedrock (all AWS regions supporting it)</dd>
+      <dt>Context window</dt><dd>300K tokens (Pro / Lite); 128K (Micro)</dd>
+      <dt>Modalities</dt><dd>Text, image, video input/output depending on variant</dd>
+      <dt>Positioning</dt><dd>Cost-per-token competitive; frontier-adjacent quality</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Nova is Amazon's first real attempt at owning the frontier-tier LLM spot in Bedrock. Before Nova, AWS customers defaulted to Claude (Anthropic) or Llama (Meta) for high-end tenancy; Amazon Titan existed but wasn't competitive. Nova changes that: Pro is benchmark-competitive with mid-tier frontier models at a fraction of the cost, Lite and Micro aggressively price the commodity tiers, and Canvas / Reel cover image and video generation so customers don't have to stitch in third-party providers.</p>
+    <p>For infrastructure teams already committed to AWS, Nova removes friction — the same IAM, VPC endpoints, CloudWatch, and KMS that govern the rest of Bedrock govern Nova too. Data residency follows AWS region settings. The tradeoff is lock-in: none of this transfers off Bedrock.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Nova Pro</strong> — flagship text. Multimodal input, 300K context, reasoning-capable.</li>
+      <li><strong>Nova Lite</strong> — mid-tier. Same multimodal capability at a fraction of Pro pricing; the workhorse for cost-sensitive agent loops.</li>
+      <li><strong>Nova Micro</strong> — text-only, optimized for latency and throughput. Routing and classification.</li>
+      <li><strong>Nova Canvas</strong> — image generation. Bedrock-integrated alternative to Stability and Titan Image.</li>
+      <li><strong>Nova Reel</strong> — video generation. Short-form clips for marketing and media.</li>
+    </ul>
+
+    <h2>Where Nova Fits</h2>
+    <p>Nova is the default when AWS is the architectural center of gravity and cost per token is a live constraint. For agent workloads that run at high volume inside an AWS environment, Nova Lite often beats Claude and GPT on cost while staying close enough in quality. Multi-model orgs tend to route by workload — Claude for hard reasoning, Nova Lite for the bulk of cheap calls, Micro for classification.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>AWS-only.</strong> No self-hosting. If you ever move off Bedrock, you move off Nova too.</li>
+      <li><strong>Benchmark ceiling.</strong> Pro is frontier-adjacent, not frontier. For the hardest reasoning and coding workloads, Claude Opus and GPT-5 still win head-to-head.</li>
+      <li><strong>Ecosystem maturity.</strong> Third-party tooling (agent frameworks, evaluation harnesses, quantization) was built for Claude / GPT first. Most things work via Bedrock, but not all.</li>
+      <li><strong>Less public research.</strong> Unlike Anthropic / OpenAI / DeepMind, Amazon publishes relatively little about Nova's architecture and training, which complicates deep evaluation.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Nova is a first-class provider in the Bedrock arbitrage lane — Nova Lite often sits alongside Claude Haiku and Gemini Flash as a cheap, fast tier that soaks up routing, classification, and high-volume summarization. For AWS-native customers where data sovereignty is tied to AWS regions, Nova is usually the lowest-friction option. For on-premise Claw deployments (OpenClaw, NanoClaw), Nova doesn't apply — it lives exclusively on the cloud side of the architecture.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://aws.amazon.com/ai/generative-ai/nova/" target="_blank">Amazon Nova</a></li>
+      <li><a href="https://docs.aws.amazon.com/bedrock/" target="_blank">Amazon Bedrock Documentation</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

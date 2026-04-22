@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Cohere's Command family. Covers Command A, Command R+, Command R, RAG-first design, multilingual capabilities, and where Command fits in managed agent infrastructure.">
+<meta property="og:title" content="Command — LLM Wiki — Organized AI">
+<meta property="og:description" content="Cohere's Command model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Command</h1>
+    <div class="subtitle">Cohere's enterprise-grounded model family — Command A, Command R+, Command R. RAG-first design, strong multilingual coverage, open-weights research release.</div>
+    <div class="abstract">
+      Command is the reference "enterprise LLM" line: trained with retrieval-augmented generation as a first-class primitive, optimized for cited answers over open-ended chat, and shipped with an embeddings and reranker family (Embed, Rerank) designed to plug in alongside. The R and R+ weights are released under CC-BY-NC-4.0 for research use.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Cohere</span>
+      <span class="wiki-tag">RAG-first</span>
+      <span class="wiki-tag">Multilingual</span>
+      <span class="wiki-tag">Enterprise</span>
+      <span class="wiki-tag">CC-BY-NC</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Cohere (Toronto)</dd>
+      <dt>Released</dt><dd>Command (2023); Command R / R+ (2024); Command A (2025)</dd>
+      <dt>Current line</dt><dd>Command A &middot; Command R+ &middot; Command R &middot; Embed &middot; Rerank</dd>
+      <dt>License</dt><dd>CC-BY-NC-4.0 for R / R+ weights (research); commercial API license</dd>
+      <dt>Hosting</dt><dd>Cohere API, Bedrock, OCI, Azure; self-hosted under commercial license</dd>
+      <dt>Context window</dt><dd>128K–256K tokens</dd>
+      <dt>Modalities</dt><dd>Text; multilingual across 100+ languages</dd>
+      <dt>Training focus</dt><dd>RAG, tool use, citations, enterprise workloads</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Cohere was founded in 2019 by Aidan Gomez (co-author of "Attention Is All You Need"), Nick Frosst, and Ivan Zhang. Where other labs sell "intelligence," Cohere sells <strong>enterprise grounding</strong>: the Command series is trained such that RAG, citations, and tool use are first-class behaviors rather than bolted-on prompting patterns. The model emits source-linked answers by default when given retrieved context.</p>
+    <p>The product strategy is tight vertical integration with Cohere's own embedding models (<strong>Embed</strong>) and cross-encoders (<strong>Rerank</strong>). For teams building search or knowledge assistants, the combination of Command + Embed + Rerank behaves like a purpose-built stack rather than three independent components.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Command A</strong> — current flagship. Competitive on general benchmarks, optimized for agentic use and tool calling.</li>
+      <li><strong>Command R+</strong> — 104B parameters. Open weights under CC-BY-NC-4.0. Strong RAG and multilingual performance; the default open-weights pick for cited-answer workloads.</li>
+      <li><strong>Command R</strong> — 35B parameters. Smaller, cheaper, still RAG-tuned. Good self-hosted fit on mid-tier GPUs.</li>
+      <li><strong>Embed v3 / v4</strong> — dense embeddings, multilingual.</li>
+      <li><strong>Rerank</strong> — cross-encoder for late-stage retrieval ranking. Often the single biggest quality lever in RAG pipelines.</li>
+    </ul>
+
+    <h2>Where Command Fits</h2>
+    <p>Command is the default when the workload is grounded Q&amp;A, enterprise search, or any agent that must cite sources. The model's baseline behavior on retrieved context — extracting only what's supported, flagging uncertainty, surfacing citations — is meaningfully ahead of stock instruct tunes. Multilingual coverage is stronger than most US frontier labs.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>License split.</strong> Open weights are CC-BY-NC-4.0 — research and non-commercial only. Commercial self-hosting requires a Cohere agreement.</li>
+      <li><strong>Not a general chat champion.</strong> For open-ended conversation or creative writing, frontier chat models beat Command. Pick it for the workloads it's trained for.</li>
+      <li><strong>Ecosystem scale.</strong> Third-party tooling and community integrations are fewer than for Llama or Qwen at similar tiers.</li>
+      <li><strong>Hosted-API latency</strong> has historically trailed the hyperscalers. Bedrock / OCI hosting helps.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Command + Embed + Rerank is a first-class option for RAG-heavy workloads — legal research agents, policy Q&amp;A, internal knowledge assistants. Bedrock or direct Cohere endpoints slot into the provider arbitrage layer. For regulated customers already on AWS or OCI, Command is often the path of least friction because it rides the existing enterprise contracts.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://cohere.com" target="_blank">Cohere</a></li>
+      <li><a href="https://docs.cohere.com" target="_blank">Cohere API Documentation</a></li>
+      <li><a href="https://huggingface.co/CohereForAI" target="_blank">Cohere For AI on Hugging Face</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

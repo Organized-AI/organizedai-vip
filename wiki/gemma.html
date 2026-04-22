@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemma — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Google's Gemma open-weights family. Covers Gemma 3, Gemma 2, CodeGemma, PaliGemma, and where Gemma fits in managed agent infrastructure.">
+<meta property="og:title" content="Gemma — LLM Wiki — Organized AI">
+<meta property="og:description" content="Google's Gemma open-weights model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Gemma</h1>
+    <div class="subtitle">Google's open-weights family — derived from Gemini research. Gemma 3, CodeGemma, PaliGemma, ShieldGemma.</div>
+    <div class="abstract">
+      Gemma is Google's answer to Llama: open-weights models built on the research and architecture that underpin Gemini, sized for self-hosted deployments (1B to 27B). Gemma 3 ships with native multimodality, strong multilingual coverage, and a permissive license that beats Llama's for most commercial use.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Google</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Multimodal</span>
+      <span class="wiki-tag">Multilingual</span>
+      <span class="wiki-tag">Edge</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Google DeepMind</dd>
+      <dt>Released</dt><dd>Gemma 1 (February 2024); Gemma 2 (June 2024); Gemma 3 (2025)</dd>
+      <dt>Current line</dt><dd>Gemma 3 (1B / 4B / 12B / 27B) &middot; CodeGemma &middot; PaliGemma &middot; ShieldGemma</dd>
+      <dt>License</dt><dd>Gemma Terms of Use (permissive; commercial use allowed with a use-policy clause)</dd>
+      <dt>Hosting</dt><dd>Self-hosted (vLLM, Ollama, llama.cpp); Vertex AI; Kaggle; Hugging Face</dd>
+      <dt>Context window</dt><dd>128K tokens (Gemma 3)</dd>
+      <dt>Modalities</dt><dd>Text, vision (Gemma 3 native; PaliGemma specialized)</dd>
+      <dt>Architecture</dt><dd>Dense transformer based on Gemini research</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Gemma is Google's open-weights line, launched in February 2024 as the open complement to Gemini. The models are trained on similar infrastructure and incorporate architectural choices from Gemini research, but ship with weights, permissive licensing, and a size range (1B–27B) aimed at self-hosted deployments. Gemma 3 (2025) added native multimodality and a 128K context window while keeping the same size-tier structure.</p>
+    <p>The family extends beyond the base text models. <strong>CodeGemma</strong> targets code workloads, <strong>PaliGemma</strong> is specialized for vision-language tasks, and <strong>ShieldGemma</strong> is the moderation classifier — Google's open answer to Llama Guard.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Gemma 3 27B</strong> — top tier. Competitive on general benchmarks with Llama 3.x 70B at less than half the parameter count. Native multimodal.</li>
+      <li><strong>Gemma 3 12B / 4B / 1B</strong> — size-tiered variants. 1B targets on-device; 4B is a strong Mac Mini fit; 12B covers mid-tier GPU hosting.</li>
+      <li><strong>CodeGemma</strong> — coding-specialized. 2B and 7B variants.</li>
+      <li><strong>PaliGemma</strong> — vision-language. Multimodal fine-tuning base.</li>
+      <li><strong>ShieldGemma</strong> — moderation classifier. Input/output safety filtering.</li>
+    </ul>
+
+    <h2>Where Gemma Fits</h2>
+    <p>Gemma is the default when the deployment is self-hosted and multilingual quality matters — Google's training data mix yields notably stronger non-English performance than most peers at similar size. The permissive Gemma Terms of Use beat Llama's Community License for many commercial scenarios (no 700M MAU clause). On a Mac Mini, Gemma 3 4B is a credible alternative to Qwen3 7B or Phi-4-mini.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Tool use and agentic behavior</strong> trail Qwen3 and Hermes at similar sizes. Fine-tune or pair with a strong agent framework for complex tool loops.</li>
+      <li><strong>License nuance.</strong> Gemma Terms of Use is commercial-friendly but includes a use policy that must be accepted and propagated. Not strictly "open source" by OSI definition.</li>
+      <li><strong>Ecosystem compared to Llama</strong> is smaller — third-party fine-tunes, quantizations, and tooling integrations exist but in smaller quantity.</li>
+      <li><strong>No frontier tier.</strong> 27B is the top; for frontier-class workloads, go to hosted Gemini or to Llama 4 / Qwen3 235B.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Gemma 3 is a strong alternative to Qwen3 for customers who want a Google-lineage model self-hosted — often preferred where existing Google Cloud / Workspace relationships argue for architectural consistency. ShieldGemma is a drop-in alternative to Llama Guard in the FrawdBot preprocessing pipeline. For multilingual-heavy workloads (i18n support, non-English documentation), Gemma is often the best open-weights pick.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://ai.google.dev/gemma" target="_blank">Google — Gemma</a></li>
+      <li><a href="https://huggingface.co/google" target="_blank">Google on Hugging Face</a></li>
+      <li><a href="https://ai.google.dev/gemma/docs/responsible/gemma_shield" target="_blank">ShieldGemma documentation</a></li>
+      <li><a href="/wiki/gemini.html">Gemini — LLM Wiki</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

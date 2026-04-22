@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phi — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Microsoft's Phi family. Covers Phi-4, Phi-3.5, textbook-quality synthetic training data, small-model efficiency, and where Phi fits in managed agent infrastructure.">
+<meta property="og:title" content="Phi — LLM Wiki — Organized AI">
+<meta property="og:description" content="Microsoft's Phi small-language-model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Phi</h1>
+    <div class="subtitle">Microsoft Research's small-language-model family. "Textbooks are all you need" — competitive reasoning performance at 1B–14B parameters.</div>
+    <div class="abstract">
+      Phi exists to test the hypothesis that curated training data beats raw scale. The result: a family of 1B to 14B parameter models that punch two weight classes above their size on reasoning benchmarks, shipped under MIT license, and small enough to run on phones, Raspberry Pis, and edge devices where Llama and Qwen don't fit.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Microsoft</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Small Model</span>
+      <span class="wiki-tag">MIT License</span>
+      <span class="wiki-tag">Edge</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Microsoft Research</dd>
+      <dt>Released</dt><dd>Phi-1 (June 2023); Phi-2 (December 2023); Phi-3 (April 2024); Phi-4 (December 2024)</dd>
+      <dt>Current line</dt><dd>Phi-4 &middot; Phi-4-mini &middot; Phi-3.5 (mini, MoE, vision)</dd>
+      <dt>License</dt><dd>MIT (recent releases)</dd>
+      <dt>Hosting</dt><dd>Self-hosted (vLLM, Ollama, ONNX Runtime); Azure AI; available on-device</dd>
+      <dt>Context window</dt><dd>128K tokens</dd>
+      <dt>Modalities</dt><dd>Text; vision (Phi-3.5-vision)</dd>
+      <dt>Training approach</dt><dd>Heavy reliance on curated and synthetic "textbook-quality" data</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Phi started in 2023 as a Microsoft Research experiment — the paper "Textbooks Are All You Need" argued that training on carefully curated, high-quality data could produce small models that outperform much larger ones trained on web-scale noise. The hypothesis held up. Phi-4 (14B) routinely ranks alongside 70B-class open-weights models on reasoning and math benchmarks, and Phi-4-mini (3.8B) holds its own against 7B–8B peers.</p>
+    <p>For infrastructure teams, Phi's niche is <strong>edge and on-device</strong>. When you need reasoning capability on a phone, a Raspberry Pi, or inside a mobile app, Phi is often the highest-quality option that fits. MIT licensing removes the scale restrictions that ship with Llama.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Phi-4</strong> — 14B dense. Flagship of the current generation. Strong reasoning per parameter; widely deployed for mid-tier inference on a single GPU.</li>
+      <li><strong>Phi-4-mini</strong> — 3.8B. Edge and on-device sweet spot.</li>
+      <li><strong>Phi-3.5-MoE</strong> — mixture-of-experts variant. Higher ceiling with moderate compute.</li>
+      <li><strong>Phi-3.5-vision</strong> — multimodal. Vision + text for small-model multimodal workloads.</li>
+      <li><strong>Phi-3 mini / small / medium</strong> — prior generation. Still widely deployed, especially phi-3-mini on mobile.</li>
+    </ul>
+
+    <h2>Where Phi Fits</h2>
+    <p>Phi is the default when size constraints are hard — mobile apps, on-device inference, Raspberry Pi class hardware, low-latency classification. It's also a strong pick for cost-sensitive self-hosted workloads where a 14B model with reasoning can replace a 70B tier without material quality loss. For consumer-facing chat, Phi's distinctive training data profile can produce unusual refusals or stilted prose — stock Llama or Qwen is often a better feel.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Chat style.</strong> Training on textbook-like data produces a measured, formal voice. Good for reasoning, less natural for open-ended conversation.</li>
+      <li><strong>Benchmark vs. real-world gap.</strong> Phi's benchmark dominance is real, but some teams report larger gaps between benchmark performance and production workload quality than with Llama or Qwen. Evaluate on your data.</li>
+      <li><strong>Tool use.</strong> Less refined than Hermes Pro or Qwen3 at similar scale. Pair with a well-tuned agent framework.</li>
+      <li><strong>Limited scale.</strong> No 70B+ Phi. For frontier workloads, go elsewhere.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Phi-4 and Phi-4-mini are strong fits for PicoClaw and ZeroClaw — the ultra-small-footprint runtimes that target embedded hardware and minimal deployments. ONNX Runtime support makes Phi particularly convenient for cross-platform edge deployments. For standard Mac Mini edge nodes in OpenClaw, Qwen3 or Hermes is usually preferred; Phi wins when the deployment envelope shrinks below a laptop.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://azure.microsoft.com/en-us/products/phi" target="_blank">Microsoft — Phi</a></li>
+      <li><a href="https://huggingface.co/microsoft" target="_blank">Microsoft on Hugging Face</a></li>
+      <li><a href="https://arxiv.org/abs/2306.11644" target="_blank">Textbooks Are All You Need</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

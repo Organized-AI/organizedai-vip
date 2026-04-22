@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeroClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for ZeroClaw — the minimal-footprint agent runtime in the Claw ecosystem. 3.4MB Rust binary, sub-10ms startup, 22 AI provider support, under 5MB runtime RAM.">
+<meta property="og:title" content="ZeroClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="ZeroClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>ZeroClaw</h1>
+    <div class="subtitle">Minimal footprint, maximum provider flexibility. 3.4MB Rust binary, sub-10ms startup, under 5MB runtime RAM, native support for 22 AI providers.</div>
+    <div class="abstract">
+      ZeroClaw is the Claw runtime optimized for one metric: not being in the way. A 3.4MB static binary that starts in under 10ms, uses less than 5MB of RAM, and speaks to any of 22 AI providers through a single abstraction. The typical deployment is a sidecar or serverless function where every megabyte and millisecond is billed.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">Rust</span>
+      <span class="wiki-tag">3.4MB Binary</span>
+      <span class="wiki-tag">Sub-10ms Start</span>
+      <span class="wiki-tag">22 Providers</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Language</dt><dd>Rust</dd>
+      <dt>Binary size</dt><dd>3.4MB (static, stripped)</dd>
+      <dt>Startup</dt><dd>Sub-10ms cold start</dd>
+      <dt>Runtime RAM</dt><dd>Under 5MB</dd>
+      <dt>Providers</dt><dd>22 native — Anthropic, OpenAI, Bedrock, Vertex, Azure, Groq, Together, Fireworks, DeepSeek, Moonshot, Mistral, Cohere, Ollama, vLLM, etc.</dd>
+      <dt>Dependencies</dt><dd>Zero runtime dependencies</dd>
+      <dt>Target</dt><dd>Serverless (Lambda, Workers, Fly), sidecars, CLI embeds, low-spec hosts</dd>
+      <dt>License</dt><dd>Open source (see Claw ecosystem on GitHub)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>ZeroClaw exists for the places where every constraint matters: Lambda cold starts billed in milliseconds, Cloudflare Workers capped at a few MB, Alpine-based sidecars that sit next to every microservice, CLI tools where a 200MB Node runtime is a non-starter. The engineering discipline is aggressive — no runtime reflection, no dynamic loading, no async runtime overhead it doesn't need, no features that can't be justified against the binary-size budget.</p>
+    <p>The feature set is deliberately narrow: an agent loop, a tool protocol, a provider abstraction, and basic observability. Everything else — memory, sandboxing, channel adapters, integrations — lives upstream or elsewhere in the architecture. ZeroClaw is a lean core that other runtimes (OpenClaw, MicroClaw, ExoClaw) use internally for hot paths.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Static Rust binary</strong> — one file, no dependencies. Works on glibc, musl, Alpine, scratch containers.</li>
+      <li><strong>Agent loop</strong> — minimal. Provider call → parse → dispatch tool → await → repeat. No session store, no persistence (caller brings its own).</li>
+      <li><strong>Provider abstraction</strong> — 22 native providers via a single trait. Switching is a config flip; failure modes route identically.</li>
+      <li><strong>Tool protocol</strong> — JSON-over-stdio by default; gRPC or HTTP endpoints optional.</li>
+      <li><strong>Observability</strong> — OTEL-compatible span emission. Everything else (metrics backend, trace storage) is the host's responsibility.</li>
+      <li><strong>No built-in channels, sandbox, or memory.</strong> That's the design.</li>
+    </ul>
+
+    <h2>When to Choose ZeroClaw</h2>
+    <p>ZeroClaw is the right choice when: the deployment surface is constrained (serverless, edge, embedded); cold-start time is billed; the binary has to drop into a distroless or scratch container; or you want a consistent agent-loop implementation across many small services that each need agent capability without the operational weight of a full runtime. It's also the typical pick for CLI tools that embed an agent — terminal utilities, CI steps, local dev tools.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Feature-sparse by design.</strong> No durable memory, no channel adapters, no sandbox, no integration library. Bring or build the rest.</li>
+      <li><strong>No built-in security isolation.</strong> ZeroClaw trusts its tool calls. For untrusted inputs or multi-tenant isolation, use NanoClaw.</li>
+      <li><strong>Configuration surface.</strong> 22 providers means 22 sets of auth, rate-limit, and error semantics to understand. The abstraction simplifies but doesn't hide.</li>
+      <li><strong>Not a standalone product.</strong> ZeroClaw is typically embedded in a larger system. If you want a complete deployable agent out of the box, OpenClaw or ExoClaw is the better choice.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/picoclaw.html">PicoClaw</a> — even smaller footprint; IoT and embedded.</li>
+      <li><a href="/wiki/nanoclaw.html">NanoClaw</a> — security-first counterpart for untrusted-input workloads.</li>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — full-featured flagship that uses ZeroClaw internally.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for NanoClaw — the containerized, security-first agent runtime in the Claw ecosystem. Built on Anthropic's Agent SDK with isolated containers for every tool execution.">
+<meta property="og:title" content="NanoClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="NanoClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>NanoClaw</h1>
+    <div class="subtitle">The containerized, security-first runtime in the Claw ecosystem. Built on Anthropic's Agent SDK with an isolated container for every tool execution.</div>
+    <div class="abstract">
+      NanoClaw exists for the workloads where the blast radius of a compromised tool call matters more than latency. Every shell command, script invocation, and tool execution runs in a fresh, short-lived container with restricted network, filesystem, and capability surface. The agent loop itself runs on Anthropic's Agent SDK — Claude-native tool use, with the sandbox layer wrapping it.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">Python</span>
+      <span class="wiki-tag">Agent SDK</span>
+      <span class="wiki-tag">Containerized</span>
+      <span class="wiki-tag">Security-first</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Language</dt><dd>Python</dd>
+      <dt>Agent loop</dt><dd>Anthropic Claude Agent SDK</dd>
+      <dt>Sandbox</dt><dd>Per-tool-call container (Docker / Firecracker)</dd>
+      <dt>Channels</dt><dd>Slack &middot; Discord &middot; WhatsApp &middot; Gmail</dd>
+      <dt>Security layer</dt><dd>FrawdBot inline + container capability restrictions</dd>
+      <dt>Target hardware</dt><dd>Linux VPS, on-prem Linux, Kubernetes</dd>
+      <dt>License</dt><dd>Open source (see Claw ecosystem on GitHub)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>NanoClaw is the security-forward member of the Claw family. Where OpenClaw optimizes for breadth of integrations and operator experience on Mac hardware, NanoClaw optimizes for isolation — a defensive posture suited to multi-tenant deployments, untrusted input (public channels, customer chat), and regulated environments where a misbehaving tool call must not be able to touch anything it shouldn't.</p>
+    <p>Every tool execution is a fresh container. The container ships with the minimal rootfs the tool needs, network egress allow-listed to the specific endpoints the tool should reach, and the filesystem scoped to a per-call workspace that's destroyed after the tool returns. Inference happens outside the sandbox; the sandbox only contains the tool-call side effects.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Agent loop</strong> — Anthropic Claude Agent SDK. The loop, tool protocol, and memory model follow Claude Code conventions.</li>
+      <li><strong>Sandbox</strong> — per-tool-call container. Docker in the basic tier; Firecracker microVMs for stronger isolation. Tool inputs and outputs cross the boundary as JSON.</li>
+      <li><strong>Channels</strong> — Slack, Discord, WhatsApp, Gmail via unified adapter layer. Channel context (user identity, thread, channel permissions) is carried into the agent loop.</li>
+      <li><strong>Security layer</strong> — FrawdBot runs inline on every tool call for behavioral analysis. Container-level capability restrictions provide defense-in-depth against FrawdBot misses.</li>
+      <li><strong>Observability</strong> — OTEL traces, Langfuse traces, container audit logs. Sandbox escape attempts are logged as distinct events.</li>
+      <li><strong>Provider</strong> — Claude by default (via Agent SDK); provider abstraction allows routing to GPT, Bedrock, or self-hosted endpoints.</li>
+    </ul>
+
+    <h2>When to Choose NanoClaw</h2>
+    <p>NanoClaw is the right choice when any of the following dominate: multi-tenant deployment where one tenant's agent must not affect another's; user-facing chat surfaces where untrusted prompts reach tool calls; regulated environments where sandbox proofs are a compliance requirement; or workloads where the set of tools includes shell / code-execution / file-writing capabilities.</p>
+
+    <h2>Tradeoffs vs. OpenClaw</h2>
+    <ul>
+      <li><strong>Latency.</strong> Container startup adds overhead per tool call. Firecracker mitigates but does not eliminate it. For latency-sensitive internal workloads, OpenClaw is faster.</li>
+      <li><strong>Integration breadth.</strong> OpenClaw's 50+ first-party integrations are designed for direct access. NanoClaw's equivalents all cross the sandbox boundary, which adds a small serialization cost and sometimes restricts what a tool can do.</li>
+      <li><strong>Operator experience.</strong> OpenClaw's Claude Code Slack control plane is optimized for a small operator team. NanoClaw supports similar patterns but is often deployed headless behind a chat channel.</li>
+      <li><strong>Hardware target.</strong> NanoClaw assumes Linux with container tooling. Mac hosts are possible but not the primary target.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — flagship runtime, breadth-first.</li>
+      <li><a href="/wiki/microclaw.html">MicroClaw</a> — multi-channel chat-native runtime.</li>
+      <li><a href="/wiki/claude.html">Claude</a> — the default model behind the Agent SDK.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+      <li><a href="/papers/infrastructure-playbook.html">The Infrastructure Playbook — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

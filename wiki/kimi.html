@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kimi — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for Moonshot AI's Kimi family. Covers Kimi K2, Kimi K1.5, the 2M+ token context window, and where Kimi fits in managed agent infrastructure.">
+<meta property="og:title" content="Kimi — LLM Wiki — Organized AI">
+<meta property="og:description" content="Moonshot AI's Kimi model family: lineage, capabilities, and deployment notes.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Open Weights &middot; Self-Hostable</div>
+    <h1>Kimi</h1>
+    <div class="subtitle">Moonshot AI's family — Kimi K2 (open-weights MoE) and Kimi K1.5 (reasoning). First shipped a 2M-token context at consumer scale.</div>
+    <div class="abstract">
+      Kimi is Moonshot AI's model family, known in China for pioneering long-context chat (2M tokens via Kimi Chat) and, in 2025, for open-weights releases that put a trillion-parameter-class mixture-of-experts in reach of self-hosted deployments. The K2 release made Kimi a credible frontier-adjacent open alternative to Qwen and DeepSeek.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Moonshot AI</span>
+      <span class="wiki-tag">Open Weights</span>
+      <span class="wiki-tag">Long Context</span>
+      <span class="wiki-tag">MoE</span>
+      <span class="wiki-tag">Reasoning</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Vendor</dt><dd>Moonshot AI (Beijing)</dd>
+      <dt>Released</dt><dd>Kimi Chat (2023); Kimi K1.5 (January 2025); Kimi K2 (2025)</dd>
+      <dt>Current line</dt><dd>Kimi K2 (open) &middot; Kimi K1.5 (reasoning) &middot; Kimi Chat (hosted product)</dd>
+      <dt>License</dt><dd>Modified MIT for K2 weights; hosted API for Kimi Chat</dd>
+      <dt>Hosting</dt><dd>Moonshot API, Kimi Chat; self-hosted via vLLM; hosted via Together, OpenRouter</dd>
+      <dt>Context window</dt><dd>128K–2M tokens depending on variant</dd>
+      <dt>Architecture</dt><dd>Mixture-of-experts (K2: ~1T params, ~32B active)</dd>
+      <dt>Modalities</dt><dd>Text; vision on select variants</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>Moonshot AI was founded in 2023 by Yang Zhilin and became one of China's "AI Tigers" on the strength of Kimi Chat — the first consumer LLM product to ship a 2M-token context window. For a long period Kimi was the definitive reference for "how does a model behave when you paste a novel into the context window." The open-weights release of <strong>Kimi K2</strong> in 2025 extended that reputation into the self-hosted world: a trillion-parameter-class MoE with sparse activation, competitive on general benchmarks and aggressive on long-context retrieval.</p>
+    <p><strong>Kimi K1.5</strong> is the reasoning-line counterpart — a dedicated thinking model that trades latency for correctness on math, code, and logic. Together, K2 and K1.5 give self-hosted deployments a two-model split that mirrors the GPT / o-series and DeepSeek V3 / R1 pattern.</p>
+
+    <h2>Model Lineup</h2>
+    <ul>
+      <li><strong>Kimi K2</strong> — flagship open-weights MoE. Trillion-parameter class with sparse activation. Strong general performance; the default for teams that want open-weights frontier-adjacent quality.</li>
+      <li><strong>Kimi K1.5</strong> — reasoning. Chain-of-thought trained; comparable to o1 / R1 class on math and code benchmarks.</li>
+      <li><strong>Kimi Chat (hosted)</strong> — the consumer product. 2M-token context. Hosted only; data stays with Moonshot.</li>
+      <li><strong>Kimi-VL</strong> — vision variant for multimodal workloads.</li>
+    </ul>
+
+    <h2>Where Kimi Fits</h2>
+    <p>Kimi is the pragmatic pick when long-context is the dominant requirement and you want open weights — whole-codebase analysis, legal document review, multi-document research. K2 is competitive with Qwen3 and DeepSeek-V3 on general tasks and often wins on long-context retrieval quality. K1.5 is a credible alternative to DeepSeek-R1 when reasoning is the bottleneck.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Provenance.</strong> Chinese-origin. Some regulated and government customers restrict this class of model; check procurement policy.</li>
+      <li><strong>Operational cost of K2.</strong> Trillion-parameter MoE needs serious GPU capacity at full scale. Plan for hosted endpoints or large self-hosted clusters; edge deployment uses the distilled or smaller companions instead.</li>
+      <li><strong>English documentation</strong> lags the Chinese ecosystem. Integration effort is higher than for Llama or Qwen at the same tier.</li>
+      <li><strong>Tool-use maturity</strong> trails Claude, GPT, and Qwen-Agent. Pair with a dedicated agent framework rather than using Kimi bare.</li>
+    </ul>
+
+    <h2>Deployment Notes</h2>
+    <p>Within the Claw ecosystem, Kimi K2 is a candidate hosted endpoint for long-context RAG workloads — the 1M-2M context window simplifies architectures that would otherwise require heavy retrieval tuning. K1.5 slots into the provider arbitrage layer as an alternative reasoning endpoint alongside DeepSeek-R1 and Claude's extended thinking.</p>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://www.moonshot.ai" target="_blank">Moonshot AI</a></li>
+      <li><a href="https://kimi.moonshot.cn" target="_blank">Kimi Chat</a></li>
+      <li><a href="https://github.com/MoonshotAI" target="_blank">Moonshot AI on GitHub</a></li>
+      <li><a href="/wiki/deepseek.html">DeepSeek — LLM Wiki</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

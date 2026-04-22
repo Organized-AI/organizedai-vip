@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MicroClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for MicroClaw — the multi-channel chat-native agent runtime in the Claw ecosystem. Rust, provider-abstracted, durable session state, layered memory across every chat platform.">
+<meta property="og:title" content="MicroClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="MicroClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>MicroClaw</h1>
+    <div class="subtitle">The multi-channel chat-native runtime in the Claw ecosystem. Rust, provider-abstracted, with durable session state and layered memory across every chat platform.</div>
+    <div class="abstract">
+      MicroClaw is the runtime for agents whose natural surface is chat — Slack, Discord, WhatsApp, SMS, Teams, iMessage. The engine is shared across channels; the same agent session carries its memory, tool history, and identity from one surface to another. Provider abstraction keeps the LLM choice a config decision rather than an architectural one.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">Rust</span>
+      <span class="wiki-tag">Multi-Channel</span>
+      <span class="wiki-tag">Provider-Abstract</span>
+      <span class="wiki-tag">Durable Memory</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Language</dt><dd>Rust</dd>
+      <dt>Channels</dt><dd>Slack &middot; Discord &middot; WhatsApp &middot; SMS &middot; Teams &middot; iMessage &middot; custom adapters</dd>
+      <dt>Session state</dt><dd>Durable (Postgres / ClickHouse); survives restarts</dd>
+      <dt>Memory model</dt><dd>Layered — per-channel, per-user, per-session, long-term</dd>
+      <dt>Providers</dt><dd>Claude &middot; GPT &middot; Qwen &middot; Llama &middot; any OpenAI-compatible endpoint</dd>
+      <dt>Target hardware</dt><dd>Linux VPS, on-prem Linux, Kubernetes</dd>
+      <dt>License</dt><dd>Open source (see Claw ecosystem on GitHub)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>MicroClaw is built for the workload that happens in the chat channel, not in a dashboard. The design premise: the agent is a participant in ongoing conversations, it has to remember who it's talking to, and it has to behave consistently when a user moves from Slack to Discord to WhatsApp mid-conversation. All of that requires durable state and a memory model that outlives any single LLM call.</p>
+    <p>The engine is written in Rust for steady latency and low per-channel overhead — a single MicroClaw process routinely handles thousands of concurrent chat sessions across multiple channels. The provider abstraction layer sits in front of the LLM call, so routing between Claude, GPT, Qwen, or a self-hosted endpoint is a runtime decision based on cost, latency, capability, and channel context.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Channel adapters</strong> — normalize every chat platform's event model (messages, edits, reactions, threads, DMs) into a uniform event stream.</li>
+      <li><strong>Session store</strong> — durable session state keyed by (channel, user, conversation). Postgres for canonical state; ClickHouse for analytics.</li>
+      <li><strong>Memory layers</strong> — four tiers: short-term (current turn), session (current conversation), user (everything this user has said across channels), channel (shared context in group spaces).</li>
+      <li><strong>Agent loop</strong> — provider-abstract, tool-capable. Tools are declared in a common schema that maps onto Claude's tool protocol, OpenAI's function calling, and the Qwen-Agent format.</li>
+      <li><strong>Provider router</strong> — cost / latency / capability policies. Can fallback across providers on rate-limit or failure.</li>
+      <li><strong>Security</strong> — FrawdBot inline; per-channel rate limiting; allow-listed tool sets per channel.</li>
+    </ul>
+
+    <h2>When to Choose MicroClaw</h2>
+    <p>MicroClaw is the right pick when: the agent lives in one or more chat surfaces as a first-class participant; you need a single agent identity across multiple channels; durable state and memory across sessions is a hard requirement; or you need provider arbitrage at runtime rather than committing to a single LLM vendor. Customer-support agents, community-management bots, and cross-channel executive assistants are the prototypical workloads.</p>
+
+    <h2>Tradeoffs vs. Other Runtimes</h2>
+    <ul>
+      <li><strong>vs. OpenClaw</strong> — MicroClaw is chat-native and lighter-weight; OpenClaw is broader on integrations but heavier and Mac-targeted.</li>
+      <li><strong>vs. NanoClaw</strong> — MicroClaw assumes trusted tool execution; NanoClaw sandboxes every tool call. Use NanoClaw when channel audiences are public or tools include arbitrary code execution.</li>
+      <li><strong>vs. ExoClaw</strong> — MicroClaw is self-hostable; ExoClaw is Organized AI's managed cloud equivalent with less operational overhead.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — breadth-first flagship runtime.</li>
+      <li><a href="/wiki/nanoclaw.html">NanoClaw</a> — containerized, security-first.</li>
+      <li><a href="/wiki/exoclaw.html">ExoClaw</a> — managed cloud runtime.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="/papers/agent-infrastructure-stack.html">The Agent Infrastructure Stack — Organized AI</a></li>
+      <li><a href="/papers/observability-architecture.html">The Observability Architecture — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

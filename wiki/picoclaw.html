@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PicoClaw — LLM Wiki — Organized AI</title>
+<meta name="description" content="Wiki entry for PicoClaw — the ultra-lightweight IoT agent runtime in the Claw ecosystem. Built in Go, under 10MB RAM, runs on RISC-V boards, IP cameras, routers, and microcontrollers.">
+<meta property="og:title" content="PicoClaw — LLM Wiki — Organized AI">
+<meta property="og:description" content="PicoClaw agent runtime: architecture, deployment model, and how it fits in managed AI agent infrastructure.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Organized AI">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/js/posthog.js"></script>
+<link rel="stylesheet" href="/wiki/wiki.css">
+</head>
+<body>
+
+<div class="wiki-wide">
+  <a href="/" class="back-link">&larr; Back to LLM Wiki</a>
+</div>
+
+<article class="wiki-container">
+
+  <header class="wiki-header">
+    <div class="meta">LLM Wiki &middot; Agent Runtime &middot; Claw Ecosystem</div>
+    <h1>PicoClaw</h1>
+    <div class="subtitle">The ultra-lightweight IoT runtime in the Claw ecosystem. Go, under 10MB RAM, built with Sipeed to run on $10 RISC-V boards, IP cameras, routers, and microcontrollers.</div>
+    <div class="abstract">
+      PicoClaw answers the question nobody else was asking: what if the agent lives on the sensor, not the server? The runtime targets hardware where Llama, Qwen, and even Phi can't load — single-board computers, embedded Linux devices, IP cameras, industrial PLCs. The inference runs elsewhere (edge server, cloud); PicoClaw handles the agent protocol, tool dispatch, and local state in &lt;10MB of RAM.
+    </div>
+    <div class="wiki-tags">
+      <span class="wiki-tag">Agent Runtime</span>
+      <span class="wiki-tag">Go</span>
+      <span class="wiki-tag">IoT</span>
+      <span class="wiki-tag">&lt;10MB RAM</span>
+      <span class="wiki-tag">RISC-V</span>
+    </div>
+  </header>
+
+  <section class="quickfacts">
+    <h2>Quick Facts</h2>
+    <dl>
+      <dt>Category</dt><dd>Agent runtime (not a model)</dd>
+      <dt>Language</dt><dd>Go</dd>
+      <dt>Memory footprint</dt><dd>Under 10MB RAM at runtime</dd>
+      <dt>Partner</dt><dd>Sipeed (RISC-V hardware maker)</dd>
+      <dt>Target hardware</dt><dd>$10 RISC-V SBCs &middot; IP cameras &middot; routers &middot; microcontrollers &middot; embedded Linux</dd>
+      <dt>Architecture</dt><dd>Agent-on-device; inference off-device via MQTT / gRPC</dd>
+      <dt>Inference</dt><dd>Offloaded to edge server (OpenClaw host) or cloud endpoint</dd>
+      <dt>License</dt><dd>Open source (see Claw ecosystem on GitHub)</dd>
+    </dl>
+  </section>
+
+  <section class="wiki-content">
+
+    <h2>Summary</h2>
+    <p>PicoClaw is the IoT and embedded member of the Claw family. It was developed in partnership with <strong>Sipeed</strong>, the Shenzhen-based company behind the sub-$10 RISC-V boards (LicheePi, MaixCube) that have made real embedded Linux cheap enough for one-per-sensor deployments. The technical constraint — under 10MB RAM at runtime — rules out running an LLM locally. PicoClaw's architectural premise is that the agent <em>protocol</em> can live on the device while the <em>inference</em> lives elsewhere.</p>
+    <p>The on-device runtime handles: receiving events (MQTT, serial, GPIO), dispatching tool calls (local GPIO writes, sensor reads, actuator control), maintaining a minimal state machine, and forwarding LLM calls via MQTT or gRPC to an OpenClaw or ExoClaw host. The agent looks the same from the control plane's perspective; the inference just happens a network hop away.</p>
+
+    <h2>Architecture</h2>
+    <ul>
+      <li><strong>Device runtime</strong> — Go binary. Single static executable; deploys via scp or an OTA channel.</li>
+      <li><strong>Local tools</strong> — GPIO, I²C, SPI, UART, camera / microphone capture. Tool definitions exposed in the common Claw tool schema.</li>
+      <li><strong>Transport</strong> — MQTT for fleet deployments, gRPC for point-to-point. TLS for both.</li>
+      <li><strong>Upstream</strong> — OpenClaw host or ExoClaw cloud endpoint. The upstream runs the actual agent loop, sees PicoClaw's tools as remote tools, and dispatches back through the same transport.</li>
+      <li><strong>State</strong> — minimal. PicoClaw keeps the last N events in memory and optionally flushes to local flash. Canonical state lives upstream.</li>
+      <li><strong>Security</strong> — device attestation, per-device credentials, FrawdBot analysis of all tool calls at the upstream boundary.</li>
+    </ul>
+
+    <h2>When to Choose PicoClaw</h2>
+    <p>PicoClaw is the right runtime when the agent's environment is the physical world and the hardware envelope is small: smart cameras with agentic triggers, industrial sensor fleets, retail IoT, home automation, agricultural deployments. Any scenario where one agent per device times tens-to-thousands of devices makes more sense than a few centralized agents polling.</p>
+
+    <h2>Tradeoffs</h2>
+    <ul>
+      <li><strong>Network dependency.</strong> PicoClaw needs a path to an inference upstream. Fully air-gapped devices need a different architecture (or a much smaller on-device model via llama.cpp — but that exceeds PicoClaw's footprint).</li>
+      <li><strong>Latency floor.</strong> Round trips to the inference upstream add latency. Real-time control loops (sub-100ms) should do the control logic on-device and use the LLM asynchronously.</li>
+      <li><strong>Fleet management overhead.</strong> A thousand devices is a thousand identities to manage, update, and monitor. PicoClaw provides OTA hooks; ops cost is real.</li>
+      <li><strong>Limited local intelligence.</strong> Without the LLM on-device, PicoClaw can't make free-form decisions offline. Design for graceful degradation.</li>
+    </ul>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="/wiki/zeroclaw.html">ZeroClaw</a> — similar-footprint runtime with on-device inference support.</li>
+      <li><a href="/wiki/openclaw.html">OpenClaw</a> — the typical inference upstream.</li>
+      <li><a href="/wiki/exoclaw.html">ExoClaw</a> — the typical cloud upstream.</li>
+    </ul>
+
+    <h2>References</h2>
+    <ol class="references">
+      <li><a href="https://github.com/organized-ai" target="_blank">Organized AI on GitHub</a></li>
+      <li><a href="https://sipeed.com" target="_blank">Sipeed — RISC-V hardware partner</a></li>
+      <li><a href="/papers/edge-compute-economics.html">Edge Compute Economics — Organized AI</a></li>
+    </ol>
+
+  </section>
+
+</article>
+
+<footer class="wiki-footer">
+  <div class="wiki-wide">
+    <div class="copyright">© 2026 Organized AI. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#wiki">LLM Wiki</a></li>
+      <li><a href="https://github.com/organized-ai" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
