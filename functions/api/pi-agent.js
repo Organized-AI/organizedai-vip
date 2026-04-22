@@ -1,21 +1,28 @@
 // Pi Agent — conversational agent over the LLM Wiki.
-// Streams SSE back to the client. Uses Anthropic tool-use loop so Pi can read
-// full entries on demand and emit "control" events that drive the UI.
+// Streams SSE back to the client. Uses OpenAI-compatible Chat Completions
+// with a Codex OAuth Bearer token, so Hermes can be served from anywhere
+// that speaks that protocol (self-hosted vLLM, proxy, hosted provider).
 //
-// Required env var on Cloudflare Pages: ANTHROPIC_API_KEY
+// Required env vars on Cloudflare Pages:
+//   CODEX_OAUTH_TOKEN — Bearer token issued by the Codex OAuth flow
+//   HERMES_API_URL    — e.g. https://api.openai.com/v1/chat/completions
+//                       or a Claw Mac Mini gateway URL exposed via CF Tunnel
+// Optional:
+//   HERMES_MODEL      — model string passed to the endpoint (default "hermes-4")
 
-const MODEL = 'claude-sonnet-4-6';
+const DEFAULT_API_URL = 'https://api.openai.com/v1/chat/completions';
+const DEFAULT_MODEL = 'hermes-4';
 const MAX_TOKENS = 2048;
 const MAX_TURNS = 6;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Manifest of wiki entries. Pi sees this list in the system prompt — the cheap
-// "what exists" lookup. Full content comes through the read_wiki_entry tool.
+// Manifest of wiki entries — Pi sees this in the system prompt as the cheap
+// "what exists" lookup; full content comes through the read_wiki_entry tool.
 const WIKI_MANIFEST = [
   // Frontier · Closed Weights
   { slug: 'claude',   title: 'Claude',   vendor: 'Anthropic',     category: 'Frontier',
@@ -95,46 +102,55 @@ ${WIKI_MANIFEST.map(e => `- \`${e.slug}\` — **${e.title}** (${e.vendor}, ${e.c
 - If the user asks for a recommendation, be opinionated. State your pick and the one tradeoff that matters.
 - Match the site's tone: technical, direct, no fluff.`;
 
+// OpenAI-compatible tool schema (same shape Hermes / vLLM / OpenRouter / OAI speak).
 const TOOLS = [
   {
-    name: 'read_wiki_entry',
-    description: 'Fetch the full text content of a specific wiki entry. Use when you need details beyond the summary.',
-    input_schema: {
-      type: 'object',
-      properties: { slug: { type: 'string', description: 'The slug of the entry (e.g. "claude", "qwen").' } },
-      required: ['slug'],
-    },
-  },
-  {
-    name: 'open_wiki_entry',
-    description: "Open a wiki entry in the user's preview pane. Use when the user should read the entry directly.",
-    input_schema: {
-      type: 'object',
-      properties: { slug: { type: 'string', description: 'The slug of the entry to open.' } },
-      required: ['slug'],
-    },
-  },
-  {
-    name: 'compare_wiki_entries',
-    description: 'Open a side-by-side comparison of 2–3 wiki entries in the preview pane.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        slugs: {
-          type: 'array',
-          items: { type: 'string' },
-          minItems: 2,
-          maxItems: 3,
-          description: 'The slugs to compare.',
-        },
+    type: 'function',
+    function: {
+      name: 'read_wiki_entry',
+      description: 'Fetch the full text content of a specific wiki entry. Use when you need details beyond the summary.',
+      parameters: {
+        type: 'object',
+        properties: { slug: { type: 'string', description: 'The slug of the entry (e.g. "claude", "qwen").' } },
+        required: ['slug'],
       },
-      required: ['slugs'],
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'open_wiki_entry',
+      description: "Open a wiki entry in the user's preview pane. Use when the user should read the entry directly.",
+      parameters: {
+        type: 'object',
+        properties: { slug: { type: 'string', description: 'The slug of the entry to open.' } },
+        required: ['slug'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'compare_wiki_entries',
+      description: 'Open a side-by-side comparison of 2–3 wiki entries in the preview pane.',
+      parameters: {
+        type: 'object',
+        properties: {
+          slugs: {
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 2,
+            maxItems: 3,
+            description: 'The slugs to compare.',
+          },
+        },
+        required: ['slugs'],
+      },
     },
   },
 ];
 
 function extractArticleText(html) {
-  // Pull the <article>...</article> block, strip tags, collapse whitespace.
   const match = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
   const raw = match ? match[1] : html;
   return raw
@@ -158,24 +174,23 @@ async function readWikiEntry(slug, origin) {
   const res = await fetch(`${origin}/wiki/${slug}.html`);
   if (!res.ok) return { error: `Failed to fetch entry '${slug}' (HTTP ${res.status})` };
   const html = await res.text();
-  const text = extractArticleText(html);
-  return { slug, url: `/wiki/${slug}.html`, content: text };
+  return { slug, url: `/wiki/${slug}.html`, content: extractArticleText(html) };
 }
 
-async function executeTool(tool, origin) {
-  if (tool.name === 'read_wiki_entry') {
-    return await readWikiEntry(tool.input.slug, origin);
+async function executeTool(name, input, origin) {
+  if (name === 'read_wiki_entry') {
+    return await readWikiEntry(input.slug, origin);
   }
-  if (tool.name === 'open_wiki_entry') {
-    if (!SLUGS.has(tool.input.slug)) return { error: `Unknown slug '${tool.input.slug}'` };
-    return { opened: tool.input.slug, url: `/wiki/${tool.input.slug}.html`, message: 'Opened in user preview pane.' };
+  if (name === 'open_wiki_entry') {
+    if (!SLUGS.has(input.slug)) return { error: `Unknown slug '${input.slug}'` };
+    return { opened: input.slug, url: `/wiki/${input.slug}.html`, message: 'Opened in user preview pane.' };
   }
-  if (tool.name === 'compare_wiki_entries') {
-    const unknown = (tool.input.slugs || []).filter(s => !SLUGS.has(s));
+  if (name === 'compare_wiki_entries') {
+    const unknown = (input.slugs || []).filter(s => !SLUGS.has(s));
     if (unknown.length) return { error: `Unknown slugs: ${unknown.join(', ')}` };
-    return { compared: tool.input.slugs, message: 'Opened comparison view.' };
+    return { compared: input.slugs, message: 'Opened comparison view.' };
   }
-  return { error: `Unknown tool: ${tool.name}` };
+  return { error: `Unknown tool: ${name}` };
 }
 
 export async function onRequestOptions() {
@@ -187,10 +202,13 @@ export async function onRequestGet() {
 }
 
 export async function onRequestPost(context) {
-  const apiKey = context.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const token = context.env.CODEX_OAUTH_TOKEN;
+  const apiUrl = context.env.HERMES_API_URL || DEFAULT_API_URL;
+  const model = context.env.HERMES_MODEL || DEFAULT_MODEL;
+
+  if (!token) {
     return Response.json(
-      { error: 'ANTHROPIC_API_KEY not configured on this deployment.' },
+      { error: 'CODEX_OAUTH_TOKEN not configured on this deployment.' },
       { status: 500, headers: CORS_HEADERS },
     );
   }
@@ -213,20 +231,32 @@ export async function onRequestPost(context) {
       const emit = (event) => controller.enqueue(enc.encode(`data: ${JSON.stringify(event)}\n\n`));
 
       try {
-        const loop = [...userMessages];
+        // Seed the loop with system prompt + the messages the client sent.
+        // Client sends simplified {role:'user'|'assistant', content:[{type:'text', text}]}
+        // — normalize to OpenAI's plain-string content form.
+        const loop = [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...userMessages.map(m => {
+            if (typeof m.content === 'string') return m;
+            const text = Array.isArray(m.content)
+              ? m.content.filter(c => c.type === 'text').map(c => c.text).join('')
+              : '';
+            return { role: m.role, content: text };
+          }),
+        ];
+
         for (let turn = 0; turn < MAX_TURNS; turn++) {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
+          const res = await fetch(apiUrl, {
             method: 'POST',
             headers: {
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01',
-              'content-type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: MODEL,
+              model,
               max_tokens: MAX_TOKENS,
-              system: SYSTEM_PROMPT,
               tools: TOOLS,
+              tool_choice: 'auto',
               messages: loop,
               stream: true,
             }),
@@ -234,18 +264,20 @@ export async function onRequestPost(context) {
 
           if (!res.ok) {
             const errText = await res.text().catch(() => '');
-            emit({ type: 'error', message: `Anthropic API ${res.status}: ${errText.slice(0, 300)}` });
+            emit({ type: 'error', message: `Hermes API ${res.status}: ${errText.slice(0, 300)}` });
             break;
           }
 
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
-          const blocks = {};       // index → accumulated block
-          const finalBlocks = [];  // in order of completion
-          let stopReason = null;
 
-          while (true) {
+          let contentText = '';
+          const toolCalls = {};      // index → { id, name, arguments_str }
+          const toolCallOrder = [];  // preserve order of first appearance by index
+          let finishReason = null;
+
+          outer: while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
@@ -254,64 +286,77 @@ export async function onRequestPost(context) {
 
             for (const line of lines) {
               if (!line.startsWith('data: ')) continue;
-              const data = line.slice(6);
-              if (!data.trim()) continue;
+              const data = line.slice(6).trim();
+              if (!data) continue;
+              if (data === '[DONE]') break outer;
+
               let evt;
               try { evt = JSON.parse(data); } catch { continue; }
+              const choice = evt.choices?.[0];
+              if (!choice) continue;
+              const delta = choice.delta || {};
 
-              if (evt.type === 'content_block_start') {
-                blocks[evt.index] = { ...evt.content_block };
-                if (evt.content_block.type === 'tool_use') {
-                  blocks[evt.index].partial_json = '';
-                  emit({ type: 'tool_call_start', name: evt.content_block.name, id: evt.content_block.id });
-                }
-              } else if (evt.type === 'content_block_delta') {
-                const b = blocks[evt.index];
-                if (!b) continue;
-                if (evt.delta.type === 'text_delta') {
-                  b.text = (b.text || '') + evt.delta.text;
-                  emit({ type: 'text_delta', text: evt.delta.text });
-                } else if (evt.delta.type === 'input_json_delta') {
-                  b.partial_json += evt.delta.partial_json;
-                }
-              } else if (evt.type === 'content_block_stop') {
-                const b = blocks[evt.index];
-                if (!b) continue;
-                if (b.type === 'tool_use') {
-                  try { b.input = JSON.parse(b.partial_json || '{}'); } catch { b.input = {}; }
-                  delete b.partial_json;
-                  // Surface control-plane intent to the UI immediately.
-                  if (b.name === 'open_wiki_entry' && b.input.slug && SLUGS.has(b.input.slug)) {
-                    emit({ type: 'control', action: 'open_entry', slug: b.input.slug });
-                  } else if (b.name === 'compare_wiki_entries' && Array.isArray(b.input.slugs)) {
-                    const valid = b.input.slugs.filter(s => SLUGS.has(s));
-                    if (valid.length >= 2) emit({ type: 'control', action: 'compare_entries', slugs: valid });
-                  }
-                  emit({ type: 'tool_call_end', name: b.name, input: b.input });
-                }
-                finalBlocks.push(b);
-              } else if (evt.type === 'message_delta') {
-                if (evt.delta?.stop_reason) stopReason = evt.delta.stop_reason;
+              if (typeof delta.content === 'string' && delta.content.length) {
+                contentText += delta.content;
+                emit({ type: 'text_delta', text: delta.content });
               }
+
+              if (Array.isArray(delta.tool_calls)) {
+                for (const tc of delta.tool_calls) {
+                  const idx = tc.index ?? 0;
+                  if (!toolCalls[idx]) {
+                    toolCalls[idx] = { id: tc.id || null, name: '', arguments_str: '' };
+                    toolCallOrder.push(idx);
+                    emit({ type: 'tool_call_start', name: tc.function?.name || '', id: tc.id || null });
+                  }
+                  const slot = toolCalls[idx];
+                  if (tc.id && !slot.id) slot.id = tc.id;
+                  if (tc.function?.name) slot.name += tc.function.name;
+                  if (tc.function?.arguments) slot.arguments_str += tc.function.arguments;
+                }
+              }
+
+              if (choice.finish_reason) finishReason = choice.finish_reason;
             }
           }
 
-          loop.push({ role: 'assistant', content: finalBlocks });
+          // Record the assistant turn for loop continuation.
+          const assistantMsg = { role: 'assistant', content: contentText || null };
+          if (toolCallOrder.length) {
+            assistantMsg.tool_calls = toolCallOrder.map(idx => {
+              const t = toolCalls[idx];
+              return {
+                id: t.id || `call_${idx}`,
+                type: 'function',
+                function: { name: t.name, arguments: t.arguments_str || '{}' },
+              };
+            });
+          }
+          loop.push(assistantMsg);
 
-          if (stopReason !== 'tool_use') break;
+          if (finishReason !== 'tool_calls' || toolCallOrder.length === 0) break;
 
-          // Execute tools, feed results back.
-          const toolResults = [];
-          for (const b of finalBlocks) {
-            if (b.type !== 'tool_use') continue;
-            const result = await executeTool(b, origin);
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: b.id,
+          // Execute each tool, emit control events for UI, feed results back.
+          for (const idx of toolCallOrder) {
+            const t = toolCalls[idx];
+            let input = {};
+            try { input = JSON.parse(t.arguments_str || '{}'); } catch {}
+
+            if (t.name === 'open_wiki_entry' && input.slug && SLUGS.has(input.slug)) {
+              emit({ type: 'control', action: 'open_entry', slug: input.slug });
+            } else if (t.name === 'compare_wiki_entries' && Array.isArray(input.slugs)) {
+              const valid = input.slugs.filter(s => SLUGS.has(s));
+              if (valid.length >= 2) emit({ type: 'control', action: 'compare_entries', slugs: valid });
+            }
+            emit({ type: 'tool_call_end', name: t.name, input });
+
+            const result = await executeTool(t.name, input, origin);
+            loop.push({
+              role: 'tool',
+              tool_call_id: t.id || `call_${idx}`,
               content: typeof result === 'string' ? result : JSON.stringify(result),
             });
           }
-          loop.push({ role: 'user', content: toolResults });
         }
 
         emit({ type: 'done' });
