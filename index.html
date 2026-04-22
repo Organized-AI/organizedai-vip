@@ -825,6 +825,84 @@ footer .container {
     </div>
   </section>
 
+  <!-- FEATURED WIKI -->
+  <section class="section-border">
+    <div class="container">
+      <div class="section-header">
+        <h2>From the LLM Wiki</h2>
+        <p>Featured entries from our field guide to the models and runtimes behind the Claw stack. <a href="#" onclick="showPage('wiki')" style="color:var(--gold); font-size:inherit; font-family:inherit;">View all →</a></p>
+      </div>
+      <div class="wiki-grid">
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Claude</div>
+            <div class="wiki-vendor">Anthropic</div>
+          </div>
+          <div class="wiki-latest">Opus 4.7 &middot; Sonnet 4.6 &middot; Haiku 4.5</div>
+          <div class="wiki-desc">The control-plane model behind Claude Code Slack and the agent SDKs that operate our stack. Constitutional AI, tool-use reliability, prompt caching.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Control Plane</span>
+            <span class="wiki-tag">Tool Use</span>
+            <span class="wiki-tag">Prompt Caching</span>
+          </div>
+          <a href="/wiki/claude.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Qwen</div>
+            <div class="wiki-vendor">Alibaba</div>
+          </div>
+          <div class="wiki-latest">Qwen3 &middot; Qwen3-Coder &middot; Qwen-Agent</div>
+          <div class="wiki-desc">The open-weights agent core powering OpenClaw and NanoClaw. Qwen3-Coder is the reference open coding agent; Qwen-Agent is the framework the ecosystem is named after.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Agent Core</span>
+            <span class="wiki-tag">Coder</span>
+            <span class="wiki-tag">Apache 2.0</span>
+          </div>
+          <a href="/wiki/qwen.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">Hermes</div>
+            <div class="wiki-vendor">Nous Research</div>
+          </div>
+          <div class="wiki-latest">Hermes 4 &middot; Hermes 3 &middot; Hermes 2 Pro</div>
+          <div class="wiki-desc">The gateway model for mixed-surface deployments. Steerable, system-prompt-driven alignment and best-in-class open function calling make it the default for the Pi × LLM recipe.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Gateway</span>
+            <span class="wiki-tag">Function Calling</span>
+            <span class="wiki-tag">Steerable</span>
+          </div>
+          <a href="/wiki/hermes.html" class="wiki-read">Read Entry →</a>
+        </div>
+
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <div class="wiki-name">OpenClaw</div>
+            <div class="wiki-vendor">Organized AI</div>
+          </div>
+          <div class="wiki-latest">Flagship Claw runtime &middot; TypeScript &middot; Mac Mini</div>
+          <div class="wiki-desc">The enterprise-tier runtime. 50+ integrations, plugin system, department loadouts, Claude Code Slack control plane, FrawdBot inline. Runs on customer-owned Mac Mini edge hardware.</div>
+          <div class="wiki-meta">
+            <span class="wiki-tag">Runtime</span>
+            <span class="wiki-tag">Edge</span>
+            <span class="wiki-tag">On-Premise</span>
+          </div>
+          <a href="/wiki/openclaw.html" class="wiki-read">Read Guide →</a>
+        </div>
+
+      </div>
+
+      <div style="text-align:center; margin-top:2.5rem;">
+        <a href="/pi/" class="btn btn-ghost" style="margin-right:1rem;">Ask Pi Agent →</a>
+        <a href="#" onclick="showPage('wiki')" class="btn btn-primary">Browse All Wiki Entries →</a>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta-section section-border">
     <div class="container">
