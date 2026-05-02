@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="/gtm-autoresearch-arch/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTM AutoResearch — Karpathy-style optimization loop</title>
+<meta name="description" content="How gtm-autoresearch slots ads data, a 12-dimension scorer, Claude Haiku mutations, and Playwright validation into one overnight loop that hands you a publish-ready GTM workspace.">
+<meta property="og:title" content="GTM AutoResearch — Architecture">
+<meta property="og:description" content="Pull ads data → Score config → Mutate via Claude → Validate → Keep/revert → Repeat. The loop that optimizes GTM containers while you sleep.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0c;--bg-1:#111114;--bg-2:#17171b;--bg-3:#1d1d22;
+  --border:#262229;--border-h:#3a3340;
+  --pink:#ec4899;--pink-2:#f0abfc;--pink-dim:#6b2246;
+  --orange:#f97316;--amber:#fbbf24;--green:#4ade80;--red:#f87171;
+  --blue:#60a5fa;--cyan:#22d3ee;--purple:#a78bfa;
+  --text:#ede0e8;--text-2:#a895a5;--text-3:#6a5e68;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text-2);font-family:var(--sans);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(236,72,153,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(236,72,153,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+a{color:var(--pink-2);text-decoration:none;font-family:var(--mono);font-size:.9em;transition:color .2s}
+a:hover{color:var(--amber)}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-3);padding:2px 6px;border-radius:3px;color:var(--pink-2)}
+
+.bar{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;background:rgba(10,10,12,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px}
+.logo{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--border);margin-right:14px}
+.logo-badge{background:var(--pink);color:#fff;font-family:var(--mono);font-weight:700;font-size:11px;padding:3px 8px;border-radius:3px;letter-spacing:.05em}
+.logo-text{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);letter-spacing:.05em}
+.logo-text span{color:var(--text-3);font-weight:400}
+.bar-end{display:flex;align-items:center;gap:18px;margin-left:auto}
+.bar-end a{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.04em;text-transform:uppercase}
+.bar-end a:hover{color:var(--pink-2)}
+
+.layout{position:relative;z-index:1;padding:108px 24px 80px;max-width:1320px;margin:0 auto}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--pink);letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--pink);padding:5px 11px;border-radius:3px;margin-bottom:24px}
+h1{font-family:var(--sans);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--text);line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
+h1 .accent{color:var(--pink)}
+.lead{font-size:16px;color:var(--text-2);max-width:880px;line-height:1.65;margin-bottom:40px}
+
+.diagram-wrap{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:36px 24px;overflow-x:auto;margin-bottom:32px}
+.mermaid{font-family:var(--mono)!important;min-width:1180px}
+.mermaid svg{max-width:none!important}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:48px}
+.legend-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:6px}
+.swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;margin-top:4px;border:1px solid rgba(255,255,255,.15)}
+.legend-item .label{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:4px}
+.legend-item .desc{font-size:13px;color:var(--text-2)}
+
+.section{margin-top:64px;padding-top:32px;border-top:1px solid var(--border)}
+.section-label{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+h2{font-family:var(--sans);font-size:clamp(22px,3vw,30px);font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.01em;margin-bottom:24px}
+
+.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.benefit{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:18px 20px;border-left-width:3px;transition:border-color .2s}
+.benefit.pull{border-left-color:var(--orange)}
+.benefit.score{border-left-color:var(--cyan)}
+.benefit.mutate{border-left-color:var(--green)}
+.benefit.validate{border-left-color:var(--purple)}
+.benefit.persist{border-left-color:var(--amber)}
+.benefit.gate{border-left-color:var(--red)}
+.benefit .num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;margin-bottom:8px}
+.benefit.pull .num{color:var(--orange)}
+.benefit.score .num{color:var(--cyan)}
+.benefit.mutate .num{color:var(--green)}
+.benefit.validate .num{color:var(--purple)}
+.benefit.persist .num{color:var(--amber)}
+.benefit.gate .num{color:var(--red)}
+.benefit .title{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.benefit .body{font-size:13px;color:var(--text-2);line-height:1.55}
+
+.cli-block{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:16px 18px;font-family:var(--mono);font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px;overflow-x:auto;white-space:pre}
+.cli-block .c{color:var(--text-3)}
+.cli-block .k{color:var(--cyan)}
+.cli-block .v{color:var(--amber)}
+
+.scorecard{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:18px}
+.dim{display:flex;justify-content:space-between;align-items:center;background:var(--bg-1);border:1px solid var(--border);border-radius:5px;padding:10px 14px;font-family:var(--mono);font-size:12px}
+.dim .n{color:var(--text-2)}
+.dim .s{color:var(--green);font-weight:600}
+.dim.warn .s{color:var(--amber)}
+.dim.miss .s{color:var(--red)}
+
+footer{margin-top:96px;padding-top:24px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-3);display:flex;flex-wrap:wrap;gap:14px 24px;justify-content:space-between}
+footer a{color:var(--text-3)}
+footer a:hover{color:var(--pink-2)}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">
+    <span class="logo-badge">G</span>
+    <span class="logo-text">gtm<span>·autoresearch</span></span>
+  </div>
+  <div class="bar-end">
+    <a href="https://github.com/Organized-AI/gtm-autoresearch">github</a>
+    <a href="https://github.com/karpathy/autoresearch">karpathy/autoresearch</a>
+  </div>
+</div>
+
+<div class="layout">
+
+  <span class="tag">Autoresearch · GTM · Overnight Loop</span>
+  <h1>Karpathy's experimentation loop, <span class="accent">pointed at GTM containers</span>.</h1>
+  <p class="lead">A 12-dimension scorer, ads data from Meta + Google, and Claude Haiku mutations — wired into one overnight loop. <strong style="color:var(--pink)">Pull → Score → Mutate → Validate → Keep/Revert → Repeat</strong>. ~100 experiments by morning, never published to live, and a versioned winning config waiting in R2 for one-click publish.</p>
+
+  <div class="diagram-wrap">
+<pre class="mermaid">
+flowchart LR
+    You(["👤 Operator<br/>npx run-gtm-loop"]):::start
+
+    subgraph SG1 ["&nbsp;PULL · ads data&nbsp;"]
+      direction TB
+      P1["1<br/>Meta Ads API<br/>conv · EMQ · CAPI"]:::pull
+      P2["2<br/>Google Ads API<br/>actions · labels"]:::pull
+    end
+
+    SNAP[("ads-snapshot-<br/>enriched.json")]:::snap
+
+    subgraph SG2 ["&nbsp;SCORE · 12-dim eval&nbsp;"]
+      direction TB
+      S1["3<br/>Structural<br/>tags · params · dedup"]:::score
+      S2["4<br/>Ads-driven<br/>Meta · CAPI · funnel · GAds"]:::score
+    end
+
+    subgraph SG3 ["&nbsp;MUTATE · Claude Haiku&nbsp;"]
+      direction TB
+      M1["5<br/>SKILL.md<br/>+ scorecard"]:::mutate
+      M2["6<br/>Patch GTM JSON<br/>tags · triggers · vars"]:::mutate
+    end
+
+    subgraph SG4 ["&nbsp;VALIDATE · Playwright&nbsp;"]
+      direction TB
+      V1["7<br/>Stage workspace<br/>preview mode"]:::validate
+      V2["8<br/>Fire tags · check<br/>params · dedup"]:::validate
+    end
+
+    KEEP{{"score Δ ≥ 0?<br/>keep / revert"}}:::gate
+
+    R2[("R2 · winning-config.json<br/>+ experiment log<br/>+ data audit (md + mermaid)")]:::r2
+
+    GTM[("GTM staging<br/>workspace<br/>(one-click publish)")]:::gtm
+
+    You ==> P1
+    You ==> P2
+    P1 ==> SNAP
+    P2 ==> SNAP
+    SNAP ==> S1 ==> S2
+    S2 ==> M1 ==> M2
+    M2 ==> V1 ==> V2
+    V2 ==> KEEP
+    KEEP ==>|keep| R2
+    KEEP -.->|revert| S1
+    R2 ==> GTM
+
+    classDef start    fill:#111114,stroke:#ec4899,stroke-width:2px,color:#ede0e8
+    classDef pull     fill:#111114,stroke:#f97316,stroke-width:2px,color:#f97316
+    classDef score    fill:#111114,stroke:#22d3ee,stroke-width:2px,color:#22d3ee
+    classDef mutate   fill:#111114,stroke:#4ade80,stroke-width:2px,color:#4ade80
+    classDef validate fill:#111114,stroke:#a78bfa,stroke-width:2px,color:#a78bfa
+    classDef gate     fill:#1a1014,stroke:#f87171,stroke-width:2px,color:#f87171
+    classDef snap     fill:#17171b,stroke:#fbbf24,stroke-width:2px,color:#ede0e8
+    classDef r2       fill:#17171b,stroke:#fbbf24,stroke-width:2px,color:#ede0e8
+    classDef gtm      fill:#1a0e18,stroke:#ec4899,stroke-width:2px,color:#ede0e8
+</pre>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="swatch" style="background:#f97316"></div>
+      <div><span class="label">Pull · Orange</span><span class="desc">Live ads data — Meta + Google APIs feed conversion counts, EMQ, CAPI dedup, conversion actions.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#22d3ee"></div>
+      <div><span class="label">Score · Cyan</span><span class="desc">12 dimensions — 8 structural (always on) + 4 ads-driven (with enriched snapshot). One number to beat.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#4ade80"></div>
+      <div><span class="label">Mutate · Green</span><span class="desc">Claude Haiku reads <code>SKILL.md</code> + the current scorecard, then patches one GTM container JSON.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#a78bfa"></div>
+      <div><span class="label">Validate · Purple</span><span class="desc">Playwright drives a staging preview — tags fire, parameters land, dedup holds. No live traffic.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#fbbf24"></div>
+      <div><span class="label">Persist · Amber</span><span class="desc">Winning JSON + experiment log + before/after data audit, all versioned in R2 for rollback.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#f87171"></div>
+      <div><span class="label">Gate · Red</span><span class="desc">Score Δ &lt; 0 reverts in-loop. Final publish to live GTM stays a one-click human decision.</span></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-label">12-dimension scorecard · first run</div>
+    <h2>From 84.3% → 91.2% in five rounds.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:6px">Eight structural dimensions are always on; four ads-driven dimensions activate when the enriched snapshot is fresh (&lt;24h). Weights are validated to sum to 1.0 after profile selection — missing data returns a neutral 0.5, not a false 1.0.</p>
+    <div class="scorecard">
+      <div class="dim"><span class="n">Tag coverage</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">Parameter completeness</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">Deduplication</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">Trigger quality</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">Folder organization</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">Meta Ads alignment</span><span class="s">100%</span></div>
+      <div class="dim"><span class="n">CAPI coverage</span><span class="s">99.4%</span></div>
+      <div class="dim warn"><span class="n">Naming conventions</span><span class="s">97.6%</span></div>
+      <div class="dim warn"><span class="n">Variable hygiene</span><span class="s">87.5%</span></div>
+      <div class="dim miss"><span class="n">Google Ads alignment</span><span class="s">80%</span></div>
+      <div class="dim miss"><span class="n">Funnel integrity</span><span class="s">70%</span></div>
+      <div class="dim miss"><span class="n">Consent settings</span><span class="s">60%</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Concrete value of running the loop</div>
+    <h2>Six things autoresearch buys you.</h2>
+    <div class="benefits">
+      <div class="benefit pull"><div class="num">PULL · 01</div><div class="title">Real signals, not vibes</div><div class="body">The optimizer sees what's actually firing in Meta + Google — conversion counts, EMQ, CAPI dedup. Catches revenue leakage where browser pixel fires but sGTM never forwards.</div></div>
+      <div class="benefit score"><div class="num">SCORE · 02</div><div class="title">One number to beat</div><div class="body">12 dimensions collapse to a single signal-quality score. <code>val_bpb</code> for tracking — every patch is comparable, every round is auditable.</div></div>
+      <div class="benefit mutate"><div class="num">MUTATE · 03</div><div class="title">Claude touches one file</div><div class="body">Haiku rewrites the GTM container JSON, guided by <code>program.md → SKILL.md</code>. Tag configs, trigger rules, variable mappings — never code, never deploys.</div></div>
+      <div class="benefit validate"><div class="num">VALIDATE · 04</div><div class="title">Playwright before promotion</div><div class="body">Each candidate is fired in staging preview — tags, parameters, dedup all checked. Bad patches revert before they ever touch the winning slot.</div></div>
+      <div class="benefit persist"><div class="num">PERSIST · 05</div><div class="title">Wake up to deliverables</div><div class="body">Staging workspace, <code>winning-config.json</code> in R2, experiment log with diffs, before/after data audit with Mermaid — every morning, on a 24h signal window.</div></div>
+      <div class="benefit gate"><div class="num">GATE · 06</div><div class="title">Never publishes to live</div><div class="body">Loop revert is automatic. The publish-to-live decision is a human one-click against a versioned, validated workspace. Rollback to any previous night.</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Setup</div>
+    <h2>Two commands. Overnight budget, $0.15.</h2>
+    <div class="cli-block"><span class="c"># 1. refresh ads data — Meta + Google Ads APIs into one snapshot</span>
+<span class="k">npx</span> tsx scripts/refresh-ads-snapshot.ts
+
+<span class="c"># 2. run the optimization loop — score · mutate · validate · keep/revert</span>
+<span class="k">npx</span> tsx scripts/run-gtm-loop.ts
+
+<span class="c"># standalone eval against a seed export</span>
+<span class="k">npx</span> tsx evals/eval_gtm_signal_quality.ts <span class="v">content/gtm-templates/HRE/seed/shopify-ecom-web.json</span> \
+  --enriched-snapshot data/signals/ads-snapshot-enriched.json</div>
+    <p style="font-size:13px;color:var(--text-2);margin-top:12px">~30 rounds × ~3K tokens ≈ ~90K tokens per run on Claude Haiku. The snapshot pipeline retries with exponential backoff, refuses to run on snapshots &gt;72h old, and writes atomically so a mid-run crash can never corrupt state.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Why a loop and not a one-shot prompt</div>
+    <h2>Same shape as Karpathy's autoresearch — different domain.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px">A one-shot "rewrite my GTM container" prompt has no feedback signal. It can't tell you whether the patch improved EMQ, broke a trigger, or left a Google Ads conversion action orphaned. The loop's value is the <strong style="color:var(--text)">measurement window</strong> — fixed scoring, validated mutations, and a kept/reverted decision per round. Same shape as <a href="https://github.com/karpathy/autoresearch">karpathy/autoresearch</a>: agent experiments with configs the way it would experiment with model architectures.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px">The loop's not a code tool, not a deploy tool, not a replacement for a human review of the winner. It's a way to make ~100 small, scored, reversible experiments run while you sleep — and hand you a publish-ready workspace by morning.</p>
+  </section>
+
+  <footer>
+    <div>Organized AI · GTM AutoResearch · Overnight Loop</div>
+    <div>
+      <a href="https://github.com/Organized-AI/gtm-autoresearch">repo</a> ·
+      <a href="https://github.com/karpathy/autoresearch">karpathy/autoresearch</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    darkMode: true,
+    background: '#111114',
+    primaryColor: '#17171b',
+    primaryTextColor: '#ede0e8',
+    primaryBorderColor: '#3a3340',
+    lineColor: '#a895a5',
+    secondaryColor: '#1d1d22',
+    tertiaryColor: '#0a0a0c',
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: '12px',
+    clusterBkg: '#0a0a0c',
+    clusterBorder: '#3a3340',
+    edgeLabelBackground: '#111114',
+  },
+  flowchart: { curve: 'basis', htmlLabels: true, padding: 12 }
+});
+</script>
+
+</body>
+</html>
