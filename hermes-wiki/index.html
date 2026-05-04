@@ -53,6 +53,9 @@
   <a href="https://organized-ai-hub.pages.dev/#wikis" class="ext">organized-ai-hub</a>
   <a href="https://hermes-agent-guide.pages.dev/" class="ext">hermes-agent-guide</a>
   <a href="https://hermes-pi-harness-guide.pages.dev/" class="ext">hermes-pi-harness-guide</a>
+  <a href="https://wiki.organizedai.vip/harness/" class="ext">harness-engineering</a>
+  <a href="https://guide.organizedai.vip/pi-agent/" class="ext">pi-agent (Pi Mono)</a>
+  <a href="https://guide.organizedai.vip/autoresearch-linear/" class="ext">autoresearch-linear</a>
   <a href="https://github.com/NousResearch/hermes-agent" class="ext">NousResearch/hermes-agent</a>
   <a href="https://openclaw-wiki.pages.dev/" class="ext">openclaw-wiki</a>
   <a href="https://clip-pipeline-wiki.pages.dev/" class="ext">clip-pipeline-wiki</a>
@@ -64,6 +67,9 @@
 <div class="howto">
   <strong>How to use this wiki (for humans and LLMs)</strong>
   Every Hermes concept has one node. Nodes split into <em>upstream Hermes</em> (gateway · agent core · toolsets · MCP · skills · platforms · models · storage) and <em>Pi Harness</em> (the concrete deployment on <code>claws-mac-mini</code> — launchd · Codex OAuth + Gemma-4 fallback · self-heal patches · tool surface). Companion prose at <a href="https://hermes-agent-guide.pages.dev/">hermes-agent-guide</a> and <a href="https://hermes-pi-harness-guide.pages.dev/">hermes-pi-harness-guide</a>.
+  <br><br>
+  <strong>Naming heads-up</strong>
+  &ldquo;Pi Harness&rdquo; here means <em>this Hermes deployment on the host called <code>claws-mac-mini</code></em> &mdash; the &ldquo;Pi&rdquo; is host-name shorthand. It is <em>not</em> the same thing as <a href="https://guide.organizedai.vip/pi-agent/">pi-agent (Pi Mono)</a>, which is Mario Zechner's <code>pi-agent-core</code> TypeScript toolkit for scaffolding harnesses. The two compose: use Pi Mono to <em>build</em> a harness, use Hermes (this Pi Harness) to <em>host &amp; delegate</em> it, and use <a href="https://guide.organizedai.vip/autoresearch-linear/">AutoAgent loops in Linear</a> to <em>tune</em> it. Umbrella discipline: <a href="https://wiki.organizedai.vip/harness/">harness engineering</a>.
 </div>
 
 <nav class="toc">
@@ -559,10 +565,29 @@
     <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://autoagent-autoresearch-wiki.pages.dev/">autoagent-autoresearch-wiki</a></div>
   </div>
 
+  <div class="node" id="guide-autoresearch-linear">
+    <header><span class="id">autoresearch-linear</span><span class="type t-guide">guide</span></header>
+    <p>How AutoAgent + autoresearch loops file one Linear issue per run (scores in title, trajectory + winning config + audits in body). The natural tuning surface for any harness Hermes hosts — reopen an issue with the right label and the Worker triggers a re-run on <code>claws-mac-mini</code>.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/autoresearch-linear/">guide.organizedai.vip/autoresearch-linear</a></div>
+  </div>
+
+  <div class="node" id="guide-pi-agent">
+    <header><span class="id">pi-agent (Pi Mono)</span><span class="type t-guide">guide</span></header>
+    <p><strong>Distinct from this wiki's &ldquo;Pi Harness&rdquo;.</strong> Mario Zechner's <code>pi-agent-core</code> TypeScript toolkit for scaffolding minimal agent harnesses. The natural &ldquo;build&rdquo; side of the loop: scaffold a harness with Pi Mono, host it via Hermes (this deployment), tune it via AutoAgent's Linear loops.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/pi-agent/">guide.organizedai.vip/pi-agent</a></div>
+  </div>
+
+  <div class="node" id="guide-harness">
+    <header><span class="id">harness-engineering</span><span class="type t-harness">harness</span></header>
+    <p>Umbrella discipline that replaced prompt engineering: anatomy, layers, patterns, notable systems. Hermes (and this Pi Harness deployment) sit in the &ldquo;long-running gateway + agent core + tool/skill surface&rdquo; pattern slot.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/harness/">guide.organizedai.vip/harness</a> <a class="chip ext" href="https://wiki.organizedai.vip/harness/">wiki.organizedai.vip/harness</a></div>
+  </div>
+
 </div>
 
 <footer>
   source: <a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a> · <a href="https://hermes-agent-guide.pages.dev/">hermes-agent-guide</a> · <a href="https://hermes-pi-harness-guide.pages.dev/">hermes-pi-harness-guide</a>
+  · loop: <a href="https://guide.organizedai.vip/pi-agent/">pi-agent</a> · <a href="https://guide.organizedai.vip/autoresearch-linear/">autoresearch-linear</a> · <a href="https://wiki.organizedai.vip/harness/">harness</a>
   · companion: <a href="https://openclaw-wiki.pages.dev/">openclaw-wiki</a>
   · index: <a href="https://organized-ai-hub.pages.dev/#wikis">organized-ai-hub # wikis</a>
 </footer>

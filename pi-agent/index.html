@@ -226,6 +226,9 @@ kbd{font-family:var(--mono);font-size:.85em;background:var(--bg-2);border:1px so
     <div class="tab" data-p="glossary" onclick="show('glossary')"><span class="td"></span> Glossary + FAQ</div>
   </div>
   <div class="bar-end">
+    <a href="https://guide.organizedai.vip/harness/" target="_blank">Harness Engineering</a>
+    <a href="https://hermes-agent-guide.pages.dev/" target="_blank">Hermes</a>
+    <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank">AutoAgent · Linear</a>
     <a href="https://github.com/badlogic/pi-mono" target="_blank">GitHub</a>
     <a href="https://mariozechner.at" target="_blank">@badlogic</a>
   </div>
@@ -250,6 +253,18 @@ kbd{font-family:var(--mono);font-size:.85em;background:var(--bg-2);border:1px so
     <p>Pi is <em>not</em> trying to be Claude Code, Cursor, or a full AI IDE. It's a TypeScript toolkit from one developer (Mario Zechner) with a radical idea: ship a tiny, understandable core, and let users add the pieces they actually need. The full distribution is only seven small npm packages &mdash; you can read and understand each one in an afternoon.</p>
     <p>There are two things you can do with Pi. First, use it as a coding agent in your terminal (<code>pi</code>) &mdash; four built-in tools (read, write, edit, bash), unlimited extensibility through TypeScript extensions and markdown skills. Second, use its libraries (<code>pi-ai</code>, <code>pi-agent-core</code>) to build <em>your own</em> agent &mdash; a Slack bot, a browser chat, a custom workflow, whatever. pi-web-ui even gives you ready-made components for putting a chat UI in a static Cloudflare Pages site.</p>
     <p><em>Who it's for:</em> developers who'd rather compose 50 lines than configure 500. If &ldquo;I want an agent that does exactly X, nothing more, nothing less&rdquo; sounds good, Pi is probably right for you.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">How Pi fits the wider Organized AI stack</div>
+    <h4>Pi as the harness toolkit · Hermes as the runtime · AutoAgent as the tuning loop</h4>
+    <p><code>pi-agent-core</code> is what you reach for when you want to <em>scaffold a new agent harness</em> &mdash; the small stateful loop that owns conversation, tool calls, and hooks. From there, three neighbors plug in:</p>
+    <ul style="margin:10px 0 12px 22px;line-height:1.7;font-size:14px">
+      <li><strong>Delegate the build to <a href="https://hermes-agent-guide.pages.dev/" target="_blank">Hermes</a></strong> &mdash; the <code>/hermes delegate</code> flow spins up your Pi-built harness in an isolated worktree on <code>claws-mac-mini</code>. (Note: Hermes itself is sometimes called the &ldquo;Pi Harness&rdquo; in <a href="https://wiki.organizedai.vip/hermes/" target="_blank">hermes-wiki</a> &mdash; that's a different &ldquo;Pi&rdquo; referring to the host, unrelated to Pi Mono.)</li>
+      <li><strong>Drive evals + fine-tune cycles via <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank">AutoAgent loops in Linear</a></strong> &mdash; harness experiments file one Linear issue per run with scores, trajectories, and GitHub-linked artifacts. Reopen an issue with the right label and Hermes re-runs the loop against your harness.</li>
+      <li><strong>Read the umbrella discipline</strong> at <a href="https://guide.organizedai.vip/harness/" target="_blank">Harness Engineering</a> (anatomy · layers · patterns · notable systems) and the LLM reference at <a href="https://wiki.organizedai.vip/harness/" target="_blank">wiki.organizedai.vip/harness</a>. Pi sits in the &ldquo;minimal core + extension&rdquo; pattern slot.</li>
+    </ul>
+    <p>Net story: <em>pi-agent-core gives you the harness; Hermes hosts &amp; delegates; AutoAgent's Linear loops tune.</em></p>
   </div>
 
   <div class="plain">

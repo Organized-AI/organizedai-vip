@@ -124,6 +124,9 @@ footer a:hover{color:var(--cyan)}
     <span class="logo-text">autoresearch<span>·linear</span></span>
   </div>
   <div class="bar-end">
+    <a href="https://guide.organizedai.vip/harness/">harness</a>
+    <a href="https://hermes-agent-guide.pages.dev/">hermes</a>
+    <a href="https://guide.organizedai.vip/pi-agent/">pi</a>
     <a href="https://arch.organizedai.vip/openclaw-linear-mcp/">linear-mcp</a>
     <a href="https://guide.organizedai.vip/autoagent-autoresearch/">guide</a>
     <a href="https://linear-worker.jordan-691.workers.dev/health">worker</a>
@@ -352,8 +355,22 @@ flowchart LR
     <p style="font-size:14px;color:var(--text-2);max-width:860px">The same logic applies when Hermes wires AutoAgent in Phase 4. AutoAgent's harness/trajectory artifacts live on <code>claws-mac-mini</code> first; the Linear post is the public-facing index into them.</p>
   </section>
 
+  <section class="section">
+    <div class="section-label">Wiring · Pi · Hermes · Harness Engineering</div>
+    <h2>What gets tuned: a Pi-built harness, delegated by Hermes.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:14px">The <em>thing</em> AutoAgent is iterating on &mdash; the harness under test &mdash; is typically scaffolded with <a href="https://guide.organizedai.vip/pi-agent/"><strong style="color:var(--text)">Pi Mono</strong></a> (Mario Zechner's <code>pi-agent-core</code> toolkit). <a href="https://hermes-agent-guide.pages.dev/"><strong style="color:var(--text)">Hermes</strong></a> on <code>claws-mac-mini</code> is the runtime that <em>hosts</em> the harness and the <code>/hermes delegate</code> flow that <em>spins up</em> a fresh worktree to build it. AutoAgent then drives the loop: a Linear issue per run, scores in the title, trajectory + winning config + run notes + audit linked in the body.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:14px">Re-runs are issue-driven. Reopen with the right label and the Worker forwards the trigger back to Hermes, which re-launches the loop against the latest harness build. Linear stays downstream of disk; Hermes stays the only thing holding host secrets.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px">The umbrella discipline is <a href="https://guide.organizedai.vip/harness/"><strong style="color:var(--text)">Harness Engineering</strong></a> &mdash; anatomy, layers, patterns, notable systems. The LLM reference is at <a href="https://wiki.organizedai.vip/harness/">wiki.organizedai.vip/harness</a>. Naming heads-up: <a href="https://wiki.organizedai.vip/hermes/">hermes-wiki</a> calls the <code>claws-mac-mini</code> deployment of Hermes the &ldquo;Pi Harness&rdquo; &mdash; that's a host-name &ldquo;Pi,&rdquo; not Pi Mono. If a doc says &ldquo;Pi Harness&rdquo; it means Hermes-on-claws; if it says &ldquo;Pi&rdquo; or &ldquo;pi-agent-core&rdquo; it means Mario's toolkit.</p>
+  </section>
+
   <footer>
     <div>Autoresearch + AutoAgent → Linear · Pipeline Guide</div>
+    <div>
+      <a href="https://guide.organizedai.vip/pi-agent/">pi-agent</a> ·
+      <a href="https://hermes-agent-guide.pages.dev/">hermes</a> ·
+      <a href="https://guide.organizedai.vip/harness/">harness engineering</a> ·
+      <a href="https://wiki.organizedai.vip/harness/">harness wiki</a>
+    </div>
     <div>
       <a href="https://arch.organizedai.vip/openclaw-linear-mcp/">linear-mcp</a> ·
       <a href="https://guide.organizedai.vip/autoagent-autoresearch/">autoresearch guide</a> ·

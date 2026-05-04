@@ -235,6 +235,9 @@ p{margin-bottom:14px}
     <div class="tab" data-p="glossary" onclick="show('glossary')"><span class="td"></span> Glossary + FAQ</div>
   </div>
   <div class="bar-end">
+    <a href="https://guide.organizedai.vip/harness/" target="_blank">Harness Engineering</a>
+    <a href="https://guide.organizedai.vip/pi-agent/" target="_blank">Pi Mono</a>
+    <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank">AutoAgent · Linear</a>
     <a href="https://github.com/NousResearch/hermes-agent" target="_blank">GitHub</a>
     <a href="https://nousresearch.com" target="_blank">Nous Research</a>
   </div>
@@ -258,6 +261,14 @@ p{margin-bottom:14px}
     <p>Strip the buzzwords and it's a command-line program that sits between you and a language model (Claude, GPT, Qwen, whatever you pick). When you type a question, Hermes doesn't just ask the model &mdash; it also gives the model the power to <em>do things</em>: read files, run commands, browse the web, send messages on your behalf, schedule recurring jobs, call other services.</p>
     <p>The twist is the <em>learning loop</em>. When Hermes solves a problem in a way that works, it can turn that approach into a reusable &ldquo;skill&rdquo; &mdash; a small markdown file it reads the next time a similar problem shows up. The more you use it, the more personal playbooks it accumulates. Over weeks and months, your install becomes genuinely yours: a library of patterns it learned while working with <em>you</em>.</p>
     <p><em>Who it's for:</em> anyone comfortable in a terminal who wants a persistent AI assistant they control end-to-end &mdash; no SaaS account required, no vendor lock-in, your data stays local.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">How Hermes fits the wider Organized AI stack</div>
+    <h4>Hermes as the runtime · Pi Mono as the toolkit · AutoAgent as the tuning loop</h4>
+    <p>Hermes isn't only a personal assistant &mdash; the same daemon doubles as the <em>delegation runtime</em> for harness work. The <code>/hermes delegate</code> flow spins up an isolated worktree on the host (the &ldquo;Pi Harness&rdquo; deployment described in <a href="https://wiki.organizedai.vip/hermes/" target="_blank">hermes-wiki</a> &mdash; the &ldquo;Pi&rdquo; is the host's name) and lets a remote builder scaffold a fresh agent there.</p>
+    <p>What gets built is usually a <a href="https://guide.organizedai.vip/pi-agent/" target="_blank"><strong>Pi Mono</strong></a> harness &mdash; Mario Zechner's <code>pi-agent-core</code> toolkit, distinct from this Pi Harness host name. Once it exists, <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank"><strong>AutoAgent's Linear loops</strong></a> drive the iteration: one Linear issue per run with scores in the title, trajectory + winning config + audits in the body, GitHub commits auto-linked. Reopen an issue with the right label and the worker triggers Hermes to re-run the loop against the latest harness build.</p>
+    <p>Read the umbrella discipline at <a href="https://guide.organizedai.vip/harness/" target="_blank"><strong>Harness Engineering</strong></a> (anatomy · layers · patterns · notable systems). Net story: <em>Pi Mono builds, Hermes hosts &amp; delegates, AutoAgent tunes.</em></p>
   </div>
 
   <div class="plain">
