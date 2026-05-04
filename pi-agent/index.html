@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi Agent — Minimal Coding Agent &amp; LLM Toolkit</title>
+<meta name="description" content="Complete guide to Pi Mono by Mario Zechner: pi-coding-agent, pi-ai, pi-agent-core, pi-tui, pi-mom, pi-pods, and pi-web-ui. A minimalist toolkit for building AI agents.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bar:48px;--status:24px;
+  --bg:#0a0c0b;--bg-1:#0f1211;--bg-2:#161a18;--bg-3:#1c211e;
+  --border:#242a26;--border-h:#36403a;
+  --accent:#00e5a0;--accent-dim:#00a876;--accent-2:#7dffce;
+  --green:#4ade80;--red:#f87171;--blue:#60a5fa;--cyan:#22d3ee;--amber:#fbbf24;
+  --text:#e6ede9;--text-2:#93a098;--text-3:#5e6b64;--text-4:#3e4742;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text-2);font-family:var(--sans);font-size:15px;line-height:1.7;overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent-dim);color:#000}
+a{color:var(--accent-2);text-decoration:none;font-family:var(--mono);font-size:.9em;transition:color .2s}
+a:hover{color:#fff}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-2);padding:2px 6px;border-radius:3px;color:var(--accent-2)}
+h1{font-family:var(--mono);font-size:1.8em;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:8px}
+h2{font-family:var(--mono);font-size:1.15em;font-weight:700;color:var(--text);margin:32px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-family:var(--mono);font-size:1em;font-weight:600;color:var(--text);margin:24px 0 10px}
+h4{font-family:var(--mono);font-size:.92em;font-weight:600;color:var(--accent-2);margin-bottom:6px}
+p{margin-bottom:14px}
+
+.bar{position:fixed;top:0;left:0;right:0;height:var(--bar);background:var(--bg-1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;z-index:100;gap:4px;overflow-x:auto}
+.logo{display:flex;align-items:center;gap:8px;margin-right:16px;flex-shrink:0}
+.logo-badge{background:var(--accent);color:#000;font-family:var(--mono);font-weight:700;font-size:11px;padding:3px 7px;border-radius:4px;letter-spacing:.5px}
+.logo-text{font-family:var(--mono);font-size:13px;color:var(--text-3);font-weight:500}
+.logo-text span{color:var(--text)}
+.tabs{display:flex;gap:2px;flex-shrink:0}
+.tab{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:6px 12px;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none}
+.tab:hover{color:var(--text-2);background:var(--bg-2)}
+.tab.on{color:var(--accent-2);background:var(--bg-2)}
+.td{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--text-4);margin-right:6px;vertical-align:middle}
+.tab.on .td{background:var(--accent)}
+.bar-end{margin-left:auto;display:flex;gap:12px;align-items:center;flex-shrink:0}
+.bar-end a{font-size:11px;color:var(--text-3)}
+.bar-end a:hover{color:var(--accent-2)}
+
+.panels{position:fixed;top:var(--bar);bottom:var(--status);left:0;right:0;overflow:hidden}
+.panel{display:none;height:100%;overflow-y:auto;padding:40px 20px 60px}
+.panel.on{display:block}
+.pw{max-width:900px;margin:0 auto}
+
+.sh{margin-bottom:32px}
+.sh-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.sh p{color:var(--text-2);font-size:15px;max-width:640px}
+
+.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin:20px 0}
+.gc{display:flex;background:var(--bg-1);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;overflow:hidden}
+.gc:hover{border-color:var(--border-h);background:var(--bg-2);transform:translateY(-1px)}
+.gc-stripe{width:4px;flex-shrink:0;background:var(--accent)}
+.gc-body{flex:1;padding:14px 16px}
+.gc-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.gc-desc{font-size:13px;color:var(--text-3);line-height:1.5}
+.gc-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.gc-tag{font-family:var(--mono);font-size:10px;background:var(--bg-2);color:var(--text-3);padding:2px 8px;border-radius:3px;border:1px solid var(--border)}
+.gc-meta{display:flex;align-items:center;padding:0 14px;color:var(--text-4)}
+.gc-arrow{font-size:16px;transition:transform .15s}
+.gc:hover .gc-arrow{transform:translateX(3px);color:var(--accent)}
+
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:20px 0}
+.info-card{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:16px;transition:border-color .15s}
+.info-card:hover{border-color:var(--border-h)}
+.info-card p{font-size:13px;color:var(--text-3);margin:0}
+
+.layer-stack{margin:20px 0;display:flex;flex-direction:column;gap:2px}
+.layer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:13px}
+.layer-name{color:var(--text)}
+.layer-detail{color:var(--text-3);font-size:12px}
+.layer.active{border-color:var(--accent-dim);background:rgba(0,229,160,0.06)}
+.layer.active .layer-name{color:var(--accent-2)}
+
+.arch{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text-3);margin:20px 0}
+.a-hl{color:var(--accent-2);font-weight:700}
+.a-box{color:var(--blue)}
+.a-arr{color:var(--green)}
+.a-lbl{color:var(--amber);font-weight:700;font-size:11px;letter-spacing:.5px}
+.a-dim{color:var(--text-4)}
+
+.cb{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:16px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.7;white-space:pre;overflow-x:auto;color:var(--text-2);margin:16px 0}
+.cb .cmt{color:var(--text-4)}
+.cb .kw{color:var(--accent-2)}
+.cb .val{color:var(--cyan)}
+.cb .str{color:var(--green)}
+.cb .hl{color:var(--amber)}
+
+.cfg-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.cfg-table th{font-family:var(--mono);font-size:11px;color:var(--text-3);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+.cfg-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text-2);font-family:var(--mono);font-size:12px}
+.cfg-table tr:hover td{background:var(--bg-2)}
+.cfg-table td:first-child{color:var(--accent-2)}
+
+.mental{background:rgba(0,229,160,0.06);border:1px solid var(--accent-dim);border-radius:8px;padding:14px 18px;font-size:14px;color:var(--text-2);margin:20px 0;line-height:1.6}
+.mental strong{color:var(--accent-2)}
+
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--text-2);background:var(--bg-1);border:1px solid var(--border);padding:5px 12px;border-radius:20px}
+.pill-dot{width:6px;height:6px;border-radius:50%}
+.pill-dot.ok{background:var(--green)}
+.pill-dot.warn{background:var(--amber)}
+.pill-dot.off{background:var(--text-4)}
+
+.ql-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:20px 0}
+.ql{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;cursor:pointer;transition:all .15s}
+.ql:hover{border-color:var(--accent-dim);background:var(--bg-2)}
+.ql-title{font-family:var(--mono);font-size:13px;color:var(--text);margin-bottom:2px}
+.ql-sub{font-size:12px;color:var(--text-3)}
+
+.sbar{position:fixed;bottom:0;left:0;right:0;height:var(--status);background:var(--bg-1);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:16px;font-family:var(--mono);font-size:10px;color:var(--text-4);z-index:100}
+.si{display:flex;align-items:center;gap:6px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.surl{margin-left:auto;color:var(--text-4)}
+
+.doc{margin:20px 0}
+.doc p{color:var(--text-2);font-size:14px;line-height:1.7;margin-bottom:12px}
+.doc ul{margin:12px 0 12px 20px;color:var(--text-2);font-size:14px}
+.doc li{margin-bottom:6px;line-height:1.6}
+.doc li code{font-size:.85em}
+
+kbd{font-family:var(--mono);font-size:.85em;background:var(--bg-2);border:1px solid var(--border);border-bottom-width:2px;padding:1px 6px;border-radius:3px;color:var(--text)}
+
+/* "In plain terms" callout */
+.plain{background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.22);border-left:3px solid var(--blue);padding:14px 18px;margin:16px 0 22px;border-radius:0 6px 6px 0;font-size:13.5px;color:var(--text-2);line-height:1.75}
+.plain-lbl{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:6px}
+.plain-term{color:var(--text);font-weight:600}
+
+/* "Why this exists" motivation box */
+.why{background:var(--bg-1);border:1px solid var(--border-h);border-radius:8px;padding:20px 24px;margin:18px 0 24px}
+.why-lbl{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--amber);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:8px}
+.why h4{font-family:var(--sans);font-size:15.5px;font-weight:700;color:var(--text);margin-bottom:10px}
+.why p{font-size:13.5px;color:var(--text-2);line-height:1.75;margin-bottom:10px}
+.why p:last-child{margin-bottom:0}
+.why em{color:var(--accent-2);font-style:normal}
+
+/* Walk-through story */
+.story{background:linear-gradient(180deg,rgba(34,211,238,0.05),rgba(34,211,238,0.01));border:1px solid rgba(34,211,238,0.22);border-radius:8px;padding:22px 26px;margin:20px 0 26px}
+.story-lbl{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:8px}
+.story h4{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
+.story ol{margin:4px 0 0 22px}
+.story ol li{margin-bottom:10px;line-height:1.75;font-size:13.5px;color:var(--text-2)}
+.story ol li strong{color:var(--cyan);font-weight:600}
+.story .t{font-family:var(--mono);font-size:11px;color:var(--text-4);margin-right:6px}
+
+/* Threat model */
+.threat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:18px 0 26px}
+.threat{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;border-left:3px solid var(--red);padding:16px 18px}
+.threat-q{font-family:var(--mono);font-size:11.5px;color:var(--red);font-weight:700;margin-bottom:8px}
+.threat-q::before{content:"? ";opacity:0.7}
+.threat-a{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:10px}
+.threat-shield{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--green);background:rgba(74,222,128,0.08);padding:4px 10px;border-radius:4px;border:1px solid rgba(74,222,128,0.2)}
+.threat-shield::before{content:"✓";font-weight:700}
+
+/* Common mistakes */
+.oops{background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.22);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:18px 22px;margin:20px 0 26px}
+.oops-lbl{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--amber);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:10px}
+.oops ul{margin:0;list-style:none;padding:0}
+.oops li{font-size:13px;color:var(--text-2);line-height:1.7;padding-left:22px;position:relative;margin-bottom:8px}
+.oops li::before{content:"⚠";position:absolute;left:0;top:0;color:var(--amber);font-weight:700}
+.oops li strong{color:var(--text)}
+
+/* Glossary */
+.gloss-index{display:flex;flex-wrap:wrap;gap:4px;margin:14px 0 20px;padding:10px 14px;background:var(--bg-1);border:1px solid var(--border);border-radius:6px}
+.gloss-index a{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:3px 9px;border-radius:3px;transition:all .15s}
+.gloss-index a:hover{background:var(--accent);color:#000}
+.gloss-list{display:flex;flex-direction:column;gap:2px;margin:8px 0 28px}
+.gloss{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:14px 18px;transition:border-color .15s}
+.gloss:hover{border-color:var(--border-h)}
+.gloss-term{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent-2);margin-bottom:4px}
+.gloss-pron{font-family:var(--sans);font-size:11px;color:var(--text-4);font-style:italic;margin-left:8px;font-weight:400}
+.gloss-def{font-size:13px;color:var(--text-2);line-height:1.75}
+.gloss-def code{font-size:.85em}
+.gloss-letter{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber);margin:22px 0 6px;letter-spacing:1.5px;scroll-margin-top:64px}
+
+/* FAQ */
+.faq{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;margin-bottom:6px;overflow:hidden}
+.faq summary{padding:14px 18px;cursor:pointer;font-family:var(--mono);font-size:12.5px;color:var(--text);font-weight:500;list-style:none;display:flex;align-items:center;gap:10px;transition:background .15s}
+.faq summary::before{content:"+";color:var(--accent-2);font-weight:700;font-size:16px}
+.faq[open] summary::before{content:"−"}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{background:var(--bg-2)}
+.faq-body{padding:0 18px 16px 36px;font-size:13px;color:var(--text-2);line-height:1.75}
+.faq-body p{margin-bottom:10px}
+.faq-body code{font-size:.85em}
+
+/* Decision table (when to use which) */
+.dec-table{width:100%;border-collapse:collapse;margin:16px 0 26px;font-size:13px}
+.dec-table th{font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left;padding:10px 14px;border-bottom:2px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+.dec-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:top}
+.dec-table tr:hover td{background:var(--bg-2)}
+.dec-table td:first-child{color:var(--text);font-weight:600;font-family:var(--mono);font-size:12px;white-space:nowrap}
+
+@media(max-width:700px){
+  .bar{padding:0 8px}
+  .tab{padding:6px 8px;font-size:11px}
+  .logo-text{display:none}
+  .panel{padding:24px 14px 40px}
+  .gc-grid,.info-grid,.ql-grid{grid-template-columns:1fr}
+  h1{font-size:1.4em}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">
+    <span class="logo-badge">π</span>
+    <span class="logo-text">Pi <span>Agent</span></span>
+  </div>
+  <div class="tabs">
+    <div class="tab on" data-p="home" onclick="show('home')"><span class="td"></span> Overview</div>
+    <div class="tab" data-p="install" onclick="show('install')"><span class="td"></span> Install</div>
+    <div class="tab" data-p="cli" onclick="show('cli')"><span class="td"></span> Coding Agent</div>
+    <div class="tab" data-p="ai" onclick="show('ai')"><span class="td"></span> pi-ai</div>
+    <div class="tab" data-p="core" onclick="show('core')"><span class="td"></span> Agent Core</div>
+    <div class="tab" data-p="packages" onclick="show('packages')"><span class="td"></span> Packages</div>
+    <div class="tab" data-p="extend" onclick="show('extend')"><span class="td"></span> Extend</div>
+    <div class="tab" data-p="deploy" onclick="show('deploy')"><span class="td"></span> Deploy</div>
+    <div class="tab" data-p="glossary" onclick="show('glossary')"><span class="td"></span> Glossary + FAQ</div>
+  </div>
+  <div class="bar-end">
+    <a href="https://guide.organizedai.vip/harness/" target="_blank">Harness Engineering</a>
+    <a href="https://hermes-agent-guide.pages.dev/" target="_blank">Hermes</a>
+    <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank">AutoAgent · Linear</a>
+    <a href="https://github.com/badlogic/pi-mono" target="_blank">GitHub</a>
+    <a href="https://mariozechner.at" target="_blank">@badlogic</a>
+  </div>
+</div>
+
+<div class="panels">
+
+<!-- ============================== OVERVIEW ============================== -->
+<div id="p-home" class="panel on">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">badlogic/pi-mono</div>
+    <h1>Pi Agent</h1>
+    <p>A minimal TypeScript toolkit for building AI agents and managing LLM deployments. Seven composable packages. MIT licensed. Built by Mario Zechner.</p>
+  </div>
+
+  <div class="mental"><strong>The Pi philosophy:</strong> No sub-agents baked in. No plan mode. No permission popups. No background bash. Instead, minimalist primitives and a robust extension system. Users build features they need; the core stays small, honest, and hackable.</div>
+
+  <div class="why">
+    <div class="why-lbl">Start here if you're new to Pi</div>
+    <h4>What is Pi Agent, actually?</h4>
+    <p>Pi is <em>not</em> trying to be Claude Code, Cursor, or a full AI IDE. It's a TypeScript toolkit from one developer (Mario Zechner) with a radical idea: ship a tiny, understandable core, and let users add the pieces they actually need. The full distribution is only seven small npm packages &mdash; you can read and understand each one in an afternoon.</p>
+    <p>There are two things you can do with Pi. First, use it as a coding agent in your terminal (<code>pi</code>) &mdash; four built-in tools (read, write, edit, bash), unlimited extensibility through TypeScript extensions and markdown skills. Second, use its libraries (<code>pi-ai</code>, <code>pi-agent-core</code>) to build <em>your own</em> agent &mdash; a Slack bot, a browser chat, a custom workflow, whatever. pi-web-ui even gives you ready-made components for putting a chat UI in a static Cloudflare Pages site.</p>
+    <p><em>Who it's for:</em> developers who'd rather compose 50 lines than configure 500. If &ldquo;I want an agent that does exactly X, nothing more, nothing less&rdquo; sounds good, Pi is probably right for you.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">How Pi fits the wider Organized AI stack</div>
+    <h4>Pi as the harness toolkit · Hermes as the runtime · AutoAgent as the tuning loop</h4>
+    <p><code>pi-agent-core</code> is what you reach for when you want to <em>scaffold a new agent harness</em> &mdash; the small stateful loop that owns conversation, tool calls, and hooks. From there, three neighbors plug in:</p>
+    <ul style="margin:10px 0 12px 22px;line-height:1.7;font-size:14px">
+      <li><strong>Delegate the build to <a href="https://hermes-agent-guide.pages.dev/" target="_blank">Hermes</a></strong> &mdash; the <code>/hermes delegate</code> flow spins up your Pi-built harness in an isolated worktree on <code>claws-mac-mini</code>. (Note: Hermes itself is sometimes called the &ldquo;Pi Harness&rdquo; in <a href="https://wiki.organizedai.vip/hermes/" target="_blank">hermes-wiki</a> &mdash; that's a different &ldquo;Pi&rdquo; referring to the host, unrelated to Pi Mono.)</li>
+      <li><strong>Drive evals + fine-tune cycles via <a href="https://guide.organizedai.vip/autoresearch-linear/" target="_blank">AutoAgent loops in Linear</a></strong> &mdash; harness experiments file one Linear issue per run with scores, trajectories, and GitHub-linked artifacts. Reopen an issue with the right label and Hermes re-runs the loop against your harness.</li>
+      <li><strong>Read the umbrella discipline</strong> at <a href="https://guide.organizedai.vip/harness/" target="_blank">Harness Engineering</a> (anatomy · layers · patterns · notable systems) and the LLM reference at <a href="https://wiki.organizedai.vip/harness/" target="_blank">wiki.organizedai.vip/harness</a>. Pi sits in the &ldquo;minimal core + extension&rdquo; pattern slot.</li>
+    </ul>
+    <p>Net story: <em>pi-agent-core gives you the harness; Hermes hosts &amp; delegates; AutoAgent's Linear loops tune.</em></p>
+  </div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">Monorepo</span> = one git repo that holds multiple related packages. <code>pi-mono</code> holds all seven Pi packages together &mdash; they share a build system and depend on each other cleanly.<br><br>
+    <span class="plain-term">Composable</span> = each package does one thing well and plays nicely with the others. You don't need all seven; grab only what you need.<br><br>
+    <span class="plain-term">Subscription auth</span> (the Pi superpower) = use the Claude/ChatGPT/Copilot subscription you already pay for instead of a separate per-token API bill. Pi logs you in through OAuth and piggybacks on your existing plan.<br><br>
+    <span class="plain-term">Minimalism as a constraint</span> &mdash; Pi deliberately omits features (plan mode, sub-agents, permission popups) that other tools treat as table stakes. The bet: most of those are poorly generalized, and a user who needs them can build them as an extension that fits their situation exactly.
+  </div>
+
+  <div class="pills">
+    <div class="pill"><span class="pill-dot ok"></span> TypeScript</div>
+    <div class="pill"><span class="pill-dot ok"></span> MIT License</div>
+    <div class="pill"><span class="pill-dot ok"></span> 7 packages</div>
+    <div class="pill"><span class="pill-dot ok"></span> 20+ LLM providers</div>
+    <div class="pill"><span class="pill-dot ok"></span> OAuth + API keys</div>
+    <div class="pill"><span class="pill-dot ok"></span> Subscription auth</div>
+  </div>
+
+  <h2>Explore the Guide</h2>
+  <div class="gc-grid">
+    <div class="gc" onclick="show('install')">
+      <div class="gc-stripe" style="background:var(--green)"></div>
+      <div class="gc-body">
+        <div class="gc-title">Install &amp; Quickstart</div>
+        <div class="gc-desc">Install globally, authenticate via OAuth subscription or API key, and start <code>pi</code>.</div>
+        <div class="gc-tags"><span class="gc-tag">npm</span><span class="gc-tag">oauth</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('cli')">
+      <div class="gc-stripe" style="background:var(--cyan)"></div>
+      <div class="gc-body">
+        <div class="gc-title">Coding Agent CLI</div>
+        <div class="gc-desc">Slash commands, @-mentions, sessions, branching, keyboard shortcuts.</div>
+        <div class="gc-tags"><span class="gc-tag">pi</span><span class="gc-tag">TUI</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('ai')">
+      <div class="gc-stripe" style="background:var(--blue)"></div>
+      <div class="gc-body">
+        <div class="gc-title">pi-ai Library</div>
+        <div class="gc-desc">Unified LLM API for 20+ providers with TypeBox tool schemas.</div>
+        <div class="gc-tags"><span class="gc-tag">library</span><span class="gc-tag">typebox</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('core')">
+      <div class="gc-stripe" style="background:var(--accent)"></div>
+      <div class="gc-body">
+        <div class="gc-title">Agent Core</div>
+        <div class="gc-desc">Stateful agent runtime with tool execution and event streaming.</div>
+        <div class="gc-tags"><span class="gc-tag">runtime</span><span class="gc-tag">events</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('packages')">
+      <div class="gc-stripe" style="background:var(--amber)"></div>
+      <div class="gc-body">
+        <div class="gc-title">All Packages</div>
+        <div class="gc-desc">pi-tui, pi-mom, pi-web-ui, pi-pods &mdash; the supporting cast.</div>
+        <div class="gc-tags"><span class="gc-tag">monorepo</span><span class="gc-tag">tui</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('extend')">
+      <div class="gc-stripe" style="background:var(--accent-2)"></div>
+      <div class="gc-body">
+        <div class="gc-title">Extensions &amp; Skills</div>
+        <div class="gc-desc">TypeScript extensions, skills, prompt templates, themes, Pi Packages.</div>
+        <div class="gc-tags"><span class="gc-tag">extensions</span><span class="gc-tag">skills</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+    <div class="gc" onclick="show('deploy')">
+      <div class="gc-stripe" style="background:var(--red)"></div>
+      <div class="gc-body">
+        <div class="gc-title">Self-Hosted Deployment</div>
+        <div class="gc-desc">Deploy pi-coding-agent as a Cloudflare Pages site using Wrangler.</div>
+        <div class="gc-tags"><span class="gc-tag">cloudflare</span><span class="gc-tag">wrangler</span></div>
+      </div>
+      <div class="gc-meta"><span class="gc-arrow">&rarr;</span></div>
+    </div>
+  </div>
+
+  <h2>Quick Links</h2>
+  <div class="ql-grid">
+    <div class="ql" onclick="window.open('https://github.com/badlogic/pi-mono','_blank')">
+      <div class="ql-title">Monorepo</div>
+      <div class="ql-sub">badlogic/pi-mono</div>
+    </div>
+    <div class="ql" onclick="window.open('https://www.npmjs.com/package/@mariozechner/pi-coding-agent','_blank')">
+      <div class="ql-title">@mariozechner/pi-coding-agent</div>
+      <div class="ql-sub">npm package</div>
+    </div>
+    <div class="ql" onclick="window.open('https://www.npmjs.com/package/@mariozechner/pi-ai','_blank')">
+      <div class="ql-title">@mariozechner/pi-ai</div>
+      <div class="ql-sub">Unified LLM library</div>
+    </div>
+    <div class="ql" onclick="window.open('https://mariozechner.at','_blank')">
+      <div class="ql-title">Mario Zechner</div>
+      <div class="ql-sub">mariozechner.at</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================== INSTALL ============================== -->
+<div id="p-install" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">Getting Started</div>
+    <h1>Install &amp; Quickstart</h1>
+    <p>Pi installs as a global npm package. You can authenticate via OAuth using an existing Claude/ChatGPT/Copilot subscription, or provide an API key directly.</p>
+  </div>
+
+  <h2>Install</h2>
+  <div class="cb"><span class="cmt"># Install the coding agent globally</span>
+<span class="kw">npm</span> install -g @mariozechner/pi-coding-agent
+
+<span class="cmt"># Launch</span>
+<span class="kw">pi</span></div>
+
+  <h2>Auth Option A &mdash; Subscription OAuth</h2>
+  <div class="doc">
+    <p>If you already pay for Claude Pro/Max, ChatGPT Plus/Pro, GitHub Copilot, Google Gemini CLI, or Google Antigravity, you can use your subscription without an API key.</p>
+  </div>
+  <div class="cb"><span class="kw">pi</span>
+<span class="cmt"># Inside the TUI:</span>
+<span class="kw">/login</span>
+<span class="cmt"># Select provider &mdash; opens browser for OAuth flow</span></div>
+
+  <h2>Auth Option B &mdash; API Key</h2>
+  <div class="cb"><span class="kw">export</span> ANTHROPIC_API_KEY=<span class="str">sk-ant-...</span>
+<span class="cmt"># or</span>
+<span class="kw">export</span> OPENAI_API_KEY=<span class="str">sk-...</span>
+<span class="cmt"># or any supported provider</span>
+
+<span class="kw">pi</span></div>
+
+  <div class="mental"><strong>Why subscription auth matters:</strong> Subscription OAuth lets you use Pi without paying twice. If you already have Claude Pro, you get Claude Sonnet/Opus access through Pi at no extra cost&mdash;same for ChatGPT Plus and Copilot.</div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">npm install -g</span> = install globally, so the <code>pi</code> command is available from any folder. The <code>-g</code> flag (versus local install) means Pi lives in a shared location, not in each project's <code>node_modules/</code>.<br><br>
+    <span class="plain-term">OAuth subscription flow</span>: Pi opens a browser page at your provider (e.g. claude.ai), you log in with your normal account, provider redirects back to Pi with a token, Pi saves that token locally. Now every request Pi makes goes through your subscription instead of billing a separate API account.<br><br>
+    <span class="plain-term">One-shot mode</span> (<code>pi "question"</code>) = don't open the interactive TUI; run once, print the answer, exit. Great for piping into other commands or scripts.<br><br>
+    <span class="plain-term">AGENTS.md</span> / <span class="plain-term">CLAUDE.md</span> = a markdown file in your project or home dir with instructions Pi reads before every request. Think of it as your project's <em>ambient context</em> &mdash; coding style, don't-dos, domain glossary. Pi supports both names for compatibility with Claude Code.<br><br>
+    <span class="plain-term">Project-level overrides</span>: settings in <code>.pi/settings.json</code> at your project root take precedence over the global <code>~/.pi/agent/settings.json</code>. Different projects can have different defaults (different model, stricter thinking level, etc.) without editing globals.
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Skipping <code>-g</code> and wondering why <code>pi</code> isn't on PATH.</strong> Local npm installs live inside the current folder's <code>node_modules/.bin/</code> &mdash; you'd have to invoke via <code>npx pi</code> or a local script. For the global CLI experience, use <code>-g</code>.</li>
+      <li><strong>Mixing subscription OAuth and direct API keys for the same provider.</strong> Pi will happily use either, but if both are configured it can pick the wrong one. Remove one when you settle on the other.</li>
+      <li><strong>Assuming subscription OAuth covers everything.</strong> Subscriptions have usage caps (Claude Pro has message limits; Copilot has monthly quotas). When you hit them, Pi's provider returns errors until reset. API keys don't have this &mdash; they just bill more.</li>
+      <li><strong>Putting API keys in <code>settings.json</code>.</strong> That file is meant to be committable (coding conventions, project model choice). Keep secrets in your shell's env vars or a <code>.env</code> file Pi loads separately.</li>
+      <li><strong>Forgetting that <code>.pi/settings.json</code> doesn't auto-create.</strong> The directory-level override only exists if you make it. Start with the global, then override per-project as needed.</li>
+      <li><strong>Editing <code>SYSTEM.md</code> expecting it to stack with the default.</strong> <code>SYSTEM.md</code> <em>replaces</em> the system prompt entirely. If you only want to add instructions, use <code>AGENTS.md</code> instead.</li>
+    </ul>
+  </div>
+
+  <h2>First Prompt</h2>
+  <div class="cb"><span class="cmt"># Interactive mode</span>
+<span class="kw">pi</span>
+
+<span class="cmt"># One-shot mode</span>
+<span class="kw">pi</span> <span class="str">"List all .ts files in src/"</span>
+
+<span class="cmt"># Print mode for scripting</span>
+<span class="kw">pi</span> -p <span class="str">"Summarize this codebase"</span>
+
+<span class="cmt"># Pipe input</span>
+<span class="kw">cat</span> README.md | <span class="kw">pi</span> -p <span class="str">"Summarize this text"</span>
+
+<span class="cmt"># Specific model</span>
+<span class="kw">pi</span> --model <span class="val">openai/gpt-4o</span> <span class="str">"Help me refactor"</span>
+
+<span class="cmt"># High thinking effort</span>
+<span class="kw">pi</span> --thinking <span class="val">high</span> <span class="str">"Solve this complex problem"</span>
+
+<span class="cmt"># Restrict tools</span>
+<span class="kw">pi</span> --tools <span class="val">read,grep,find,ls</span> -p <span class="str">"Review the code"</span></div>
+
+  <h2>Configuration Locations</h2>
+  <table class="cfg-table">
+    <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>~/.pi/agent/settings.json</td><td>Global settings (thinking level, theme, transport)</td></tr>
+      <tr><td>.pi/settings.json</td><td>Project-level overrides</td></tr>
+      <tr><td>~/.pi/agent/SYSTEM.md</td><td>Global system prompt replacement</td></tr>
+      <tr><td>.pi/SYSTEM.md</td><td>Project system prompt replacement</td></tr>
+      <tr><td>~/AGENTS.md or ./AGENTS.md</td><td>Context file (or CLAUDE.md)</td></tr>
+      <tr><td>~/.pi/agent/prompts/</td><td>Global prompt templates (invoked via /name)</td></tr>
+      <tr><td>~/.pi/agent/skills/</td><td>Global skills (Agent Skills standard)</td></tr>
+      <tr><td>~/.pi/agent/models.json</td><td>Custom model definitions</td></tr>
+      <tr><td>~/.pi/agent/themes/</td><td>Theme files (hot-reload)</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ============================== CODING AGENT ============================== -->
+<div id="p-cli" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">pi-coding-agent</div>
+    <h1>Coding Agent CLI</h1>
+    <p>A minimal terminal coding harness with four built-in tools: read, write, edit, bash. Everything else is opt-in via extensions.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">Why only four tools?</div>
+    <h4>Because those four are enough, and everything else distracts.</h4>
+    <p>Claude Code has ~20 built-in tools. Cursor has dozens. Pi has four. The rationale: every extra built-in is a decision someone made about <em>your</em> workflow, baked in where you can't remove it. Four tools cover what a coding agent fundamentally needs &mdash; read code, write code, edit code, run things &mdash; and leave room for you to add the specific capabilities <em>your</em> work wants as TypeScript extensions. No popups, no sub-agents, no hidden background bash. What you see in the session is what happened.</p>
+  </div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">JSONL</span> = JSON Lines. One JSON object per line, one line per event. Human-readable, appendable, easy to diff and grep. Pi stores every session turn as a JSON line &mdash; you can <code>tail -f</code> a running session or search across every conversation with <code>grep</code>.<br><br>
+    <span class="plain-term">Branching</span> = fork a conversation at any message. You get two independent futures stemming from the same past &mdash; useful when you want to try &ldquo;what if I asked it differently&rdquo; without losing the original thread.<br><br>
+    <span class="plain-term">Compact</span> = summarize older turns to free up context space, preserving the essence. Different from <code>/new</code>, which wipes history entirely.<br><br>
+    <span class="plain-term">Thinking level</span> = how much private reasoning the model does before replying. <kbd>Shift+Tab</kbd> cycles off / low / medium / high. Higher levels pay in latency and cost but dramatically improve output on complex problems.<br><br>
+    <span class="plain-term">Bang injection</span>: <code>!cmd</code> runs a shell command and <em>sends the output</em> to the model along with your next message. <code>!!cmd</code> runs but silently &mdash; you see it, model doesn't. Fast way to give the model live context (git status, file list, error output) without typing it yourself.<br><br>
+    <span class="plain-term">@-mentions</span> = type <code>@</code> and fuzzy-match any file in your project. Picks the file; Pi automatically adds its contents to the message as context. Saves copy-pasting.
+  </div>
+
+  <h2>Built-in Tools</h2>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>read</h4>
+      <p>Read files from the filesystem with line numbers. Supports ranges.</p>
+    </div>
+    <div class="info-card">
+      <h4>write</h4>
+      <p>Create or overwrite files with specified content.</p>
+    </div>
+    <div class="info-card">
+      <h4>edit</h4>
+      <p>Exact string replacement edits&mdash;diff-based, reviewable changes.</p>
+    </div>
+    <div class="info-card">
+      <h4>bash</h4>
+      <p>Execute shell commands, capture stdout/stderr, and return output.</p>
+    </div>
+  </div>
+
+  <h2>Slash Commands</h2>
+  <table class="cfg-table">
+    <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>/login</td><td>OAuth authentication flow (select provider)</td></tr>
+      <tr><td>/logout</td><td>Clear stored credentials</td></tr>
+      <tr><td>/model</td><td>Switch AI models interactively</td></tr>
+      <tr><td>/settings</td><td>Configure thinking, theme, delivery mode</td></tr>
+      <tr><td>/tree</td><td>Browse session history and branches</td></tr>
+      <tr><td>/fork</td><td>Create a new session branching from current point</td></tr>
+      <tr><td>/new</td><td>Start a fresh session</td></tr>
+      <tr><td>/compact</td><td>Summarize older messages to recover context</td></tr>
+      <tr><td>/copy</td><td>Copy assistant's last message to clipboard</td></tr>
+      <tr><td>/export [file]</td><td>Save session as HTML</td></tr>
+      <tr><td>/skill:name</td><td>Invoke a loaded skill by name</td></tr>
+      <tr><td>/templatename</td><td>Expand a prompt template</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Editor Features</h2>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>@-mentions</h4>
+      <p>Type <code>@</code> to fuzzy-search and reference project files inline.</p>
+    </div>
+    <div class="info-card">
+      <h4>Multi-line</h4>
+      <p><kbd>Shift+Enter</kbd> for newline (<kbd>Ctrl+Enter</kbd> on Windows Terminal).</p>
+    </div>
+    <div class="info-card">
+      <h4>Image Paste</h4>
+      <p><kbd>Ctrl+V</kbd> to paste images, or drag-and-drop from the desktop.</p>
+    </div>
+    <div class="info-card">
+      <h4>Bash Injection</h4>
+      <p><code>!cmd</code> runs and sends output; <code>!!cmd</code> runs silently.</p>
+    </div>
+  </div>
+
+  <h2>Keyboard Shortcuts</h2>
+  <table class="cfg-table">
+    <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Ctrl+L</td><td>Open model selector</td></tr>
+      <tr><td>Ctrl+P / Shift+Ctrl+P</td><td>Cycle through scoped models</td></tr>
+      <tr><td>Shift+Tab</td><td>Adjust thinking level (off / low / medium / high)</td></tr>
+      <tr><td>Escape (x2)</td><td>Open session tree navigator</td></tr>
+      <tr><td>Ctrl+O</td><td>Collapse / expand tool output</td></tr>
+      <tr><td>Ctrl+T</td><td>Collapse / expand thinking blocks</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Session Management</h2>
+  <div class="doc">
+    <p>Sessions persist as JSONL files with branching support. Every message can be the root of a new fork&mdash;experiment freely without losing prior work.</p>
+  </div>
+  <div class="layer-stack">
+    <div class="layer active"><span class="layer-name">JSONL storage</span><span class="layer-detail">Append-only, human-readable session history</span></div>
+    <div class="layer"><span class="layer-name">Branching</span><span class="layer-detail"><code>/fork</code> creates a new branch at any point</span></div>
+    <div class="layer"><span class="layer-name">Navigation</span><span class="layer-detail"><code>/tree</code> browses the session graph</span></div>
+    <div class="layer"><span class="layer-name">Compaction</span><span class="layer-detail"><code>/compact</code> summarizes old turns to recover context window</span></div>
+    <div class="layer"><span class="layer-name">Export</span><span class="layer-detail"><code>/export session.html</code> renders a portable view</span></div>
+  </div>
+
+  <div class="story">
+    <div class="story-lbl">Walk-through</div>
+    <h4>Branching a tricky refactor without losing work</h4>
+    <ol>
+      <li><span class="t">step 1</span> You're debugging a tangled state-management bug. You've had a 40-turn conversation with Pi that's finally narrowed down to two possible fixes: inline the state into the component, or lift it into a context provider.</li>
+      <li><span class="t">step 2</span> You're not sure which approach is right. Type <code>/fork</code>. Pi creates a new session branching at your current point &mdash; same history up to here, new future from here.</li>
+      <li><span class="t">step 3</span> In the fork, you say: &ldquo;go with the context provider approach.&rdquo; Pi writes the changes. You see how it plays out, run the test suite.</li>
+      <li><span class="t">step 4</span> Results are meh. Without losing the work, you type <code>/tree</code> to see the session graph &mdash; you can see the original branch and your experimental fork as two siblings.</li>
+      <li><span class="t">step 5</span> You hop back to the original branch, fork it again, try the inline approach instead. That works better.</li>
+      <li><span class="t">step 6</span> You keep the inline-approach branch, abandon the other. Nothing was destroyed &mdash; both branches are still on disk as JSONL files in case you ever want to compare.</li>
+      <li><span class="t">step 7</span> When you're done, <code>/export</code> renders the session to a portable HTML file you can attach to the PR as a record of how you arrived at the fix.</li>
+    </ol>
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Forgetting to <code>/compact</code> on long sessions.</strong> Context windows fill up. You'll see Pi refuse to accept more input or silently drop older context. Compact when you notice responses feeling &ldquo;thin&rdquo; &mdash; before you hit the wall.</li>
+      <li><strong>Using <code>/new</code> when you meant <code>/fork</code>.</strong> <code>/new</code> starts a completely fresh session with no history. <code>/fork</code> keeps history up to the fork point. If you wipe a session by mistake, the JSONL file is still on disk &mdash; you can <code>/tree</code> your way back.</li>
+      <li><strong>Running <code>!cmd</code> when you meant <code>!!cmd</code>.</strong> The single-bang sends command output into the model context, eating tokens. For diagnostic peeks you just want to see, use <code>!!</code>.</li>
+      <li><strong>Assuming restricted tools via <code>--tools</code> are enforced mid-session.</strong> <code>--tools read,grep</code> applies for that invocation only. If you start a new session, the default tools come back.</li>
+      <li><strong>Editing files outside the session and losing track.</strong> Pi's <code>edit</code> tool does exact-match string replacement &mdash; if the file changed between read and edit, the edit fails. Either pause Pi while editing manually or re-read the file first.</li>
+      <li><strong>Thinking level stuck on high.</strong> The <kbd>Shift+Tab</kbd> cycle is session-scoped. If responses are slow and expensive, check your thinking level before blaming the model.</li>
+    </ul>
+  </div>
+
+  <h2>Execution Modes</h2>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Interactive</h4>
+      <p>Default TUI mode&mdash;multi-line editor, streaming, session branching.</p>
+    </div>
+    <div class="info-card">
+      <h4>Print (-p)</h4>
+      <p>Non-interactive output for scripting and pipelines.</p>
+    </div>
+    <div class="info-card">
+      <h4>JSON</h4>
+      <p>Structured output for programmatic consumption.</p>
+    </div>
+    <div class="info-card">
+      <h4>RPC</h4>
+      <p>Integration with parent processes over stdio RPC.</p>
+    </div>
+    <div class="info-card">
+      <h4>SDK</h4>
+      <p>Embed Pi directly into your own TypeScript applications.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================== PI-AI ============================== -->
+<div id="p-ai" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">@mariozechner/pi-ai</div>
+    <h1>Unified LLM Library</h1>
+    <p>TypeScript library providing unified access to 20+ LLM providers with automatic model discovery, token tracking, cost monitoring, and context persistence.</p>
+  </div>
+
+  <div class="mental"><strong>Design constraint:</strong> pi-ai only includes models that support tool calling. This makes it ideal for agentic workflows but means you won't find raw text-completion-only models here.</div>
+
+  <div class="why">
+    <div class="why-lbl">Why this library exists</div>
+    <h4>Every LLM provider has a slightly different API &mdash; and it's exhausting.</h4>
+    <p>Anthropic uses <code>messages</code> with a <code>content</code> array. OpenAI uses the &ldquo;chat completions&rdquo; shape. Gemini wants yet another structure. Each supports tool-calling, but the JSON schema for how a tool is defined and how a tool call comes back is different for every one of them. Reasoning tokens, streaming events, cost fields &mdash; all different. Writing an agent from scratch against four providers means writing four agents.</p>
+    <p><code>pi-ai</code> normalizes all of it into one TypeScript API. You write code once against the <code>complete()</code> / <code>stream()</code> interface. Behind the scenes, pi-ai translates to whichever provider you pointed at. Switch from Claude to GPT to Qwen with a one-line change &mdash; the rest of your agent doesn't notice.</p>
+  </div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">TypeBox</span> = a TypeScript library for describing JSON schemas with static types. <code>Type.Object({ location: Type.String() })</code> gives you both a validator at runtime <em>and</em> a compile-time type. pi-ai uses TypeBox to define tool parameters &mdash; your tool definitions are type-safe end-to-end.<br><br>
+    <span class="plain-term">Unified reasoning</span> (Extended Thinking): different providers expose reasoning differently &mdash; Anthropic has &ldquo;extended thinking,&rdquo; OpenAI has &ldquo;o1/o3&rdquo; reasoning tokens, Gemini has its own flavor. pi-ai boils them down to one knob: <code>reasoning: 'off' | 'low' | 'medium' | 'high'</code>. Library handles provider-specific translation.<br><br>
+    <span class="plain-term">Streaming deltas</span> = the model sends its response in chunks as it generates. <code>text_delta</code> is a new piece of the visible reply; <code>toolcall_delta</code> is a piece of a tool's JSON arguments as they're being built; <code>thinking_delta</code> is a piece of the model's private reasoning. All arrive live; <code>done</code> fires at the end.<br><br>
+    <span class="plain-term">openai-completions API dialect</span> = the OpenAI chat-completions shape has become the de-facto standard. Ollama, LM Studio, vLLM, Together, Groq &mdash; they all speak it. So when you point pi-ai at <code>http://localhost:11434/v1</code> (Ollama), it just works.<br><br>
+    <span class="plain-term">Proxy URL</span> = route requests through your own backend instead of calling the provider directly. Essential for browser apps where shipping the API key to the user's browser would leak it.
+  </div>
+
+  <h2>Supported Providers</h2>
+  <div class="pills">
+    <div class="pill"><span class="pill-dot ok"></span> OpenAI</div>
+    <div class="pill"><span class="pill-dot ok"></span> Anthropic</div>
+    <div class="pill"><span class="pill-dot ok"></span> Google Gemini</div>
+    <div class="pill"><span class="pill-dot ok"></span> Google Vertex AI</div>
+    <div class="pill"><span class="pill-dot ok"></span> Azure OpenAI</div>
+    <div class="pill"><span class="pill-dot ok"></span> Amazon Bedrock</div>
+    <div class="pill"><span class="pill-dot ok"></span> Mistral</div>
+    <div class="pill"><span class="pill-dot ok"></span> Groq</div>
+    <div class="pill"><span class="pill-dot ok"></span> Cerebras</div>
+    <div class="pill"><span class="pill-dot ok"></span> xAI</div>
+    <div class="pill"><span class="pill-dot ok"></span> OpenRouter</div>
+    <div class="pill"><span class="pill-dot ok"></span> Vercel AI Gateway</div>
+    <div class="pill"><span class="pill-dot ok"></span> MiniMax</div>
+    <div class="pill"><span class="pill-dot ok"></span> Kimi / Moonshot</div>
+    <div class="pill"><span class="pill-dot ok"></span> GitHub Copilot</div>
+    <div class="pill"><span class="pill-dot ok"></span> Ollama / LM Studio / vLLM</div>
+  </div>
+
+  <h2>Basic Usage</h2>
+  <div class="cb"><span class="kw">import</span> { <span class="val">getModel</span>, <span class="val">complete</span>, <span class="val">stream</span> } <span class="kw">from</span> <span class="str">'@mariozechner/pi-ai'</span>;
+
+<span class="cmt">// Type-safe model discovery with auto-complete</span>
+<span class="kw">const</span> model = <span class="val">getModel</span>(<span class="str">'openai'</span>, <span class="str">'gpt-4o-mini'</span>);
+
+<span class="kw">const</span> context = {
+  <span class="hl">systemPrompt</span>: <span class="str">'You are a helpful assistant.'</span>,
+  <span class="hl">messages</span>: [
+    { <span class="hl">role</span>: <span class="str">'user'</span>, <span class="hl">content</span>: <span class="str">'Hello!'</span> }
+  ]
+};
+
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="val">complete</span>(model, context);
+<span class="kw">console</span>.log(result.content, result.cost);</div>
+
+  <h2>Streaming</h2>
+  <div class="cb"><span class="kw">for await</span> (<span class="kw">const</span> event <span class="kw">of</span> <span class="val">stream</span>(model, context)) {
+  <span class="kw">switch</span> (event.type) {
+    <span class="kw">case</span> <span class="str">'text_delta'</span>:
+      process.stdout.write(event.delta);
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'toolcall_delta'</span>:
+      <span class="cmt">// Partial tool arguments as JSON stream</span>
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'thinking_delta'</span>:
+      <span class="cmt">// Reasoning content</span>
+      <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'done'</span>:
+      console.log(<span class="str">'Stop reason:'</span>, event.stopReason);
+      <span class="kw">break</span>;
+  }
+}</div>
+
+  <h2>Tool Calling with TypeBox</h2>
+  <div class="cb"><span class="kw">import</span> { <span class="val">Type</span>, <span class="val">StringEnum</span> } <span class="kw">from</span> <span class="str">'@mariozechner/pi-ai'</span>;
+
+<span class="kw">const</span> tools = [{
+  <span class="hl">name</span>: <span class="str">'get_weather'</span>,
+  <span class="hl">description</span>: <span class="str">'Get current weather'</span>,
+  <span class="hl">parameters</span>: <span class="val">Type</span>.Object({
+    <span class="hl">location</span>: <span class="val">Type</span>.String(),
+    <span class="hl">units</span>: <span class="val">StringEnum</span>([<span class="str">'celsius'</span>, <span class="str">'fahrenheit'</span>])
+  })
+}];
+
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="val">complete</span>(model, { ...context, tools });</div>
+
+  <h2>Extended Thinking</h2>
+  <div class="cb"><span class="cmt">// Unified reasoning across Claude, GPT-5, Gemini 2.5</span>
+<span class="kw">await</span> <span class="val">completeSimple</span>(model, context, {
+  <span class="hl">reasoning</span>: <span class="str">'high'</span>  <span class="cmt">// 'off' | 'low' | 'medium' | 'high'</span>
+});</div>
+
+  <h2>OAuth Login</h2>
+  <div class="cb"><span class="kw">import</span> {
+  <span class="val">loginGitHubCopilot</span>,
+  <span class="val">getOAuthApiKey</span>
+} <span class="kw">from</span> <span class="str">'@mariozechner/pi-ai/oauth'</span>;
+
+<span class="kw">const</span> credentials = <span class="kw">await</span> <span class="val">loginGitHubCopilot</span>({
+  <span class="hl">onVerificationUri</span>: (uri) =&gt; console.log(<span class="str">'Visit:'</span>, uri)
+});
+
+<span class="kw">const</span> { apiKey } = <span class="kw">await</span> <span class="val">getOAuthApiKey</span>(<span class="str">'github-copilot'</span>, auth);</div>
+
+  <h2>Streaming Events</h2>
+  <table class="cfg-table">
+    <thead><tr><th>Event</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>text_delta</td><td>Streamed response text chunk</td></tr>
+      <tr><td>toolcall_delta</td><td>Partial tool arguments (JSON streaming)</td></tr>
+      <tr><td>thinking_delta</td><td>Model reasoning content</td></tr>
+      <tr><td>done</td><td>Completion with stop reason and token usage</td></tr>
+      <tr><td>error</td><td>Failure with any partial content preserved</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Custom Endpoints</h2>
+  <div class="cb"><span class="kw">const</span> ollamaModel = {
+  <span class="hl">id</span>: <span class="str">'llama-3.1-8b'</span>,
+  <span class="hl">api</span>: <span class="str">'openai-completions'</span>,
+  <span class="hl">baseUrl</span>: <span class="str">'http://localhost:11434/v1'</span>,
+  <span class="hl">reasoning</span>: <span class="val">false</span>,
+  <span class="hl">input</span>: [<span class="str">'text'</span>],
+  <span class="hl">cost</span>: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+  <span class="hl">contextWindow</span>: <span class="val">128000</span>,
+  <span class="hl">maxTokens</span>: <span class="val">32000</span>
+};</div>
+
+  <div class="mental"><strong>Cross-provider handoffs:</strong> Switch models mid-conversation while preserving thinking blocks and tool results. Thinking automatically converts to <code>&lt;thinking&gt;</code> tagged text for providers that don't support native reasoning.</div>
+
+  <div class="story">
+    <div class="story-lbl">Walk-through</div>
+    <h4>Switching from Claude to GPT mid-conversation without breaking anything</h4>
+    <ol>
+      <li><span class="t">step 1</span> You're 15 turns into a design session with Claude Opus. It's been carefully reasoning; thinking blocks are embedded in the history. You hit Claude's reasoning rate limit.</li>
+      <li><span class="t">step 2</span> You swap the model: <code>model = getModel('openai', 'gpt-4o')</code>. Nothing else in your code changes.</li>
+      <li><span class="t">step 3</span> On the next <code>stream()</code> call, pi-ai inspects the context. Claude-style thinking blocks don't map to GPT-4o's format &mdash; so pi-ai automatically converts them into <code>&lt;thinking&gt;...&lt;/thinking&gt;</code> tagged plain text that GPT-4o can read as context.</li>
+      <li><span class="t">step 4</span> Claude's tool-call messages get reshaped to the OpenAI tool_calls format. Tool result messages get re-keyed.</li>
+      <li><span class="t">step 5</span> GPT-4o gets a coherent conversation history and responds. The streaming events that come back are the same <code>text_delta</code> / <code>done</code> shape as Claude &mdash; your consumer doesn't know a switch happened.</li>
+      <li><span class="t">step 6</span> A few turns later, you swap to a local Ollama model via Custom Endpoint for privacy. pi-ai converts the OpenAI-shaped history to openai-completions shape (mostly identical) &mdash; Ollama picks up the thread.</li>
+      <li><span class="t">step 7</span> Total code changes across three provider hops: three strings. pi-ai absorbed everything else.</li>
+    </ol>
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Using a model that doesn't support tool calling and wondering why tools never fire.</strong> pi-ai's registry filters to tool-capable models, but Custom Endpoint models you register yourself bypass that filter. Verify.</li>
+      <li><strong>Shipping API keys in a browser bundle.</strong> pi-ai works in the browser, but calls to provider APIs from the browser either CORS-fail or expose your key. Use the <code>proxyUrl</code> option with a Worker or backend that holds the key server-side.</li>
+      <li><strong>Forgetting that <code>reasoning: 'high'</code> costs real money.</strong> High-reasoning Claude/GPT runs can easily eat $0.10+ per turn. Track <code>result.cost</code> and set budgets.</li>
+      <li><strong>Assuming streaming events arrive in a specific order across providers.</strong> Most providers interleave <code>thinking_delta</code> / <code>text_delta</code>, but timing varies. Write consumer code that handles any order.</li>
+      <li><strong>Defining tools without TypeBox.</strong> You can technically pass plain JSON Schema &mdash; but you lose the compile-time types pi-ai generates from TypeBox. Use TypeBox; future-you will appreciate the IntelliSense.</li>
+      <li><strong>Registering a Custom Endpoint with wrong <code>contextWindow</code>.</strong> pi-ai uses that number to decide when to warn about overflow. Too high = silent truncation. Check the model's real context window and enter it accurately.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- ============================== AGENT CORE ============================== -->
+<div id="p-core" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">@mariozechner/pi-agent-core</div>
+    <h1>Agent Core Runtime</h1>
+    <p>Stateful agent with tool execution and event streaming, built on pi-ai. This is the engine powering the coding agent and the foundation for your own custom agents.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">Why a separate runtime?</div>
+    <h4>Agents need more than &ldquo;call an LLM in a loop.&rdquo;</h4>
+    <p>pi-ai handles one LLM request: send context, get response, stream deltas. But an <em>agent</em> needs to: remember the conversation across turns, decide when tool calls are done, run tools safely (and possibly in parallel), handle interruptions, post-process results, surface progress events to a UI. That's all state management and orchestration &mdash; not LLM stuff.</p>
+    <p>pi-agent-core is exactly that layer: a small state machine that owns the conversation, fires a clean set of events as things happen, and lets you hook in before/after tool calls. Build a coding CLI, a Slack bot, a browser chat, or your own wild experimental UI &mdash; they all share this same engine. The coding agent in Pi is, itself, just a consumer of pi-agent-core.</p>
+  </div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">Stateful</span> = remembers things between method calls. <code>agent.prompt("hi")</code>, then later <code>agent.prompt("again")</code> &mdash; the agent knows they're in the same conversation without you re-feeding history.<br><br>
+    <span class="plain-term">Event-driven</span> = instead of making you poll or wait, the agent <em>tells</em> you when things happen: message started, tool firing, tool done, turn complete. You subscribe to the events you care about. Perfect for streaming UIs.<br><br>
+    <span class="plain-term">Turn</span> = one full cycle of (think → run tools → wait → think again → run more tools → reply). A single user prompt can trigger multiple turns if the agent needs to iterate.<br><br>
+    <span class="plain-term">transformContext()</span> = a hook that runs just before pi-agent-core sends history to the LLM. Use it to filter sensitive data, summarize old turns, redact internal-only info, whatever you need. The agent's <em>real</em> state stays intact; only what the LLM sees gets transformed.<br><br>
+    <span class="plain-term">Parallel vs sequential tool execution</span>: when the model requests 5 tools at once, parallel fires them all simultaneously (fast, assumes independence). Sequential runs them one after the other (safer when later tools might depend on earlier results).<br><br>
+    <span class="plain-term">beforeToolCall / afterToolCall</span>: hooks to intercept tool execution &mdash; validate parameters, show a confirmation prompt, log calls, modify results. The &ldquo;permission system&rdquo; Pi doesn't include by default is a short extension using these hooks.
+  </div>
+
+  <h2>Quick Example</h2>
+  <div class="cb"><span class="kw">import</span> { <span class="val">Agent</span> } <span class="kw">from</span> <span class="str">'@mariozechner/pi-agent-core'</span>;
+<span class="kw">import</span> { <span class="val">getModel</span> } <span class="kw">from</span> <span class="str">'@mariozechner/pi-ai'</span>;
+
+<span class="kw">const</span> agent = <span class="kw">new</span> <span class="val">Agent</span>({
+  <span class="hl">initialState</span>: {
+    <span class="hl">systemPrompt</span>: <span class="str">"You are a helpful assistant."</span>,
+    <span class="hl">model</span>: <span class="val">getModel</span>(<span class="str">"anthropic"</span>, <span class="str">"claude-sonnet-4-20250514"</span>),
+  },
+});
+
+agent.subscribe((event) =&gt; {
+  <span class="kw">if</span> (event.type === <span class="str">"message_update"</span>) {
+    process.stdout.write(event.assistantMessageEvent.delta);
+  }
+});
+
+<span class="kw">await</span> agent.prompt(<span class="str">"Hello!"</span>);</div>
+
+  <h2>Message System</h2>
+  <div class="doc">
+    <p>pi-agent-core distinguishes between two message formats:</p>
+  </div>
+  <div class="layer-stack">
+    <div class="layer"><span class="layer-name">AgentMessages</span><span class="layer-detail">Internal format: <code>user</code>, <code>assistant</code>, <code>toolResult</code>, plus custom types</span></div>
+    <div class="layer active"><span class="layer-name">transformContext()</span><span class="layer-detail">Pre-LLM transformation hook (filter, summarize, redact)</span></div>
+    <div class="layer"><span class="layer-name">convertToLlm()</span><span class="layer-detail">Bridge: AgentMessages &rarr; Messages that models understand</span></div>
+    <div class="layer"><span class="layer-name">LLM Messages</span><span class="layer-detail">The subset of messages sent to the model</span></div>
+  </div>
+
+  <h2>Event System</h2>
+  <table class="cfg-table">
+    <thead><tr><th>Event</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>agent_start</td><td>Agent run has begun</td></tr>
+      <tr><td>agent_end</td><td>Final event&mdash;no more loop events will fire</td></tr>
+      <tr><td>turn_start</td><td>A new LLM-call-plus-tool-execution cycle begins</td></tr>
+      <tr><td>turn_end</td><td>The current turn completes</td></tr>
+      <tr><td>message_start</td><td>New assistant message begins streaming</td></tr>
+      <tr><td>message_update</td><td>Content delta for an in-progress message</td></tr>
+      <tr><td>message_end</td><td>Message fully assembled</td></tr>
+      <tr><td>tool_execution_start</td><td>A tool call is about to execute</td></tr>
+      <tr><td>tool_execution_update</td><td>Progress update from the tool</td></tr>
+      <tr><td>tool_execution_end</td><td>Tool call completed with result</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tool Execution</h2>
+  <div class="doc">
+    <p>Tools are defined with <code>AgentTool</code> using TypeBox schemas for parameters. Two execution strategies are available:</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Parallel (default)</h4>
+      <p>Preflight sequentially, then execute all pending tool calls concurrently. Faster for independent operations.</p>
+    </div>
+    <div class="info-card">
+      <h4>Sequential</h4>
+      <p>Execute one-by-one in order. Safer when tool calls have implicit dependencies.</p>
+    </div>
+  </div>
+
+  <div class="mental"><strong>Tool contract:</strong> Tools must <em>throw</em> errors on failure rather than returning error messages. The <code>beforeToolCall</code> hook can block execution; <code>afterToolCall</code> post-processes results.</div>
+
+  <div class="story">
+    <div class="story-lbl">Walk-through</div>
+    <h4>Events firing during one agent.prompt("fix the failing test")</h4>
+    <ol>
+      <li><span class="t">t+0ms</span> You call <code>agent.prompt("fix the failing test")</code>. <strong>agent_start</strong> fires. State flips to <code>isStreaming: true</code>.</li>
+      <li><span class="t">t+30ms</span> <strong>turn_start</strong> fires &mdash; we're entering the first think-and-tool cycle.</li>
+      <li><span class="t">t+40ms</span> <strong>message_start</strong> &mdash; the model begins streaming its reply.</li>
+      <li><span class="t">t+200ms</span> Stream of <strong>message_update</strong> events carries visible text deltas. Your UI streams them into the screen. Some deltas are <em>thinking</em> (private reasoning) &mdash; render them differently or hide them.</li>
+      <li><span class="t">t+800ms</span> Model decides it needs tools: run <code>bash: npm test</code>, read a source file. <strong>tool_execution_start</strong> fires twice (parallel mode).</li>
+      <li><span class="t">t+810ms</span> If you've registered <code>beforeToolCall</code>, it runs. You could pop a confirmation dialog here. For this example, it passes through.</li>
+      <li><span class="t">t+2100ms</span> Tests finish. <strong>tool_execution_end</strong> fires with exit code and output. <strong>afterToolCall</strong> post-processes (e.g., truncates huge stdout to something sane).</li>
+      <li><span class="t">t+2200ms</span> <strong>message_end</strong> (from the first message). <strong>turn_end</strong>. Then <strong>turn_start</strong> again &mdash; the model now has tool results and starts a second think cycle.</li>
+      <li><span class="t">t+4000ms</span> Second turn produces an <code>edit</code> tool call that patches the failing assertion. <strong>tool_execution_*</strong> fires. New message summarizing the fix streams in.</li>
+      <li><span class="t">t+5000ms</span> Model stops; no more tool calls. Final <strong>message_end</strong>, <strong>turn_end</strong>, and <strong>agent_end</strong>. <code>isStreaming</code> flips back to false.</li>
+    </ol>
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Returning error strings from tools instead of throwing.</strong> The Agent can't distinguish &ldquo;tool succeeded and returned text that looks like an error&rdquo; from &ldquo;tool failed.&rdquo; Throw. The Agent's retry + error-handling logic kicks in properly.</li>
+      <li><strong>Mutating <code>agent.state.messages</code> directly mid-stream.</strong> The runtime is actively reading/writing that array. Use the provided APIs; treat state as read-mostly from outside.</li>
+      <li><strong>Assuming <code>parallel</code> tool execution is safe.</strong> If two tools both write to the same file, races happen. Tag tools with dependencies or switch to sequential for this group.</li>
+      <li><strong>Subscribing to every event for a simple UI.</strong> You usually just need <code>message_update</code> (streaming text) and <code>tool_execution_*</code> (progress indicators). The others are for advanced cases.</li>
+      <li><strong>Using <code>agentLoop</code> directly without understanding you're bypassing the state machine.</strong> The low-level API is powerful but places the burden of correctness on you. Start with <code>Agent</code>; drop down only when you've hit its opinionated walls.</li>
+      <li><strong>Forgetting that <code>transformContext</code> runs <em>every</em> LLM call.</strong> A slow or expensive transformation multiplies cost. Cache where possible.</li>
+    </ul>
+  </div>
+
+  <h2>State Management</h2>
+  <div class="cb"><span class="cmt">// Access agent state</span>
+agent.state.<span class="hl">systemPrompt</span>
+agent.state.<span class="hl">model</span>
+agent.state.<span class="hl">thinkingLevel</span>
+agent.state.<span class="hl">tools</span>
+agent.state.<span class="hl">messages</span>
+agent.state.<span class="hl">isStreaming</span>
+agent.state.<span class="hl">streamingMessage</span>
+agent.state.<span class="hl">pendingToolCalls</span>
+agent.state.<span class="hl">errorMessage</span>
+
+<span class="cmt">// Assigning arrays copies the top-level array before storing</span>
+agent.state.tools = newTools;</div>
+
+  <h2>Advanced Features</h2>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Steering / Follow-up</h4>
+      <p>Interrupt running operations or queue work to run after completion.</p>
+    </div>
+    <div class="info-card">
+      <h4>Custom Messages</h4>
+      <p>Extend message types via TypeScript declaration merging&mdash;add your own discriminated variants.</p>
+    </div>
+    <div class="info-card">
+      <h4>Proxy Support</h4>
+      <p>Browser apps can proxy through backend servers to avoid exposing keys client-side.</p>
+    </div>
+    <div class="info-card">
+      <h4>Low-Level API</h4>
+      <p>Direct control via <code>agentLoop</code> for advanced use cases where the <code>Agent</code> class is too opinionated.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================== PACKAGES ============================== -->
+<div id="p-packages" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">Monorepo</div>
+    <h1>All Packages</h1>
+    <p>Seven packages that compose together. Use the full stack, or pick pieces for your own project.</p>
+  </div>
+
+  <h3>Which package do I actually need?</h3>
+  <table class="dec-table">
+    <thead><tr><th>I want to...</th><th>Use</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Use Pi as a coding agent in my terminal</td><td>pi-coding-agent</td><td>The full CLI. Install globally with <code>npm i -g</code>.</td></tr>
+      <tr><td>Call an LLM from my own TypeScript code</td><td>pi-ai</td><td>Unified API across 20+ providers. No agent loop &mdash; just model calls.</td></tr>
+      <tr><td>Build a custom agent (Slack bot, Discord bot, custom CLI)</td><td>pi-agent-core + pi-ai</td><td>Core gives you the stateful loop; ai gives you the LLM calls.</td></tr>
+      <tr><td>Make a terminal UI for my own tool</td><td>pi-tui</td><td>Flicker-free rendering, components, image support. No Pi-agent coupling.</td></tr>
+      <tr><td>Build an AI chat UI in a browser</td><td>pi-web-ui + pi-agent-core</td><td>Web components + IndexedDB storage. Deploy as a static site.</td></tr>
+      <tr><td>Have a bot read my Slack and respond</td><td>pi-mom</td><td>Pre-built Slack agent. Sandboxed, self-managing.</td></tr>
+      <tr><td>Run open-source models on rented GPUs</td><td>pi-pods</td><td>Automates vLLM setup across providers. OpenAI-compatible endpoint out.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">Flicker-free rendering</span> = when a terminal UI redraws the screen, a naive approach wipes everything and re-paints &mdash; users see a brief flash. Pi-tui uses a three-strategy diff to only rewrite what changed, and <em>CSI 2026</em> (a terminal escape sequence) to tell the terminal &ldquo;don't show intermediate frames.&rdquo; Result: redraws look instant and smooth.<br><br>
+    <span class="plain-term">Bracketed paste</span> = a terminal mode where pasted text arrives wrapped in special markers. Without it, pasting 50 lines into a prompt breaks because each newline submits early. With it, Pi-tui's editor receives the whole paste as one event.<br><br>
+    <span class="plain-term">IME support</span> (Input Method Editor) = the composition system used for CJK (Chinese, Japanese, Korean) input and other multi-keystroke scripts. Pi-tui keeps the cursor visually in the right place while you're typing a multi-character glyph.<br><br>
+    <span class="plain-term">Kitty / iTerm2 graphics protocols</span> = ways to render actual images <em>inside</em> a terminal (not ASCII art). Pi-tui emits the right escape sequences so supported terminals can show photos, diagrams, screenshots inline with your chat.<br><br>
+    <span class="plain-term">mini-lit</span> = a stripped-down build of the Lit web components library. Pi-web-ui uses it to ship standards-based web components (custom HTML tags) with minimal bundle size.<br><br>
+    <span class="plain-term">IndexedDB</span> = a browser-native local database. Pi-web-ui puts your sessions, preferences, and credentials there &mdash; no server needed. Survives page reloads; private to your browser.<br><br>
+    <span class="plain-term">vLLM</span> = a high-throughput inference engine for open-source models. Pi-pods installs it on your rented GPU, exposes an OpenAI-compatible endpoint, so anything that speaks OpenAI (including pi-ai) can hit your private model.
+  </div>
+
+  <h2>Package Map</h2>
+  <div class="arch">
+<span class="a-lbl">MONOREPO STRUCTURE</span>
+pi-mono/
+├── packages/
+│   ├── <span class="a-hl">ai/</span>             <span class="a-dim"># @mariozechner/pi-ai</span>
+│   ├── <span class="a-hl">agent/</span>          <span class="a-dim"># @mariozechner/pi-agent-core</span>
+│   ├── <span class="a-hl">coding-agent/</span>   <span class="a-dim"># @mariozechner/pi-coding-agent</span>
+│   ├── <span class="a-box">tui/</span>            <span class="a-dim"># @mariozechner/pi-tui</span>
+│   ├── <span class="a-box">web-ui/</span>         <span class="a-dim"># @mariozechner/pi-web-ui</span>
+│   ├── <span class="a-box">mom/</span>            <span class="a-dim"># @mariozechner/pi-mom (Slack bot)</span>
+│   └── <span class="a-box">pods/</span>           <span class="a-dim"># pi-pods (GPU deployment)</span>
+├── AGENTS.md                <span class="a-dim"># Development rules</span>
+├── test.sh
+└── pi-test.sh               <span class="a-dim"># Run from source</span></div>
+
+  <h2>pi-tui</h2>
+  <div class="doc">
+    <p>Minimal terminal UI framework with flicker-free rendering. Three-strategy rendering only updates what changed, and CSI 2026 synchronized output prevents visual tearing.</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Components</h4>
+      <p>Text, Input, Editor, Markdown, Loader, SelectList, SettingsList, Image, Box, Container</p>
+    </div>
+    <div class="info-card">
+      <h4>Editor</h4>
+      <p>Multi-line editing, syntax-highlighted code blocks, vertical scrolling</p>
+    </div>
+    <div class="info-card">
+      <h4>Bracketed Paste</h4>
+      <p>Handles large pastes exceeding 10 lines without input glitches</p>
+    </div>
+    <div class="info-card">
+      <h4>IME Support</h4>
+      <p>CJK input methods with proper cursor positioning</p>
+    </div>
+    <div class="info-card">
+      <h4>Inline Images</h4>
+      <p>Kitty or iTerm2 graphics protocols for rendering images</p>
+    </div>
+    <div class="info-card">
+      <h4>Autocomplete</h4>
+      <p>File paths and slash commands with fuzzy matching</p>
+    </div>
+  </div>
+
+  <h2>pi-mom &mdash; Slack Agent</h2>
+  <div class="doc">
+    <p>An autonomous Slack bot powered by an LLM. Responds to @mentions, DMs, and can execute bash, read/write files, and manage its own development environment.</p>
+    <ul>
+      <li><strong>Self-managing:</strong> installs dependencies and builds custom CLI tools ("skills") on demand</li>
+      <li><strong>Sandboxed:</strong> Docker containers by default, host mode available</li>
+      <li><strong>Persistent:</strong> conversation history, files, and tools all in one controlled directory</li>
+      <li><strong>Memory:</strong> global and per-channel memory files for cross-session context</li>
+    </ul>
+  </div>
+
+  <div class="cb"><span class="kw">npm</span> install @mariozechner/pi-mom
+
+<span class="cmt"># Then create a Slack app with Socket Mode enabled</span>
+<span class="cmt"># Set env vars: SLACK_BOT_TOKEN, SLACK_APP_TOKEN, etc.</span></div>
+
+  <h2>pi-web-ui</h2>
+  <div class="doc">
+    <p>Reusable web components for building AI chat interfaces. Built on mini-lit web components and Tailwind CSS v4.</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>ChatPanel</h4>
+      <p>Primary high-level interface: messages + artifacts viewer</p>
+    </div>
+    <div class="info-card">
+      <h4>AgentInterface</h4>
+      <p>Lower-level chat for custom layouts with attachments and thinking</p>
+    </div>
+    <div class="info-card">
+      <h4>Artifacts</h4>
+      <p>JavaScript REPL, HTML, SVG, Markdown rendering</p>
+    </div>
+    <div class="info-card">
+      <h4>File Handling</h4>
+      <p>PDFs, Word, spreadsheets, presentations, images</p>
+    </div>
+    <div class="info-card">
+      <h4>IndexedDB Storage</h4>
+      <p>Sessions, credentials, preferences persist in the browser</p>
+    </div>
+    <div class="info-card">
+      <h4>Local Providers</h4>
+      <p>Ollama, LM Studio, vLLM&mdash;plus automatic CORS proxy</p>
+    </div>
+  </div>
+
+  <h2>pi-pods &mdash; GPU Deployment</h2>
+  <div class="doc">
+    <p>A Node.js CLI for running large language models on remote GPU pods. Automates vLLM setup, configures tool calling for agentic models, and exposes OpenAI-compatible endpoints.</p>
+  </div>
+
+  <div class="pills">
+    <div class="pill"><span class="pill-dot ok"></span> DataCrunch</div>
+    <div class="pill"><span class="pill-dot ok"></span> RunPod</div>
+    <div class="pill"><span class="pill-dot ok"></span> Vast.ai</div>
+    <div class="pill"><span class="pill-dot ok"></span> Prime Intellect</div>
+    <div class="pill"><span class="pill-dot ok"></span> AWS EC2</div>
+    <div class="pill"><span class="pill-dot ok"></span> Any Ubuntu + NVIDIA</div>
+  </div>
+
+  <div class="cb"><span class="kw">export</span> HF_TOKEN=<span class="str">token</span>
+<span class="kw">export</span> PI_API_KEY=<span class="str">key</span>
+
+<span class="cmt"># Set up a pod with shared NFS storage</span>
+<span class="kw">pi</span> pods setup <span class="val">dc1</span> <span class="str">"ssh root@1.2.3.4"</span> --mount <span class="str">"nfs_command"</span>
+
+<span class="cmt"># Start a model with smart GPU allocation</span>
+<span class="kw">pi</span> start <span class="val">Qwen/Qwen2.5-Coder-32B-Instruct</span> --name <span class="val">qwen</span>
+
+<span class="cmt"># Interactive chat against deployed model</span>
+<span class="kw">pi</span> agent <span class="val">qwen</span> -i</div>
+
+  <div class="mental"><strong>Multi-model per pod:</strong> pi-pods automatically assigns models to different GPUs on the same machine. Configure memory fraction (30&ndash;90%), context window (4k&ndash;128k), and GPU count per model.</div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Installing every package when you only need pi-ai.</strong> Each package has its own footprint. <code>npm i @mariozechner/pi-ai</code> alone is ~1 MB. The full stack is 10× that.</li>
+      <li><strong>Using pi-tui for rendering in a way that bypasses its redraw engine.</strong> If you <code>console.log()</code> inside a pi-tui app, the screen tears. All terminal output must go through pi-tui's write API.</li>
+      <li><strong>Letting pi-mom run in host mode by default.</strong> Host mode means Slack messages can trigger bash on your machine. Keep it in Docker sandbox mode unless you have a specific, scoped reason to go host.</li>
+      <li><strong>Running pi-pods without HF_TOKEN set.</strong> Most models on HuggingFace need an auth token for download. pi-pods errors out &mdash; but the error can be silent on slow connections; always verify.</li>
+      <li><strong>Shipping pi-web-ui without a Worker proxy for API keys.</strong> pi-web-ui supports provider keys for convenience in dev, but in production you must never ship keys to the browser. Proxy through a Worker (see Deploy tab).</li>
+      <li><strong>Assuming pi-tui works on Windows cmd.exe.</strong> It expects a modern terminal with ANSI support. Windows Terminal, WSL, macOS Terminal, iTerm2, Kitty, Alacritty all work. cmd.exe/PowerShell conhost does not.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- ============================== EXTEND ============================== -->
+<div id="p-extend" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">Customization</div>
+    <h1>Extensions &amp; Skills</h1>
+    <p>The Pi philosophy is minimalism at the core, extensibility everywhere else. Four layers let you shape the agent to your workflow.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-lbl">Four layers, one question</div>
+    <h4>Which extension mechanism should I use?</h4>
+    <p>Pi gives you <em>four</em> places to hook in, from simplest to most powerful: <strong>prompt templates</strong> (markdown you invoke with <code>/name</code>), <strong>skills</strong> (markdown + supporting files following an open standard), <strong>TypeScript extensions</strong> (full programmatic access), and <strong>Pi Packages</strong> (bundles of any of the above). The right choice depends on whether you're capturing a workflow, adding a tool, or shipping to others.</p>
+  </div>
+
+  <h3>Extension layer picker</h3>
+  <table class="dec-table">
+    <thead><tr><th>I want to...</th><th>Use</th><th>Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td>Save a prompt I type often</td><td>Prompt template</td><td>Fastest to write. Only pastes text into the session. No logic.</td></tr>
+      <tr><td>Teach Pi a repeatable workflow (with scripts)</td><td>Skill</td><td>Portable (Agent Skills standard). Can include files the agent reads. Still declarative.</td></tr>
+      <tr><td>Add a new tool, slash command, or UI element</td><td>Extension (TypeScript)</td><td>Full power. Runs code. Requires build step.</td></tr>
+      <tr><td>Distribute my work to others</td><td>Pi Package</td><td>Wraps any of the above. Installable via npm or git.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">Agent Skills standard</span> = an open spec (originally from Anthropic) defining how a skill folder is laid out: one <code>SKILL.md</code> with YAML frontmatter (name, description, tags, when-to-use) plus any supporting files in the same folder. Pi reads the standard; so do other agent tools &mdash; skills port between them.<br><br>
+    <span class="plain-term">YAML frontmatter</span> = the <code>---</code>-bracketed metadata block at the top of a markdown file. Machine-parseable, human-readable. Pi uses it to decide when a skill applies without needing to read the whole body.<br><br>
+    <span class="plain-term">Hot reload</span> (themes) = Pi watches theme files for changes and re-applies them live &mdash; no restart. Edit colors in your editor, see them immediately in the terminal.<br><br>
+    <span class="plain-term">Pi Package</span> = an npm-installable bundle that can include any combination of prompts, skills, extensions, themes. <code>pi install npm:@foo/bar</code> pulls it in. Good for distributing a team's shared customizations or publishing open-source.<br><br>
+    <span class="plain-term">&ldquo;things Pi deliberately doesn't bake in&rdquo;</span> &mdash; the Pi philosophy. Plan mode, sub-agents, permission systems, git checkpointing &mdash; all exist as community extensions because they depend heavily on what <em>you</em> actually want. Better to have 10 flavors of plan-mode extension than one forced into the core.
+  </div>
+
+  <h2>Four Extension Layers</h2>
+  <div class="layer-stack">
+    <div class="layer"><span class="layer-name">Prompt Templates</span><span class="layer-detail">Markdown files in <code>~/.pi/agent/prompts/</code> &mdash; invoke with <code>/name</code></span></div>
+    <div class="layer"><span class="layer-name">Skills</span><span class="layer-detail">SKILL.md files following the Agent Skills standard</span></div>
+    <div class="layer active"><span class="layer-name">Extensions</span><span class="layer-detail">TypeScript modules registering tools, commands, shortcuts, UI</span></div>
+    <div class="layer"><span class="layer-name">Themes</span><span class="layer-detail">Theme files in <code>~/.pi/agent/themes/</code> with hot reload</span></div>
+  </div>
+
+  <h2>Prompt Templates</h2>
+  <div class="cb"><span class="cmt"># Create ~/.pi/agent/prompts/commit.md</span>
+<span class="hl">---</span>
+<span class="kw">name</span>: commit
+<span class="kw">description</span>: Review changes and write a commit message
+<span class="hl">---</span>
+Review the current git diff. Write a conventional commit
+message following the project's style. Then propose running
+<span class="str">git commit</span> with that message.
+
+<span class="cmt"># Invoke inside pi:</span>
+/commit</div>
+
+  <h2>Skills</h2>
+  <div class="doc">
+    <p>Skills follow the <a href="https://github.com/anthropics/agent-skills" target="_blank">Agent Skills</a> standard: a <code>SKILL.md</code> file with YAML frontmatter describing the skill's purpose, plus supporting files (scripts, templates, references) in the same directory.</p>
+  </div>
+
+  <div class="cb"><span class="hl">~/.pi/agent/skills/pdf-extract/</span>
+  ├── <span class="kw">SKILL.md</span>       <span class="cmt"># Metadata + instructions</span>
+  ├── <span class="kw">extract.py</span>     <span class="cmt"># Supporting script</span>
+  └── <span class="kw">README.md</span>      <span class="cmt"># Documentation for the skill</span>
+
+<span class="cmt"># Invoke in pi:</span>
+/skill:pdf-extract</div>
+
+  <h2>Extensions (TypeScript)</h2>
+  <div class="doc">
+    <p>Extensions are TypeScript modules that can register:</p>
+    <ul>
+      <li>Custom tools (beyond read/write/edit/bash)</li>
+      <li>Additional slash commands</li>
+      <li>Keyboard shortcuts</li>
+      <li>UI components (leveraging pi-tui)</li>
+      <li>Transport implementations</li>
+      <li>Editor integrations</li>
+    </ul>
+  </div>
+
+  <div class="mental"><strong>Community examples include:</strong> git checkpointing, SSH remote execution, MCP integration, custom code editors, plan mode, sub-agent spawners, and permission systems&mdash;all the things Pi deliberately doesn't bake in.</div>
+
+  <h2>Pi Packages</h2>
+  <div class="doc">
+    <p>Bundle prompts, skills, extensions, and themes into distributable Pi Packages. Ship via npm or git.</p>
+  </div>
+
+  <div class="cb"><span class="cmt"># Install from npm</span>
+<span class="kw">pi</span> install <span class="val">npm:@foo/pi-tools</span>
+
+<span class="cmt"># Install from git</span>
+<span class="kw">pi</span> install <span class="val">git:github.com/user/repo</span>
+
+<span class="cmt"># List installed packages</span>
+<span class="kw">pi</span> list
+
+<span class="cmt"># Update all</span>
+<span class="kw">pi</span> update
+
+<span class="cmt"># Enable/disable resources interactively</span>
+<span class="kw">pi</span> config</div>
+
+  <h2>Custom Models</h2>
+  <div class="doc">
+    <p>Add providers that aren't in pi-ai's built-in registry via <code>~/.pi/agent/models.json</code>, as long as they speak the OpenAI or Anthropic API dialect.</p>
+  </div>
+
+  <div class="cb">{
+  <span class="hl">"models"</span>: [
+    {
+      <span class="hl">"id"</span>: <span class="str">"my-local-model"</span>,
+      <span class="hl">"provider"</span>: <span class="str">"custom"</span>,
+      <span class="hl">"api"</span>: <span class="str">"openai-completions"</span>,
+      <span class="hl">"baseUrl"</span>: <span class="str">"http://localhost:8080/v1"</span>,
+      <span class="hl">"contextWindow"</span>: <span class="val">128000</span>,
+      <span class="hl">"maxTokens"</span>: <span class="val">32000</span>
+    }
+  ]
+}</div>
+
+  <h2>Context Files</h2>
+  <div class="doc">
+    <p>Pi loads <code>AGENTS.md</code> (or <code>CLAUDE.md</code> for compatibility) from your home directory or project root. This is where project-specific instructions live&mdash;coding conventions, architectural notes, don't-do lists.</p>
+  </div>
+
+  <div class="story">
+    <div class="story-lbl">Walk-through</div>
+    <h4>Turning a recurring workflow into a portable skill</h4>
+    <ol>
+      <li><span class="t">step 1</span> Every Friday you ask Pi to generate a weekly changelog from git commits. The prompt is long and you keep re-typing variations of it. Time to capture it.</li>
+      <li><span class="t">step 2</span> Start with a prompt template: create <code>~/.pi/agent/prompts/changelog.md</code> with the prompt text. Invoke with <code>/changelog</code>. Done in 30 seconds.</li>
+      <li><span class="t">step 3</span> A month later you want it smarter &mdash; the changelog should categorize commits (feat/fix/chore) and pull PR titles. That needs logic, not just text. Upgrade to a skill.</li>
+      <li><span class="t">step 4</span> Create <code>~/.pi/agent/skills/changelog/</code>. Inside: <code>SKILL.md</code> with YAML frontmatter (<em>name: changelog, when-to-use: weekly summary of git activity</em>) plus <code>categorize.py</code> (a script the skill tells Pi to run).</li>
+      <li><span class="t">step 5</span> In the SKILL.md body, describe the workflow step-by-step: &ldquo;run <code>git log --since=7days</code>; pipe through categorize.py; pull PR titles for any merge commits; format as markdown.&rdquo;</li>
+      <li><span class="t">step 6</span> Invoke with <code>/skill:changelog</code>. Pi follows the playbook, using your script as a helper.</li>
+      <li><span class="t">step 7</span> A teammate wants the same workflow. Bundle the skill (plus your git-checkpoint prompt) into a Pi Package: <code>@yourname/team-workflow</code>, publish to npm. Teammate runs <code>pi install npm:@yourname/team-workflow</code> &mdash; gets the whole thing.</li>
+    </ol>
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Using an extension when a skill would do.</strong> Skills are portable, declarative, and scan-auditable. Reach for TypeScript extensions only when you genuinely need code &mdash; custom tools, UI integration, or runtime logic.</li>
+      <li><strong>Putting logic in YAML frontmatter.</strong> Frontmatter is metadata only (name, tags, triggers). Keep the playbook in the markdown body.</li>
+      <li><strong>Writing skills that assume Pi-specific behavior.</strong> The Agent Skills standard is cross-tool. If you rely on Pi-only things (specific slash commands, internal state), your skill won't port. Keep skills portable where you can.</li>
+      <li><strong>Forgetting that prompts/skills go in <code>~/.pi/agent/</code> not <code>~/.pi/</code>.</strong> Easy to typo. Check with <code>ls ~/.pi/agent/skills/</code>.</li>
+      <li><strong>Publishing a Pi Package without a README.</strong> npm installs strangers' code. A README explaining what the package registers (tools, commands) is table stakes for trust.</li>
+      <li><strong>Assuming themes hot-reload the layout &mdash; they only hot-reload colors.</strong> Structural changes still need a Pi restart.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- ============================== DEPLOY ============================== -->
+<div id="p-deploy" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">Distribution</div>
+    <h1>Cloudflare Pages Deploy</h1>
+    <p>Deploy this documentation site (or your own pi-web-ui application) to Cloudflare Pages using the Wrangler CLI.</p>
+  </div>
+
+  <h2>This Site's Deployment</h2>
+  <div class="doc">
+    <p>The guide you're reading is a single-file HTML SPA deployed to Cloudflare Pages. Here's the exact flow:</p>
+  </div>
+
+  <div class="cb"><span class="cmt"># 1. Install Wrangler (once)</span>
+<span class="kw">npm</span> install -g wrangler
+
+<span class="cmt"># 2. Authenticate (once)</span>
+<span class="kw">wrangler</span> login
+
+<span class="cmt"># 3. Create the Pages project (once per project)</span>
+<span class="kw">wrangler</span> pages project create <span class="val">pi-agent-guide</span> \
+  --production-branch=main
+
+<span class="cmt"># 4. Deploy the directory containing index.html</span>
+<span class="kw">wrangler</span> pages deploy <span class="val">pi-agent</span> \
+  --project-name=<span class="val">pi-agent-guide</span> \
+  --commit-dirty=<span class="val">true</span>
+
+<span class="cmt"># 5. Verify</span>
+<span class="kw">curl</span> -sI <span class="str">"https://pi-agent-guide.pages.dev/"</span></div>
+
+  <h2>Deploy pi-web-ui Applications</h2>
+  <div class="doc">
+    <p>pi-web-ui ships reusable components for building a full chat UI in the browser. Because it uses IndexedDB for session/credential storage, no server is required&mdash;deploy as a static site on Cloudflare Pages.</p>
+  </div>
+
+  <div class="cb"><span class="cmt"># Create a new pi-web-ui project</span>
+<span class="kw">mkdir</span> my-pi-app &amp;&amp; <span class="kw">cd</span> my-pi-app
+<span class="kw">npm</span> init -y
+<span class="kw">npm</span> install @mariozechner/pi-web-ui @mariozechner/pi-agent-core
+
+<span class="cmt"># Build (assuming Vite or similar)</span>
+<span class="kw">npm</span> run build
+
+<span class="cmt"># Deploy dist/ to Cloudflare Pages</span>
+<span class="kw">wrangler</span> pages deploy <span class="val">dist</span> \
+  --project-name=<span class="val">my-pi-app</span> \
+  --commit-dirty=<span class="val">true</span></div>
+
+  <h2>Local Dev with Wrangler</h2>
+  <div class="cb"><span class="cmt"># Preview this site locally</span>
+<span class="kw">cd</span> pi-agent
+<span class="kw">wrangler</span> pages dev .
+
+<span class="cmt"># Opens http://localhost:8788</span></div>
+
+  <h2>Auto-Deploy via Git</h2>
+  <div class="doc">
+    <p>For production workflows, connect your GitHub repository to Cloudflare Pages via the dashboard:</p>
+    <ul>
+      <li>Build command: <code>npm run build</code> (or empty for static)</li>
+      <li>Build output directory: <code>dist</code> (or <code>.</code> for static)</li>
+      <li>Every push to <code>main</code> triggers a production deploy</li>
+      <li>PRs get preview deployments on unique URLs</li>
+    </ul>
+  </div>
+
+  <h2>Environment Secrets</h2>
+  <div class="cb"><span class="cmt"># Pages deployments never ship API keys</span>
+<span class="cmt"># Use Cloudflare Workers as a proxy for secure key handling</span>
+<span class="kw">wrangler</span> secret put <span class="val">ANTHROPIC_API_KEY</span>
+<span class="kw">wrangler</span> secret put <span class="val">OPENAI_API_KEY</span>
+
+<span class="cmt"># In your Worker, proxy to the LLM provider</span>
+<span class="cmt"># The browser app points at the Worker, not directly at OpenAI</span></div>
+
+  <div class="mental"><strong>Security model:</strong> Never expose API keys in client-side pi-web-ui bundles. Route requests through a Worker that injects the key server-side. pi-ai supports a <code>proxyUrl</code> option precisely for this pattern.</div>
+
+  <div class="plain">
+    <div class="plain-lbl">In plain terms</div>
+    <span class="plain-term">Static site</span> = just HTML/CSS/JS files served from a CDN. No server running code on each request. Fast, cheap, resilient. Cloudflare Pages is built for this.<br><br>
+    <span class="plain-term">Cloudflare Worker</span> = a small server-side function that runs at Cloudflare's edge. When your browser app needs to call an LLM, it calls the Worker; the Worker adds the API key and forwards the request. Key never touches the browser.<br><br>
+    <span class="plain-term">CORS</span> (Cross-Origin Resource Sharing) = the browser rule that blocks pages on one domain from calling APIs on another unless the API explicitly allows it. Provider APIs typically reject browser calls directly &mdash; another reason for the Worker proxy.<br><br>
+    <span class="plain-term">Preview deployment</span> = when you push a PR branch, Cloudflare Pages builds it and gives you a unique URL. You can share it for review without affecting production.<br><br>
+    <span class="plain-term">Cloudflare Access</span> = authentication gate in front of a Pages site. Good for internal tools &mdash; visitors log in via Google/GitHub/email before the site loads.<br><br>
+    <span class="plain-term">Wrangler</span> = Cloudflare's CLI. Handles login, project creation, deploys, secrets, local dev. Everything you can do in the dashboard you can do in Wrangler.
+  </div>
+
+  <h2>Threat Models &mdash; What Could Actually Go Wrong</h2>
+  <div class="doc">
+    <p>Pi's deployment story is &ldquo;static + optional Worker proxy.&rdquo; Here's what goes wrong when that's misconfigured and what fixes each scenario.</p>
+  </div>
+
+  <div class="threat-grid">
+    <div class="threat">
+      <div class="threat-q">I shipped ANTHROPIC_API_KEY in the browser bundle.</div>
+      <div class="threat-a">A user opens DevTools → Network tab → sees the key in a request header. Within hours, keys show up in public scrapers and someone runs up your bill.</div>
+      <div class="threat-shield">Use a Worker proxy with <code>wrangler secret put</code>. The browser calls the Worker; only the Worker knows the key. pi-ai's <code>proxyUrl</code> option exists for exactly this.</div>
+    </div>
+
+    <div class="threat">
+      <div class="threat-q">Someone discovers my Worker URL and uses it as a free OpenAI proxy.</div>
+      <div class="threat-a">Your Worker forwards any request with any prompt. A bored person on Reddit posts the URL. Your quota burns in a weekend.</div>
+      <div class="threat-shield">Gate the Worker with Cloudflare Access (login required), or add a simple session token your app generates, or restrict origin via CORS in the Worker. Don't ship an unauthenticated proxy.</div>
+    </div>
+
+    <div class="threat">
+      <div class="threat-q">A user's browser gets compromised and reads IndexedDB.</div>
+      <div class="threat-a">pi-web-ui stores credentials (subscription tokens, API keys if the user entered them) in IndexedDB. A browser-level attack could harvest them.</div>
+      <div class="threat-shield">IndexedDB is scoped to the origin, so only same-origin scripts can read it. Don't inject third-party JS carelessly. Encourage users to rely on the Worker proxy instead of entering keys into the browser.</div>
+    </div>
+
+    <div class="threat">
+      <div class="threat-q">My Worker logs user prompts and I didn't realize.</div>
+      <div class="threat-a">Cloudflare Worker logs can capture request bodies. If you ever log the full request for debugging, private prompts end up in your log store.</div>
+      <div class="threat-shield">Strip request bodies from Worker logs by default. If you need to log, hash or sanitize first. Document logging behavior in your privacy policy.</div>
+    </div>
+
+    <div class="threat">
+      <div class="threat-q">I accidentally <code>wrangler pages deploy</code>'d the wrong directory.</div>
+      <div class="threat-a">Your <code>node_modules</code>, <code>.env</code>, or a local dev folder goes live. Secrets in filenames get indexed; huge bundles tank performance.</div>
+      <div class="threat-shield">Always specify the exact directory: <code>wrangler pages deploy dist</code>, not <code>wrangler pages deploy .</code>. Add a <code>.gitignore</code>/<code>.wranglerignore</code> for safety. Double-check the upload summary before confirming.</div>
+    </div>
+
+    <div class="threat">
+      <div class="threat-q">A deploy breaks production and I need to roll back fast.</div>
+      <div class="threat-a">You pushed bad code; users hit a white screen.</div>
+      <div class="threat-shield">Cloudflare Pages keeps a deployment history. Dashboard → deployments → &ldquo;rollback to this version.&rdquo; Every preview URL stays live, so roll back via URL while you fix the issue.</div>
+    </div>
+  </div>
+
+  <div class="oops">
+    <div class="oops-lbl">Common mistakes</div>
+    <ul>
+      <li><strong>Deploying without <code>--commit-dirty=true</code> while iterating.</strong> Wrangler refuses deploys from dirty git trees by default. During active dev, pass the flag; for release, commit first.</li>
+      <li><strong>Putting API keys in <code>wrangler.toml</code>.</strong> That file is meant to be committable. Use <code>wrangler secret put</code> &mdash; secrets live encrypted in Cloudflare, not in your repo.</li>
+      <li><strong>Forgetting that Pages deploys are immutable.</strong> You can't &ldquo;edit&rdquo; a deployed version &mdash; you push a new one. Rollback = route to an earlier version.</li>
+      <li><strong>Using a static site when you actually need a Worker.</strong> If your app calls LLMs directly from JavaScript, you need a Worker proxy &mdash; a purely static deploy leaks keys.</li>
+      <li><strong>Not setting up preview URLs for PRs.</strong> Cloudflare Pages auto-creates them when you connect a GitHub repo. Don't build + test only locally; real preview URLs catch CDN-level issues (headers, routes) you'd miss otherwise.</li>
+    </ul>
+  </div>
+
+  <h2>Monitoring</h2>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Analytics</h4>
+      <p>Cloudflare Pages Analytics shows visits, bandwidth, and geographic distribution for free.</p>
+    </div>
+    <div class="info-card">
+      <h4>Web Vitals</h4>
+      <p>Built-in Core Web Vitals tracking&mdash;LCP, CLS, FID&mdash;for performance monitoring.</p>
+    </div>
+    <div class="info-card">
+      <h4>Access Rules</h4>
+      <p>Add authentication via Cloudflare Access to gate internal tools.</p>
+    </div>
+    <div class="info-card">
+      <h4>Custom Domains</h4>
+      <p>Point your own domain via the Pages dashboard; SSL is automatic.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================== GLOSSARY + FAQ ============================== -->
+<div id="p-glossary" class="panel">
+<div class="pw">
+  <div class="sh">
+    <div class="sh-eyebrow">Reference</div>
+    <h1>Glossary + FAQ</h1>
+    <p>Every piece of jargon in Pi Agent, in plain English. Jump to a letter or scroll.</p>
+  </div>
+
+  <div class="gloss-index">
+    <a href="#g-A">A</a><a href="#g-B">B</a><a href="#g-C">C</a><a href="#g-E">E</a>
+    <a href="#g-F">F</a><a href="#g-H">H</a><a href="#g-I">I</a><a href="#g-J">J</a>
+    <a href="#g-K">K</a><a href="#g-M">M</a><a href="#g-O">O</a><a href="#g-P">P</a>
+    <a href="#g-R">R</a><a href="#g-S">S</a><a href="#g-T">T</a><a href="#g-V">V</a>
+    <a href="#g-W">W</a><a href="#g-Y">Y</a>
+  </div>
+
+  <div class="doc">
+
+    <div class="gloss-letter" id="g-A">A</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Agent Skills standard</div>
+        <div class="gloss-def">Open spec (originally Anthropic) for how a skill folder is structured: a <code>SKILL.md</code> with YAML frontmatter plus supporting files. Portable across agent tools that implement it.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">AGENTS.md / CLAUDE.md</div>
+        <div class="gloss-def">A markdown file in your home or project dir holding ambient instructions (coding style, project conventions, don't-dos). Pi loads it automatically. Supports both names for interop.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">agentLoop</div>
+        <div class="gloss-def">pi-agent-core's low-level API. Gives you full control over the agent loop without the <code>Agent</code> class's opinions. Use when <code>Agent</code> is too rigid for your case.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-B">B</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Bang injection</div>
+        <div class="gloss-def"><code>!cmd</code> runs a shell command and feeds output into the model's context. <code>!!cmd</code> runs but hides output from the model. Fast way to add live data to a prompt.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Bracketed paste</div>
+        <div class="gloss-def">Terminal mode where pasted text arrives wrapped in markers. Lets pi-tui's editor receive multi-line pastes as one event instead of losing lines to newline submissions.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-C">C</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Compact <span class="gloss-pron">(/compact)</span></div>
+        <div class="gloss-def">Replace older conversation turns with a summary to free context space. Preserves meaning, drops verbosity. Different from <code>/new</code> which wipes history entirely.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">CORS <span class="gloss-pron">Cross-Origin Resource Sharing</span></div>
+        <div class="gloss-def">Browser rule: a page on one domain can't call APIs on another unless the API explicitly allows it. Most LLM provider APIs don't allow browser calls &mdash; use a Worker proxy.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">CSI 2026</div>
+        <div class="gloss-def">A terminal control sequence that groups screen updates atomically. pi-tui uses it so you never see half-rendered intermediate frames during a redraw.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-E">E</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Extension</div>
+        <div class="gloss-def">A TypeScript module that registers tools, slash commands, shortcuts, or UI into Pi. The most powerful extension layer &mdash; anything the coding agent can do, an extension can add.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Event (pi-agent-core)</div>
+        <div class="gloss-def">A message fired by the agent runtime as things happen: <code>agent_start</code>, <code>turn_start</code>, <code>message_update</code>, <code>tool_execution_end</code>, etc. Subscribe to build streaming UIs.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-F">F</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Fork <span class="gloss-pron">(/fork)</span></div>
+        <div class="gloss-def">Create a new session branch at the current message. Same history up to here, independent future from here. Useful for &ldquo;what if I asked differently?&rdquo; experiments.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-H">H</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Hot reload</div>
+        <div class="gloss-def">Changes to theme files apply live without restarting Pi. Edit colors in your editor, see them immediately.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-I">I</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">IME <span class="gloss-pron">Input Method Editor</span></div>
+        <div class="gloss-def">System for composing multi-keystroke characters (CJK scripts, accented letters). pi-tui tracks IME state so the cursor stays in the right spot mid-composition.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">IndexedDB</div>
+        <div class="gloss-def">Browser-native local database. pi-web-ui stores sessions, credentials, and preferences here &mdash; no server needed. Scoped to the page's origin; private to that browser profile.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-J">J</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">JSONL</div>
+        <div class="gloss-def">JSON Lines &mdash; one JSON object per line. Appendable, greppable, diff-friendly. Pi's session format.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-K">K</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Kitty / iTerm2 graphics protocols</div>
+        <div class="gloss-def">Escape-sequence protocols for rendering real images inside a terminal. pi-tui emits them so supported terminals show photos, diagrams, or screenshots inline.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-M">M</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">mini-lit</div>
+        <div class="gloss-def">A minimal fork of the Lit web-components library. pi-web-ui uses it for small-bundle, standards-based components.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Monorepo</div>
+        <div class="gloss-def">One git repo holding multiple related packages. pi-mono contains all seven Pi packages together.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-O">O</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">OAuth subscription</div>
+        <div class="gloss-def">Log in to a provider (Claude, ChatGPT, Copilot) via browser; provider returns a token that lets Pi use your <em>existing</em> subscription instead of a separate API bill.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">openai-completions API</div>
+        <div class="gloss-def">The request/response shape OpenAI's chat-completions endpoint uses. De-facto standard &mdash; Ollama, LM Studio, vLLM, Groq, Together all speak it. pi-ai's <code>api: 'openai-completions'</code> tells pi-ai to use this shape for a custom endpoint.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-P">P</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Pi Package</div>
+        <div class="gloss-def">An npm- or git-installable bundle that can include prompt templates, skills, extensions, or themes. How you distribute your customizations to others.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-agent-core</div>
+        <div class="gloss-def">The stateful agent runtime: session state, tool execution, event streaming, hooks. Built on pi-ai.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-ai</div>
+        <div class="gloss-def">Unified LLM library. Same API across 20+ providers, automatic cross-provider handoffs, streaming events, TypeBox tool schemas.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-mom</div>
+        <div class="gloss-def">A Slack bot package. Autonomous LLM-powered bot with bash access, self-managing skills, Docker sandboxing.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-pods</div>
+        <div class="gloss-def">CLI for running open-source LLMs on rented GPUs (DataCrunch, RunPod, Vast.ai, etc). Sets up vLLM, exposes an OpenAI-compatible endpoint.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-tui</div>
+        <div class="gloss-def">Terminal UI framework. Flicker-free redraws, components, images, IME support. Used by pi-coding-agent; usable standalone.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">pi-web-ui</div>
+        <div class="gloss-def">Web components for building chat UIs in the browser. Ships with ChatPanel, Artifacts, file handling, IndexedDB storage.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Preview deployment</div>
+        <div class="gloss-def">A unique-URL deployment for a PR or branch on Cloudflare Pages. Lets you share &ldquo;test this&rdquo; links without touching production.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Prompt template</div>
+        <div class="gloss-def">A markdown file in <code>~/.pi/agent/prompts/</code> you invoke with <code>/name</code>. Pure text expansion &mdash; no code, no logic, just a saved prompt.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">proxyUrl</div>
+        <div class="gloss-def">pi-ai option that routes requests through a server you control instead of calling providers directly. Essential for browser apps &mdash; keeps API keys out of the bundle.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-R">R</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Reasoning level</div>
+        <div class="gloss-def">Unified thinking control across providers: <code>'off' | 'low' | 'medium' | 'high'</code>. Higher = slower, pricier, smarter on complex problems.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">RPC mode</div>
+        <div class="gloss-def">One of Pi's execution modes. Pi runs as a subprocess of a parent program, communicating over stdio JSON-RPC. How to embed Pi in your own tool.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-S">S</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">SKILL.md</div>
+        <div class="gloss-def">The markdown entry point of a skill folder. YAML frontmatter on top (name, description, triggers), playbook body below.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Skill</div>
+        <div class="gloss-def">A folder under <code>~/.pi/agent/skills/&lt;name&gt;/</code> containing a SKILL.md plus any supporting files. Invoked via <code>/skill:name</code>.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Streaming deltas</div>
+        <div class="gloss-def">Chunks of a model's response as it generates. <code>text_delta</code> = visible reply piece; <code>thinking_delta</code> = private reasoning piece; <code>toolcall_delta</code> = partial tool arguments.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">SYSTEM.md</div>
+        <div class="gloss-def">Markdown file that <em>replaces</em> Pi's default system prompt entirely. Advanced use &mdash; most people want AGENTS.md (which layers on top) instead.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-T">T</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">transformContext</div>
+        <div class="gloss-def">pi-agent-core hook that runs before each LLM call. Lets you filter/summarize/redact what the model sees without losing the agent's real state.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Tree <span class="gloss-pron">(/tree)</span></div>
+        <div class="gloss-def">Session navigator. Shows the branching history of your conversation as a graph; jump to any node.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Turn</div>
+        <div class="gloss-def">One full cycle of (LLM call + tool execution) inside a prompt. A single user message can span multiple turns if the agent iterates.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">TypeBox</div>
+        <div class="gloss-def">TypeScript library for describing JSON schemas with static types. pi-ai uses it to define tool parameters with both runtime validation and compile-time types.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-V">V</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">vLLM</div>
+        <div class="gloss-def">High-throughput open-source inference engine for LLMs. pi-pods installs it on rented GPUs to serve models behind an OpenAI-compatible API.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-W">W</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">Worker <span class="gloss-pron">(Cloudflare Worker)</span></div>
+        <div class="gloss-def">A small server-side function running at Cloudflare's edge. Used to hold API keys and proxy requests from browser apps.</div>
+      </div>
+      <div class="gloss">
+        <div class="gloss-term">Wrangler</div>
+        <div class="gloss-def">Cloudflare's CLI. Deploys Pages sites, manages Workers, handles secrets, runs local dev.</div>
+      </div>
+    </div>
+
+    <div class="gloss-letter" id="g-Y">Y</div>
+    <div class="gloss-list">
+      <div class="gloss">
+        <div class="gloss-term">YAML frontmatter</div>
+        <div class="gloss-def">The <code>---</code>-bracketed metadata block at the top of a markdown file. Machine-parseable. Pi uses it to read a skill's name, description, and tags without processing the whole body.</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:48px">Frequently Asked Questions</h2>
+
+    <details class="faq" open>
+      <summary>How is Pi different from Claude Code / Cursor / Continue?</summary>
+      <div class="faq-body">
+        <p>Claude Code and Cursor are polished, opinionated products with plan mode, sub-agents, permission systems, and many built-in tools. Pi is deliberately minimal &mdash; four tools, no baked-in workflows &mdash; and instead ships a full extension system so you build the exact shape you want. If you love defaults, Pi will feel bare. If you want a toolkit to build <em>your</em> agent, Pi is the best-documented starting point I've seen.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Do I really save money with subscription OAuth?</summary>
+      <div class="faq-body">
+        <p>Usually yes, if your usage fits your subscription's limits. Claude Pro gives ~40 messages per 5-hour window; ChatGPT Plus is more generous; Copilot has monthly limits. If you'd hit those caps anyway, using OAuth is free vs. paying per-token via API. If you're a heavy user who'd exceed the subscription caps, API keys (or OpenRouter) might be cheaper overall.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Can I run Pi offline with a local model?</summary>
+      <div class="faq-body">
+        <p>Yes. Run Ollama or LM Studio locally, configure a Custom Endpoint in pi-ai pointing at <code>http://localhost:11434/v1</code> (Ollama) or <code>http://localhost:1234/v1</code> (LM Studio). Pi will treat it like any other OpenAI-completions provider. Nothing leaves your machine.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Which package do I install if I just want to call an LLM from my app?</summary>
+      <div class="faq-body">
+        <p>Just <code>@mariozechner/pi-ai</code>. It has no dependencies on the coding agent or the runtime. You'll get model discovery, streaming, tool calling, cross-provider handoffs &mdash; nothing else.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>What if I want plan mode, sub-agents, or a permission system?</summary>
+      <div class="faq-body">
+        <p>Write it as an extension or install a community one. Pi's philosophy is that these features vary too much between users to bake in &mdash; but the extension API exposes everything you'd need (tool hooks, state access, UI slots). Check the pi-mono issues/discussions for community extensions.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>How do I back up my Pi setup?</summary>
+      <div class="faq-body">
+        <p>Copy <code>~/.pi/</code>. Contains settings, prompts, skills, sessions, themes, model definitions. On a new machine: <code>npm i -g @mariozechner/pi-coding-agent</code>, drop the folder in place, run <code>pi</code>. Re-run <code>/login</code> for OAuth providers since tokens may be machine-bound.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Is it safe to share a pi-web-ui deployment publicly?</summary>
+      <div class="faq-body">
+        <p>Only with a Worker proxy and authentication. A purely static pi-web-ui deployment that lets anonymous users enter their own API keys is fine (they pay for their usage). A deployment calling <em>your</em> API keys without auth will be abused &mdash; see the Threat Models on the Deploy tab.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Why TypeBox instead of Zod?</summary>
+      <div class="faq-body">
+        <p>TypeBox outputs real JSON Schema natively &mdash; the format LLM providers expect for tool definitions. Zod needs a converter. TypeBox also has zero runtime dependencies. Different tradeoffs; Pi picked TypeBox for the LLM use case.</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>Can Pi's coding agent run in a GitHub Action or CI?</summary>
+      <div class="faq-body">
+        <p>Yes &mdash; use <code>pi -p "prompt"</code> (print mode) for one-shot non-interactive runs. Pipe input, capture output, feed into your pipeline. Authenticate with an API key via env var (OAuth subscriptions don't work in CI since they need a browser).</p>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>What happens if I break a session JSONL file?</summary>
+      <div class="faq-body">
+        <p>Since sessions are append-only JSONL, corruption usually means a bad line at the end. Open the file, remove the partial line, save. Pi will load everything up to the last valid entry. Full corruption is rare because Pi writes line-by-line.</p>
+      </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+</div><!-- /panels -->
+
+<div class="sbar">
+  <div class="si"><span class="sdot"></span> pi-agent-guide</div>
+  <div class="si">9 sections</div>
+  <div class="si">MIT</div>
+  <div class="surl" id="surl">pi-agent-guide.pages.dev/#home</div>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  const tab=document.querySelector(`.tab[data-p="${id}"]`);
+  const panel=document.getElementById('p-'+id);
+  if(tab)tab.classList.add('on');
+  if(panel){panel.classList.add('on');panel.scrollTop=0;}
+  document.getElementById('surl').textContent='pi-agent-guide.pages.dev/#'+id;
+  history.replaceState(null,null,'#'+id);
+}
+const hash=location.hash.replace('#','');
+if(hash&&document.getElementById('p-'+hash)){show(hash)}
+window.addEventListener('popstate',()=>{
+  const h=location.hash.replace('#','');
+  if(h&&document.getElementById('p-'+h)){show(h)}
+});
+</script>
+</body>
+</html>

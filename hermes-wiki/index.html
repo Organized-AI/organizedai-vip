@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hermes Wiki — LLM knowledge base for the Hermes Agent + Pi Harness deployment</title>
+<style>
+  :root{--bg:#000;--ink:#e6f2ff;--muted:#6b8aa8;--rule:#0f2740;--accent:#00e5ff;--code-bg:#07121c;--code-ink:#b8d4ee;--link:#29b8ff;--chip-bg:#0a1a28;--chip-bg-hover:#0f2740;--badge-core:#4ade80;--badge-toolset:#fbbf24;--badge-model:#f472b6;--badge-concept:#a78bfa;--badge-command:#38bdf8;--badge-skill:#fde047;--badge-platform:#22d3ee;--badge-storage:#fb7185;--badge-guide:#94a3b8;--badge-harness:#e879f9;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--serif:"Iowan Old Style",Georgia,"Times New Roman",serif}
+  *{box-sizing:border-box}html,body{background:var(--bg);color:var(--ink)}
+  body{font-family:var(--serif);font-size:16px;line-height:1.55;max-width:980px;margin:0 auto;padding:48px 28px 120px;text-shadow:0 0 .5px rgba(0,229,255,.05)}
+  nav.top{display:flex;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;margin-bottom:48px;color:var(--muted)}
+  nav.top a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--rule)}
+  nav.top a:hover{color:var(--ink);text-shadow:0 0 8px rgba(0,229,255,.6)}nav.top .ext::after{content:" ↗"}
+  h1{font-family:var(--mono);font-size:40px;font-weight:700;letter-spacing:-.5px;margin:0 0 6px;color:var(--accent);text-shadow:0 0 18px rgba(0,229,255,.35)}
+  .tagline{font-family:var(--mono);color:var(--muted);font-size:14px;margin-bottom:32px}
+  .howto{border:1px solid var(--rule);background:var(--code-bg);padding:16px 20px;margin:24px 0 40px;font-size:14px;color:var(--ink)}
+  .howto strong{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);display:block;margin-bottom:6px}
+  nav.toc{font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 48px;padding:14px 0;border-top:1px solid rgba(0,229,255,.2);border-bottom:1px solid rgba(0,229,255,.2)}
+  nav.toc a{color:var(--muted);text-decoration:none}nav.toc a:hover{color:var(--ink)}
+  h2{font-family:var(--mono);font-size:15px;font-weight:600;margin:64px 0 18px;padding-bottom:8px;border-bottom:1px solid rgba(0,229,255,.25);color:var(--ink)}
+  h2::before{content:"// ";color:var(--muted)}
+  .node-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:18px 0 32px}
+  .node{border:1px solid var(--rule);padding:12px 14px;background:var(--code-bg);font-size:13.5px;line-height:1.5}
+  .node:target{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 28px rgba(0,229,255,.15)}
+  .node header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:8px}
+  .node .id{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);word-break:break-all}
+  .node .type{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;padding:1px 6px;border:1px solid;border-radius:2px;flex-shrink:0}
+  .t-core{color:var(--badge-core);border-color:var(--badge-core)}
+  .t-toolset{color:var(--badge-toolset);border-color:var(--badge-toolset)}
+  .t-model{color:var(--badge-model);border-color:var(--badge-model)}
+  .t-concept{color:var(--badge-concept);border-color:var(--badge-concept)}
+  .t-command{color:var(--badge-command);border-color:var(--badge-command)}
+  .t-skill{color:var(--badge-skill);border-color:var(--badge-skill)}
+  .t-platform{color:var(--badge-platform);border-color:var(--badge-platform)}
+  .t-storage{color:var(--badge-storage);border-color:var(--badge-storage)}
+  .t-guide{color:var(--badge-guide);border-color:var(--badge-guide)}
+  .t-harness{color:var(--badge-harness);border-color:var(--badge-harness)}
+  .node p{margin:0 0 8px;color:var(--ink);font-size:13.5px}
+  .node .links{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+  .node .links .lbl{color:var(--muted);margin-right:4px}
+  .node .chip{display:inline-block;background:var(--chip-bg);border:1px solid var(--rule);padding:1px 6px;border-radius:2px;color:var(--link);text-decoration:none;font-size:11px}
+  .node .chip:hover{background:var(--chip-bg-hover);color:var(--accent)}
+  .node .chip.ext::after{content:" ↗";opacity:.6}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--code-bg);padding:1px 5px;border:1px solid var(--rule);border-radius:3px;color:var(--code-ink)}
+  pre.ascii{font-family:var(--mono);font-size:12px;line-height:1.35;background:var(--code-bg);padding:18px 20px;border:1px solid var(--rule);border-radius:4px;box-shadow:inset 0 0 40px rgba(0,229,255,.03);white-space:pre;overflow-x:auto;color:var(--code-ink);margin:18px 0}
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:12px;color:var(--muted)}
+  footer a{color:var(--link);text-decoration:none}footer a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <a href="https://organized-ai-hub.pages.dev/#wikis" class="ext">organized-ai-hub</a>
+  <a href="https://hermes-agent-guide.pages.dev/" class="ext">hermes-agent-guide</a>
+  <a href="https://hermes-pi-harness-guide.pages.dev/" class="ext">hermes-pi-harness-guide</a>
+  <a href="https://wiki.organizedai.vip/harness/" class="ext">harness-engineering</a>
+  <a href="https://guide.organizedai.vip/pi-agent/" class="ext">pi-agent (Pi Mono)</a>
+  <a href="https://guide.organizedai.vip/autoresearch-linear/" class="ext">autoresearch-linear</a>
+  <a href="https://github.com/NousResearch/hermes-agent" class="ext">NousResearch/hermes-agent</a>
+  <a href="https://openclaw-wiki.pages.dev/" class="ext">openclaw-wiki</a>
+  <a href="https://clip-pipeline-wiki.pages.dev/" class="ext">clip-pipeline-wiki</a>
+</nav>
+
+<h1>Hermes Wiki</h1>
+<p class="tagline">// LLM knowledge base for Hermes Agent (NousResearch) + the Pi Harness deployment on claws-mac-mini</p>
+
+<div class="howto">
+  <strong>How to use this wiki (for humans and LLMs)</strong>
+  Every Hermes concept has one node. Nodes split into <em>upstream Hermes</em> (gateway · agent core · toolsets · MCP · skills · platforms · models · storage) and <em>Pi Harness</em> (the concrete deployment on <code>claws-mac-mini</code> — launchd · Codex OAuth + Gemma-4 fallback · self-heal patches · tool surface). Companion prose at <a href="https://hermes-agent-guide.pages.dev/">hermes-agent-guide</a> and <a href="https://hermes-pi-harness-guide.pages.dev/">hermes-pi-harness-guide</a>.
+  <br><br>
+  <strong>Naming heads-up</strong>
+  &ldquo;Pi Harness&rdquo; here means <em>this Hermes deployment on the host called <code>claws-mac-mini</code></em> &mdash; the &ldquo;Pi&rdquo; is host-name shorthand. It is <em>not</em> the same thing as <a href="https://guide.organizedai.vip/pi-agent/">pi-agent (Pi Mono)</a>, which is Mario Zechner's <code>pi-agent-core</code> TypeScript toolkit for scaffolding harnesses. The two compose: use Pi Mono to <em>build</em> a harness, use Hermes (this Pi Harness) to <em>host &amp; delegate</em> it, and use <a href="https://guide.organizedai.vip/autoresearch-linear/">AutoAgent loops in Linear</a> to <em>tune</em> it. Umbrella discipline: <a href="https://wiki.organizedai.vip/harness/">harness engineering</a>.
+</div>
+
+<nav class="toc">
+  <a href="#core">#core</a>
+  <a href="#models">#models</a>
+  <a href="#toolsets">#toolsets</a>
+  <a href="#mcp">#mcp</a>
+  <a href="#skills">#skills</a>
+  <a href="#platforms">#platforms</a>
+  <a href="#storage">#storage</a>
+  <a href="#harness">#pi-harness</a>
+  <a href="#commands">#commands</a>
+  <a href="#guides">#guides</a>
+</nav>
+
+<pre class="ascii">
+ ┌────────────── MESSAGE INGRESS ──────────────┐
+ │ Telegram · Discord · Slack · WhatsApp       │
+ │ Signal · Matrix · SMS · CLI · voice · …     │
+ └────────────────────┬────────────────────────┘
+                      ▼
+ ┌─────────────────────────────────────────────┐
+ │  <span style="color:#4ade80">GATEWAY SERVICE (long-running)</span>              │
+ │  multi-platform routing · per-user sessions │
+ │  cron dispatch · systemd/launchd restart    │
+ └────────────────────┬────────────────────────┘
+                      ▼
+ ┌─────────────────────────────────────────────┐
+ │  <span style="color:#4ade80">AGENT CORE  (claw.py)  6-step loop</span>          │
+ │  1 load → 2 LLM → 3 tools → 4 stream → 5 persist → 6 learn
+ └────┬─────────────┬──────────────┬───────────┘
+      ▼             ▼              ▼
+ <span style="color:#fbbf24">17 toolsets</span>   <span style="color:#22d3ee">MCP servers</span>   <span style="color:#f472b6">Model tier</span>
+ (web · fs ·     (stdio · HTTP    OpenRouter · Anthropic
+  browser ·      · OAuth 2.1)     OpenAI · Nous · Copilot
+  code · TTS …)                   (+ Codex OAuth, Gemma-4 local on Pi harness)
+      │
+      ▼
+ <span style="color:#fde047">SKILLS</span>   Official · Trusted · Community · Custom
+                                │
+                                ▼
+                         <span style="color:#fb7185">~/.hermes/</span>
+                         .env · config.yaml · SOUL.md
+                         state.db (FTS5) · skills/ · memories/
+                         sessions/ · logs/ · cron/
+</pre>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="core">Core (gateway + agent loop)</h2>
+<div class="node-grid">
+
+  <div class="node" id="gateway-service">
+    <header><span class="id">Gateway service</span><span class="type t-core">service</span></header>
+    <p>Long-running entry point. Multi-platform routing, per-user session isolation, cron trigger dispatch. Supervised by systemd (Linux / WSL2) or launchd (macOS). On the Pi Harness: launchd label <code>ai.hermes.gateway</code>.</p>
+    <div class="links"><span class="lbl">→</span><a class="chip" href="#agent-core">agent core</a><a class="chip" href="#harness-launchd">launchd</a><a class="chip" href="#platforms">platforms</a></div>
+  </div>
+
+  <div class="node" id="agent-core">
+    <header><span class="id">Agent core (claw.py)</span><span class="type t-core">loop</span></header>
+    <p>The thinking loop. Six steps per turn: <em>load context → LLM call → tool execution → stream response → persist + learn</em>. Persist step updates <code>state.db</code>, token usage, Honcho, and offers skill extraction.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a><a class="chip" href="#state-db">state.db</a><a class="chip" href="#skills-hub">skills hub</a></div>
+  </div>
+
+  <div class="node" id="model-normalize">
+    <header><span class="id">model_normalize.py</span><span class="type t-core">module</span></header>
+    <p>Provider-agnostic LLM call shim. Normalises auth + streaming across OpenRouter · Anthropic · OpenAI · Ollama · vLLM · Nous · Copilot. The agent core never speaks to a provider directly.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#agent-core">agent core</a><a class="chip" href="#models">model providers</a></div>
+  </div>
+
+  <div class="node" id="hermes-cli">
+    <header><span class="id">hermes CLI</span><span class="type t-command">binary</span></header>
+    <p>Top-level command — <code>hermes run</code> for an interactive session, <code>hermes gateway run</code> for the service, plus the slash command family in-chat.</p>
+    <div class="links"><span class="lbl">→</span><a class="chip" href="#cmd-run">hermes run</a><a class="chip" href="#cmd-slash">slash commands</a><a class="chip" href="#cmd-doctor">hermes doctor</a></div>
+  </div>
+
+  <div class="node" id="learning-loop">
+    <header><span class="id">learning loop</span><span class="type t-concept">concept</span></header>
+    <p>What makes Hermes stateful. After each turn, the core offers to extract reusable skills and update Honcho/Mem0 memories. The same install grows more personal over weeks.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#memory-system">memory system</a><a class="chip" href="#skills-hub">skills hub</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="models">Model providers</h2>
+<div class="node-grid">
+
+  <div class="node" id="prov-openrouter">
+    <header><span class="id">OpenRouter</span><span class="type t-model">provider</span></header>
+    <p>Provider aggregator — single API key, many upstreams. Default recommendation for new installs because it covers most model choices in one place.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a></div>
+  </div>
+
+  <div class="node" id="prov-anthropic">
+    <header><span class="id">Anthropic</span><span class="type t-model">provider</span></header>
+    <p>Claude model family — Opus, Sonnet, Haiku. First-class support; used by the autoresearch loop escalation policy (Sonnet → Opus 4.6 at 0.92).</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a></div>
+  </div>
+
+  <div class="node" id="prov-openai">
+    <header><span class="id">OpenAI (API)</span><span class="type t-model">provider</span></header>
+    <p>Supported via API key. Distinct from the Codex OAuth path used on the Pi harness.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a><a class="chip" href="#prov-codex-oauth">Codex OAuth</a></div>
+  </div>
+
+  <div class="node" id="prov-nous">
+    <header><span class="id">Nous Portal</span><span class="type t-model">provider</span></header>
+    <p>Nous Research's hosted endpoint. Project-default path for Nous-branded installs.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a></div>
+  </div>
+
+  <div class="node" id="prov-local">
+    <header><span class="id">Ollama / vLLM / llama-server</span><span class="type t-model">provider</span></header>
+    <p>Local inference paths. vLLM for throughput, Ollama for ergonomics, <code>llama-server</code> for Gemma-class quantised models on Apple silicon.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#prov-gemma">Gemma-4 @ :8080</a></div>
+  </div>
+
+  <div class="node" id="prov-copilot">
+    <header><span class="id">GitHub Copilot</span><span class="type t-model">provider</span></header>
+    <p>Available as a provider for licensed users. Useful when the existing Copilot entitlement covers inference cost.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#model-normalize">model_normalize</a></div>
+  </div>
+
+  <div class="node" id="prov-codex-oauth">
+    <header><span class="id">Codex OAuth (ChatGPT backend)</span><span class="type t-model">provider</span></header>
+    <p>Pi-harness primary. <code>chatgpt.com/backend-api/codex</code> via ChatGPT session — entitlement-funded rather than API-billed. Not a supported surface; returns empty <code>response.output</code> in bursts. Covered by the Gemma self-heal.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#prov-gemma">Gemma fallback</a><a class="chip" href="#harness-self-heal">self-heal</a></div>
+  </div>
+
+  <div class="node" id="prov-gemma">
+    <header><span class="id">Gemma-4 @ :8080</span><span class="type t-model">provider</span></header>
+    <p>Pi-harness fallback. <code>gemma-4-e4b-it-Q4_K_M.gguf</code> on <code>llama-server</code> at <code>127.0.0.1:8080</code>. OpenAI-compatible chat-completions endpoint. Always up; covers Codex upstream blips.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-self-heal">self-heal</a></div>
+  </div>
+
+  <div class="node" id="smart-routing">
+    <header><span class="id">smart routing (cheap_model)</span><span class="type t-concept">routing</span></header>
+    <p>Config toggle in <code>config.yaml</code>. Lets Hermes route low-stakes turns to a cheap model (Gemma on the Pi harness) while keeping the primary model for harder work. One knob, two models.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-config">config.yaml</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="toolsets">Built-in toolsets</h2>
+<div class="node-grid">
+
+  <div class="node" id="ts-web-search">
+    <header><span class="id">web search</span><span class="type t-toolset">toolset</span></header>
+    <p>Search providers: Firecrawl, Exa, Tavily. Config-selectable per install.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#tool-providers">tool providers</a></div>
+  </div>
+
+  <div class="node" id="ts-browser">
+    <header><span class="id">browser automation</span><span class="type t-toolset">toolset</span></header>
+    <p>Playwright-backed browser sessions. Inactivity timeout 120s in the config reference. Browserbase as an external option.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#terminal-backends">terminal backends</a></div>
+  </div>
+
+  <div class="node" id="ts-file-ops">
+    <header><span class="id">file ops</span><span class="type t-toolset">toolset</span></header>
+    <p>Read / write / patch files in the active working directory. Gated by the session's cwd + the permission model.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#security">security</a></div>
+  </div>
+
+  <div class="node" id="ts-code-exec">
+    <header><span class="id">code execution</span><span class="type t-toolset">toolset</span></header>
+    <p>Runs code through the chosen <em>terminal backend</em> — local shell, Docker, SSH, Modal, Daytona, Singularity.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#terminal-backends">terminal backends</a></div>
+  </div>
+
+  <div class="node" id="ts-vision">
+    <header><span class="id">vision / image</span><span class="type t-toolset">toolset</span></header>
+    <p>Image understanding + generation. FAL.ai common for image gen; vision inputs piped through the provider's multimodal path.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#tool-providers">tool providers</a></div>
+  </div>
+
+  <div class="node" id="ts-tts-stt">
+    <header><span class="id">TTS / STT</span><span class="type t-toolset">toolset</span></header>
+    <p>Voice out (ElevenLabs class) + voice in (Whisper class). Pairs with the iOS Pi harness voice input node.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#platforms">platforms</a></div>
+  </div>
+
+  <div class="node" id="ts-planner">
+    <header><span class="id">planner</span><span class="type t-toolset">toolset</span></header>
+    <p>Decomposes a task into subtasks; calls other toolsets in sequence. Explicit planner toolset rather than emergent behaviour.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#agent-core">agent core</a></div>
+  </div>
+
+  <div class="node" id="ts-cron">
+    <header><span class="id">cron</span><span class="type t-toolset">toolset</span></header>
+    <p>Schedule recurring agent runs. Standard cron expressions plus per-run cost caps + pause/resume control.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#cron-scheduler">cron scheduler</a></div>
+  </div>
+
+  <div class="node" id="ts-home-assist">
+    <header><span class="id">home assistant</span><span class="type t-toolset">toolset</span></header>
+    <p>Bridge to Home Assistant for physical-world automations. Entity discovery + service calls from chat.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#platforms">platforms</a></div>
+  </div>
+
+  <div class="node" id="terminal-backends">
+    <header><span class="id">terminal backends</span><span class="type t-toolset">family</span></header>
+    <p>Where code execution runs: <em>local</em>, <em>Docker</em>, <em>SSH</em>, <em>Modal</em>, <em>Daytona</em>, <em>Singularity (HPC)</em>. Configurable per session. Pi harness uses <code>local</code> with a 180s per-call timeout.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#ts-code-exec">code execution</a></div>
+  </div>
+
+  <div class="node" id="tool-providers">
+    <header><span class="id">external tool providers</span><span class="type t-toolset">externals</span></header>
+    <p>Firecrawl · Exa · Tavily · Browserbase · FAL.ai · ElevenLabs · Home Assistant. API keys held in <code>.env</code>; consumed by the matching toolset.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#file-env">~/.hermes/.env</a></div>
+  </div>
+
+  <div class="node" id="cron-scheduler">
+    <header><span class="id">cron scheduler</span><span class="type t-core">service</span></header>
+    <p><code>0 9 * * *</code>-style expressions stored in <code>~/.hermes/cron/</code>. Per-run cost cap + pause/resume. Triggers flow back through the agent core like any other message.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#ts-cron">cron toolset</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="mcp">MCP (Model Context Protocol)</h2>
+<div class="node-grid">
+
+  <div class="node" id="mcp-server">
+    <header><span class="id">MCP server (external)</span><span class="type t-toolset">server</span></header>
+    <p>External tools plugged in via the open MCP standard. Three transports supported: <em>stdio</em>, <em>HTTP</em>, and <em>OAuth 2.1</em>. Any MCP server that works with Claude Code works with Hermes.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#mcp-transports">transports</a><a class="chip" href="#mcp-configuration">mcp config</a></div>
+  </div>
+
+  <div class="node" id="mcp-transports">
+    <header><span class="id">MCP transports</span><span class="type t-toolset">transport</span></header>
+    <p>stdio (local subprocess), HTTP (hosted), OAuth 2.1 (hosted with user auth). Pi harness uses stdio for <code>filesystem</code> and OAuth-bridged HTTP via <code>mcp-remote</code> for <code>gtm</code>.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-mcp-fs">mcp-filesystem</a><a class="chip" href="#harness-mcp-gtm">mcp-gtm</a></div>
+  </div>
+
+  <div class="node" id="mcp-configuration">
+    <header><span class="id">mcp_servers config</span><span class="type t-toolset">config</span></header>
+    <p><code>mcp_servers:</code> block in <code>config.yaml</code>. Each entry names a server, its transport command, and description. Gateway starts the subprocess on boot.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-config">config.yaml</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="skills">Skills</h2>
+<div class="node-grid">
+
+  <div class="node" id="skills-hub">
+    <header><span class="id">skills hub</span><span class="type t-skill">registry</span></header>
+    <p>Four-tier library: <em>Official</em>, <em>Trusted</em>, <em>Community</em>, <em>Custom</em>. Skills are lazy — only attached when matched. Stored under <code>~/.hermes/skills/</code>.</p>
+    <div class="links"><span class="lbl">→</span><a class="chip" href="#skills-guard">skills_guard</a></div>
+  </div>
+
+  <div class="node" id="skills-guard">
+    <header><span class="id">skills_guard</span><span class="type t-skill">gate</span></header>
+    <p>Security pipeline for skills: <em>static scan → quarantine → policy check → user confirm → deploy</em>. Custom taps hook into each phase.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#skills-hub">skills hub</a></div>
+  </div>
+
+  <div class="node" id="skill-lifecycle">
+    <header><span class="id">skill lifecycle</span><span class="type t-skill">flow</span></header>
+    <p>Author → scan → test → publish → pin. Community skills land in quarantine first; promote after policy check + confirmation.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#skills-guard">skills_guard</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="platforms">Platforms (message surfaces)</h2>
+<div class="node-grid">
+
+  <div class="node" id="plat-telegram">
+    <header><span class="id">Telegram</span><span class="type t-platform">platform</span></header>
+    <p>Bot API adapter. DMs + groups. Primary mobile surface for many installs.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#gateway-service">Gateway</a></div>
+  </div>
+
+  <div class="node" id="plat-slack">
+    <header><span class="id">Slack</span><span class="type t-platform">platform</span></header>
+    <p>Socket-mode. Pi harness runs <em>claude_code_slack</em> as the Slack handle on a Blue Highlighted Text workspace.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-gateway">harness gateway</a></div>
+  </div>
+
+  <div class="node" id="plat-discord">
+    <header><span class="id">Discord</span><span class="type t-platform">platform</span></header>
+    <p>Bot-gateway. Native support in the platform family; shares channel-routing semantics with Slack.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#gateway-service">Gateway</a></div>
+  </div>
+
+  <div class="node" id="plat-other">
+    <header><span class="id">WhatsApp · Signal · Matrix · SMS · TUI · voice</span><span class="type t-platform">platform</span></header>
+    <p>Supported surfaces sharing the one-internal-protocol design. Voice channels pair with STT/TTS toolsets.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#ts-tts-stt">TTS/STT</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="storage">~/.hermes/ storage</h2>
+<div class="node-grid">
+
+  <div class="node" id="file-env">
+    <header><span class="id">~/.hermes/.env</span><span class="type t-storage">file</span></header>
+    <p>Secrets. API keys for every provider + external tool. Backed up separately from <code>config.yaml</code> for safety.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#tool-providers">tool providers</a></div>
+  </div>
+
+  <div class="node" id="file-config">
+    <header><span class="id">~/.hermes/config.yaml</span><span class="type t-storage">file</span></header>
+    <p>Runtime config — <code>model.*</code>, <code>smart_routing</code>, <code>mcp_servers</code>, <code>platform_toolsets</code>, compression, memory, session_reset, delegation. See Pi harness block for the concrete shape.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-config">harness config</a></div>
+  </div>
+
+  <div class="node" id="file-soul">
+    <header><span class="id">~/.hermes/SOUL.md</span><span class="type t-storage">file</span></header>
+    <p>Persona + style guide read on every turn. Sibling to OpenClaw's <code>SOUL.md</code>; shared convention across the two projects.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://openclaw-wiki.pages.dev/#soul-md">openclaw SOUL.md</a></div>
+  </div>
+
+  <div class="node" id="state-db">
+    <header><span class="id">state.db (SQLite FTS5)</span><span class="type t-storage">store</span></header>
+    <p>Session history + token usage + semantic index. SQLite with FTS5 for full-text recall. Ground truth for what "happened" in any session.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#memory-system">memory system</a></div>
+  </div>
+
+  <div class="node" id="memory-system">
+    <header><span class="id">memory system</span><span class="type t-storage">system</span></header>
+    <p>Honcho (dialectic memory) + optional Mem0. Distinct from state.db — memories are distilled facts; state.db is raw history. Memory limits per user: 2200-char memory, 1375-char profile on the Pi harness.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#state-db">state.db</a></div>
+  </div>
+
+  <div class="node" id="dir-skills">
+    <header><span class="id">~/.hermes/skills/</span><span class="type t-storage">dir</span></header>
+    <p>Installed skill bundles. Each skill is a folder with its own <code>SKILL.md</code>. Skills hub manages the registry; this directory holds the bytes.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#skills-hub">skills hub</a></div>
+  </div>
+
+  <div class="node" id="dir-sessions">
+    <header><span class="id">~/.hermes/sessions/</span><span class="type t-storage">dir</span></header>
+    <p>Per-session working state. Paired with <code>state.db</code> for durability; survives Gateway restarts.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#state-db">state.db</a></div>
+  </div>
+
+  <div class="node" id="dir-logs">
+    <header><span class="id">~/.hermes/logs/</span><span class="type t-storage">dir</span></header>
+    <p>Gateway + agent logs. Pi harness splits into <code>gateway.log</code>, <code>gateway.error.log</code>, and <code>errors.log</code> — the last is what you tail during self-heal debugging.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-self-heal">self-heal</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="harness">Pi Harness (claws-mac-mini deployment)</h2>
+<div class="node-grid">
+
+  <div class="node" id="harness-host">
+    <header><span class="id">claws-mac-mini</span><span class="type t-harness">host</span></header>
+    <p>Apple-silicon Mac mini. Tailscale IP <code>100.82.244.127</code>. OS Darwin 25.2.0 arm64. User <code>claw</code>. Python 3.11 venv under <code>~/.hermes/hermes-agent/venv</code>.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-launchd">launchd</a></div>
+  </div>
+
+  <div class="node" id="harness-launchd">
+    <header><span class="id">launchd — ai.hermes.gateway</span><span class="type t-harness">service</span></header>
+    <p>LaunchAgent at <code>~/Library/LaunchAgents/ai.hermes.gateway.plist</code>. <code>LimitLoadToSessionType=Aqua</code> — gateway needs a logged-in desktop session. Restart: <code>launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway</code>.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-host">host</a><a class="chip" href="#cmd-kickstart">kickstart</a></div>
+  </div>
+
+  <div class="node" id="harness-gateway">
+    <header><span class="id">hermes gateway (Pi harness)</span><span class="type t-harness">process</span></header>
+    <p><code>python -m hermes_cli.main gateway run --replace</code>. One process; binds the Slack Socket Mode app, loads MCP servers, opens the session store, starts a 60s cron ticker.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-launchd">launchd</a><a class="chip" href="#plat-slack">Slack</a></div>
+  </div>
+
+  <div class="node" id="harness-config">
+    <header><span class="id">~/.hermes/config.yaml (Pi harness)</span><span class="type t-harness">config</span></header>
+    <p>Primary model <code>openai-codex / gpt-5.4</code>; smart_routing cheap_model <code>gemma-4-e4b-it-Q4_K_M.gguf</code>; compression summary model <code>google/gemini-3-flash-preview</code>; session_reset daily at 04:00 local; mcp_servers <code>filesystem</code> + remote <code>gtm</code> via Stape; <code>platform_toolsets.slack = [hermes-slack, filesystem]</code>.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#prov-codex-oauth">Codex OAuth</a><a class="chip" href="#prov-gemma">Gemma</a><a class="chip" href="#harness-mcp-fs">mcp-fs</a><a class="chip" href="#harness-mcp-gtm">mcp-gtm</a></div>
+  </div>
+
+  <div class="node" id="harness-self-heal">
+    <header><span class="id">self-heal (run_agent.py patches)</span><span class="type t-harness">patch</span></header>
+    <p>Two-patch ramp on top of upstream. Patch 1: content flattener — folds Codex's list-of-parts input into plain text so Gemma's <code>/v1/chat/completions</code> accepts it. Patch 2: sliding-window trim, tool-call token stripper, retry with <code>[system, last_user, last_assistant]</code> minimal envelope, graceful final message so Slack never shows "Max retries exceeded".</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#prov-codex-oauth">Codex</a><a class="chip" href="#prov-gemma">Gemma</a><a class="chip" href="#harness-backup">backups</a></div>
+  </div>
+
+  <div class="node" id="harness-mcp-fs">
+    <header><span class="id">MCP · filesystem</span><span class="type t-harness">mcp</span></header>
+    <p><code>npx -y @modelcontextprotocol/server-filesystem ~/.hermes/hermes-agent</code>. Rooted at the Hermes repo — agent can read/write anywhere under its own install.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#mcp-transports">stdio</a></div>
+  </div>
+
+  <div class="node" id="harness-mcp-gtm">
+    <header><span class="id">MCP · gtm (remote)</span><span class="type t-harness">mcp</span></header>
+    <p><code>npx -y mcp-remote https://gtm-mcp.stape.ai/mcp</code>. OAuth-bridged Google Tag Manager MCP. Lets the harness read + mutate GTM container state — the bridge between Hermes and the autoresearch loop.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#mcp-transports">OAuth 2.1</a></div>
+  </div>
+
+  <div class="node" id="harness-shell-tools">
+    <header><span class="id">shell tool surface</span><span class="type t-harness">tools</span></header>
+    <p>Installed on the Mac mini's PATH for the gateway to reach: <code>gh</code> (GitHub CLI) · <code>gitingest</code> (repo → LLM-friendly digest) · <code>repo-digest</code> (wrapper that glues both into one call). Auth via <code>GITHUB_TOKEN</code> in the plist env.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-gateway">gateway</a></div>
+  </div>
+
+  <div class="node" id="harness-backup">
+    <header><span class="id">backup discipline</span><span class="type t-harness">convention</span></header>
+    <p>Every edit to <code>config.yaml</code> or <code>run_agent.py</code> creates a timestamped backup — e.g. <code>run_agent.py.bak-2026-04-18-155055</code>. Enables deterministic rollback after a bad patch.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-self-heal">self-heal</a></div>
+  </div>
+
+  <div class="node" id="harness-runbook">
+    <header><span class="id">ops runbook</span><span class="type t-harness">runbook</span></header>
+    <p>Tail: <code>tail -f ~/.hermes/logs/errors.log</code>. Status: <code>launchctl list ai.hermes.gateway</code>. Restart: <code>launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway</code>. Verify Gemma: <code>curl http://localhost:8080/v1/models</code>.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-launchd">launchd</a><a class="chip" href="#cmd-kickstart">kickstart</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="commands">Commands</h2>
+<div class="node-grid">
+
+  <div class="node" id="cmd-install-sh">
+    <header><span class="id">install.sh</span><span class="type t-command">cmd</span></header>
+    <p><code>curl -fsSL https://…/install.sh | bash</code>. One-line install creates the Python venv under <code>~/.hermes</code>, installs <code>hermes-agent</code>, sets up the config dir, adds the <code>hermes</code> binary to PATH.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#file-env">~/.hermes</a></div>
+  </div>
+
+  <div class="node" id="cmd-run">
+    <header><span class="id">hermes run</span><span class="type t-command">cmd</span></header>
+    <p>Interactive session in the TUI. Good for quick work + debugging the install. <code>hermes gateway run</code> starts the always-on service instead.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#hermes-cli">hermes CLI</a></div>
+  </div>
+
+  <div class="node" id="cmd-doctor">
+    <header><span class="id">hermes doctor</span><span class="type t-command">cmd</span></header>
+    <p>Diagnoses the install. Checks Python venv, config, provider auth, MCP subprocesses, session store.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#hermes-cli">hermes CLI</a></div>
+  </div>
+
+  <div class="node" id="cmd-slash">
+    <header><span class="id">/compact · /new · /think · /memory · /skill</span><span class="type t-command">slash</span></header>
+    <p>In-chat slash commands. <code>/compact</code> tightens context; <code>/new</code> resets the session; <code>/think</code> toggles thinking depth; <code>/memory</code> inspects memories; <code>/skill</code> previews skill state.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#agent-core">agent core</a></div>
+  </div>
+
+  <div class="node" id="cmd-kickstart">
+    <header><span class="id">launchctl kickstart -k …</span><span class="type t-command">cmd</span></header>
+    <p>Pi harness gateway restart. <code>launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway</code>. The <code>-k</code> kills the current process first so the reload is immediate.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-launchd">launchd</a></div>
+  </div>
+
+  <div class="node" id="cmd-repo-digest">
+    <header><span class="id">repo-digest owner/name</span><span class="type t-command">cmd</span></header>
+    <p>Pi-harness wrapper around <code>gh</code> + <code>gitingest</code>. One-shot repo → digest path + metadata. Installed at <code>~/bin/repo-digest</code>, on the gateway's PATH.</p>
+    <div class="links"><span class="lbl">↔</span><a class="chip" href="#harness-shell-tools">shell tools</a></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<h2 id="guides">Related guides</h2>
+<div class="node-grid">
+
+  <div class="node" id="guide-hermes-agent">
+    <header><span class="id">hermes-agent-guide</span><span class="type t-guide">guide</span></header>
+    <p>Upstream prose guide for Hermes Agent. Tabs: Overview · Install · CLI · Skills · MCP · Models · Platforms · Architecture · Glossary + FAQ. Source of truth for generic Hermes phrasing.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://hermes-agent-guide.pages.dev/">hermes-agent-guide.pages.dev</a></div>
+  </div>
+
+  <div class="node" id="guide-pi-harness">
+    <header><span class="id">hermes-pi-harness-guide</span><span class="type t-guide">guide</span></header>
+    <p>Deployment-specific guide for the Pi harness on <code>claws-mac-mini</code>. Runbook, self-heal patch history, backup discipline, shell tool surface, model stack.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://hermes-pi-harness-guide.pages.dev/">hermes-pi-harness-guide.pages.dev</a></div>
+  </div>
+
+  <div class="node" id="guide-openclaw">
+    <header><span class="id">openclaw-wiki / openclaw-education</span><span class="type t-guide">guide</span></header>
+    <p>Sibling personal-AI control plane. Shares conceptual shape (gateway · channels · skills · agents) but uses a different runtime. OpenClaw is a node/npm-delivered daemon; Hermes is a Python package.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://openclaw-wiki.pages.dev/">openclaw-wiki</a></div>
+  </div>
+
+  <div class="node" id="guide-duraclaw">
+    <header><span class="id">duraclaw-wiki</span><span class="type t-guide">guide</span></header>
+    <p>Cloudflare-edge session orchestrator for Claude Code. Complementary to the Pi harness — same "host the coding agent somewhere reliable" problem, different substrate.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://duraclaw-wiki.pages.dev/">duraclaw-wiki</a></div>
+  </div>
+
+  <div class="node" id="guide-autoagent">
+    <header><span class="id">autoagent-autoresearch-wiki</span><span class="type t-guide">guide</span></header>
+    <p>Hill-climb loop used with Hermes on the Pi harness to drive autoresearch. The gtm MCP server is the bridge; the escalation policy (Sonnet → Opus 4.6 @ 0.92) is the shared model-routing convention.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://autoagent-autoresearch-wiki.pages.dev/">autoagent-autoresearch-wiki</a></div>
+  </div>
+
+  <div class="node" id="guide-autoresearch-linear">
+    <header><span class="id">autoresearch-linear</span><span class="type t-guide">guide</span></header>
+    <p>How AutoAgent + autoresearch loops file one Linear issue per run (scores in title, trajectory + winning config + audits in body). The natural tuning surface for any harness Hermes hosts — reopen an issue with the right label and the Worker triggers a re-run on <code>claws-mac-mini</code>.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/autoresearch-linear/">guide.organizedai.vip/autoresearch-linear</a></div>
+  </div>
+
+  <div class="node" id="guide-pi-agent">
+    <header><span class="id">pi-agent (Pi Mono)</span><span class="type t-guide">guide</span></header>
+    <p><strong>Distinct from this wiki's &ldquo;Pi Harness&rdquo;.</strong> Mario Zechner's <code>pi-agent-core</code> TypeScript toolkit for scaffolding minimal agent harnesses. The natural &ldquo;build&rdquo; side of the loop: scaffold a harness with Pi Mono, host it via Hermes (this deployment), tune it via AutoAgent's Linear loops.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/pi-agent/">guide.organizedai.vip/pi-agent</a></div>
+  </div>
+
+  <div class="node" id="guide-harness">
+    <header><span class="id">harness-engineering</span><span class="type t-harness">harness</span></header>
+    <p>Umbrella discipline that replaced prompt engineering: anatomy, layers, patterns, notable systems. Hermes (and this Pi Harness deployment) sit in the &ldquo;long-running gateway + agent core + tool/skill surface&rdquo; pattern slot.</p>
+    <div class="links"><span class="lbl">↗</span><a class="chip ext" href="https://guide.organizedai.vip/harness/">guide.organizedai.vip/harness</a> <a class="chip ext" href="https://wiki.organizedai.vip/harness/">wiki.organizedai.vip/harness</a></div>
+  </div>
+
+</div>
+
+<footer>
+  source: <a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a> · <a href="https://hermes-agent-guide.pages.dev/">hermes-agent-guide</a> · <a href="https://hermes-pi-harness-guide.pages.dev/">hermes-pi-harness-guide</a>
+  · loop: <a href="https://guide.organizedai.vip/pi-agent/">pi-agent</a> · <a href="https://guide.organizedai.vip/autoresearch-linear/">autoresearch-linear</a> · <a href="https://wiki.organizedai.vip/harness/">harness</a>
+  · companion: <a href="https://openclaw-wiki.pages.dev/">openclaw-wiki</a>
+  · index: <a href="https://organized-ai-hub.pages.dev/#wikis">organized-ai-hub # wikis</a>
+</footer>
+
+</body>
+</html>
