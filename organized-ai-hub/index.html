@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORGANIZED AI — Index of Everything Deployed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0c0b09;
+  --bg-secondary: #141210;
+  --bg-card: #1a1814;
+  --bg-card-hover: #211e18;
+  --border: #2a2520;
+  --border-hover: #3a3428;
+  --gold: #F5D623;
+  --gold-dim: #8B7A12;
+  --gold-bright: #FFE94A;
+  --gold-glow: rgba(245, 214, 35, 0.06);
+  --gold-glow-strong: rgba(245, 214, 35, 0.12);
+  --rust: #C4943D;
+  --metal: #8a8a8a;
+  --text-primary: #f0ece4;
+  --text-secondary: #a09888;
+  --text-muted: #605848;
+  --dead: #7a4a3a;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --max-width: 1100px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-decoration: none; font-family: var(--font-mono); font-size: 0.9em; transition: color 0.2s; }
+a:hover { color: var(--gold-bright); }
+::selection { background: var(--gold-dim); color: var(--text-primary); }
+
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; }
+section { padding: 5rem 0; }
+.section-border { border-top: 1px solid var(--border); }
+
+/* ========== NAV ========== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(12, 11, 9, 0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+nav .container { display: flex; justify-content: space-between; align-items: center; }
+.nav-logo {
+  font-family: var(--font-mono); font-weight: 800; font-size: 0.85rem;
+  color: var(--text-primary); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-secondary); }
+.nav-links a.active { color: var(--gold); }
+
+/* ========== HERO ========== */
+.hero {
+  margin-top: 60px;
+  padding: 5rem 0 3rem;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--gold);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--gold-dim); padding: 0.35rem 0.85rem;
+  margin-bottom: 2rem;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; background: var(--gold);
+  border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hero h1 {
+  font-family: var(--font-mono); font-weight: 800;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  color: var(--text-primary); line-height: 1.15;
+  margin-bottom: 1.5rem; letter-spacing: -0.01em;
+}
+.hero h1 em { font-style: normal; color: var(--gold); }
+.hero .tagline {
+  font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2.5rem;
+  line-height: 1.7; max-width: 640px;
+}
+
+/* ========== STATS ========== */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+.stat {
+  text-align: center; padding: 2rem 0.5rem;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat .value {
+  font-family: var(--font-mono); font-size: 1.85rem; font-weight: 800;
+  color: var(--gold); display: block; line-height: 1;
+}
+.stat .label {
+  font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.5rem;
+}
+@media (max-width: 768px) { .stats-bar { grid-template-columns: repeat(3, 1fr); } }
+
+/* ========== SECTION HEADERS ========== */
+.section-header { margin-bottom: 2.5rem; }
+.section-header h2 {
+  font-family: var(--font-mono); font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+.section-header .count {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold-dim);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.section-header p { font-size: 0.95rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+/* ========== CARD GRID ========== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  transition: border-color 0.25s, background 0.25s, transform 0.15s;
+  display: flex; flex-direction: column;
+  min-height: 150px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+.card:hover {
+  border-color: var(--gold-dim);
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+.card .tier-label {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  color: var(--gold-dim); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.card:hover .tier-label { color: var(--gold); }
+.card h3 {
+  font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700;
+  color: var(--text-primary); line-height: 1.35; margin-bottom: 0.75rem;
+  letter-spacing: -0.005em;
+}
+.card .card-footer {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+.card .domain { color: var(--gold); text-transform: lowercase; }
+.card:hover .domain { color: var(--gold-bright); }
+.card .age { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Dead cards */
+.card.dead { border-style: dashed; border-color: var(--dead); opacity: 0.5; }
+.card.dead:hover { border-color: var(--rust); background: var(--bg-card); transform: none; opacity: 0.7; }
+.card.dead .tier-label { color: var(--dead); }
+.card.dead:hover .tier-label { color: var(--rust); }
+.card.dead h3 { color: var(--text-muted); }
+.card .status-dead {
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--rust);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+
+/* Highlighted card — the current hub itself or featured */
+.card.highlighted {
+  border-color: var(--gold-dim);
+  background: var(--gold-glow);
+  box-shadow: 0 0 40px rgba(245, 214, 35, 0.03);
+}
+.card.highlighted .tier-label { color: var(--gold); }
+
+/* ========== FOOTER ========== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 0; margin-top: 4rem;
+  text-align: center;
+}
+footer .container {
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+footer code {
+  font-family: var(--font-mono); color: var(--gold-dim);
+  background: var(--bg-card); padding: 0.15rem 0.45rem; border: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-right: 1px solid var(--border); }
+  .stat:nth-child(2n) { border-right: none; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="nav-logo">ORGANIZED <span>AI</span> <span style="color: var(--text-muted); font-weight: 400;">· hub</span></div>
+    <ul class="nav-links">
+      <li><a href="#guides">Guides</a></li>
+      <li><a href="#wikis">LLM Wikis</a></li>
+      <li><a href="#arch">Architecture</a></li>
+      <li><a href="#apps">Apps</a></li>
+      <li><a href="#brand">Brand</a></li>
+      <li><a href="#talks">Talks</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Index · 65 Deployments</div>
+    <h1>Every Organized AI <em>page,</em> in one place.</h1>
+    <p class="tagline">
+      Every guide, architecture doc, app, and landing page deployed to Cloudflare Workers Assets under organizedai.vip — grouped by kind, sorted by recency. Each card links straight to the live deployment. The source of truth is always <code style="color: var(--gold-dim); font-family: var(--font-mono); font-size: 0.82em;">wrangler pages project list</code>.
+    </p>
+
+  </div>
+</section>
+
+<section id="guides" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>Guides</h2>
+      <span class="count">29 · how-to &amp; reference docs</span>
+      <p>Step-by-step walkthroughs — project setup, pipelines, agent harnesses. LLM-loadable knowledge bases live in their own section below.</p>
+    </div>
+
+    <div class="grid">
+
+
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/stripe-agentic-commerce/">
+        <div class="tier-label">Operator Guide · new</div>
+        <h3>Stripe Agentic Commerce — Operator Guide</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/stripe-agentic-commerce</span><span class="age">just now</span></div>
+      </a>
+      <a class="card highlighted" href="https://guide.organizedai.vip/ai-essentials/">
+        <div class="tier-label">Beginner Guide · new</div>
+        <h3>AI Engineer Essentials — 14 production-AI concepts (tokenization · embeddings · vector DB · RAG · context window · KV cache · fine-tuning · LoRA · quantization · function calling · prompt chaining · hallucination · guardrails · evals)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/ai-essentials</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/symphony/">
+        <div class="tier-label">Operator Guide · new</div>
+        <h3>OpenAI Symphony — orchestrate Codex per Linear issue (per-issue workspaces · WORKFLOW.md · ACP composition · BLU team integration)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/symphony</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/codex-plugin-cc/">
+        <div class="tier-label">Plugin Guide · new</div>
+        <h3>Codex Plugin for Claude Code — /codex:review · /codex:rescue · review gate · ACP-driving Symphony · Linear integration</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/codex-plugin-cc</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/autoresearch-linear/">
+        <div class="tier-label">Pipeline Guide · new</div>
+        <h3>Autoresearch → Linear — gtm-autoresearch loop posts run results to Linear (poster module · GitHub linking · linear-worker)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/autoresearch-linear</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/harness/">
+        <div class="tier-label">Discipline Guide · new · cyan</div>
+        <h3>Harness Engineering — the discipline that replaced prompt engineering (anatomy · layers · patterns · notable systems)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/harness</span><span class="age">just now</span></div>
+      </a>
+      <a class="card highlighted" href="https://guide.organizedai.vip/openclaw-gateway/">
+        <div class="tier-label">System Guide · new · openclaw red+yellow</div>
+        <h3>OpenClaw Gateway — HICAM workshop · BYOK→Codex→Stripe phases · 3 post-training paths</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/openclaw-gateway</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/organized-gateway/">
+        <div class="tier-label">Worker Guide · new · organized ai</div>
+        <h3>organized-gateway — Worker-focused (Hono · KV · D1 · Tailscale proxy)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/organized-gateway</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/wrangler/">
+        <div class="tier-label">Cloud Guide · emerald</div>
+        <h3>Wrangler CLI — Workers · Pages · Queues · Dynamic Workers · Tunnel</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/wrangler</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/mlx/">
+        <div class="tier-label">ML Guide · new · rose</div>
+        <h3>MLX — Apple Silicon ML framework with Gemma 3 4B walkthrough</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/mlx</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/acp/">
+        <div class="tier-label">Protocol Guide · violet</div>
+        <h3>ACP — Agent Client Protocol guide with acpx (LSP-for-coding-agents)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/acp</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/claude-code/">
+        <div class="tier-label">Agent Guide</div>
+        <h3>Claude Code — Operator Guide (CLI · slash commands · hooks · skills · MCP · subagents · settings)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/claude-code</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/codex/">
+        <div class="tier-label">Agent Guide · new</div>
+        <h3>Codex — Operator Guide (CLI · ChatGPT · Cloud · auth · tools · config · models · vs Claude Code)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/codex</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/claude-desktop/">
+        <div class="tier-label">Desktop Guide · new</div>
+        <h3>Claude Desktop — Operator Guide (install · artifacts · projects · MCP · tools · files · settings · compare)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/claude-desktop</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/matchbox/">
+        <div class="tier-label">Product · new</div>
+        <h3>MatchBox — founder/VC matching engine (Forbes-first · Crowley Capital seed node)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/matchbox</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/clawbox/">
+        <div class="tier-label">Desktop Client</div>
+        <h3>ClawBox — Tauri desktop client for the OpenClaw Gateway (component of organized-market)</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/clawbox</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/nvme-upgrade/">
+        <div class="tier-label">Hardware Runbook</div>
+        <h3>NVMe Upgrade — TB4 + 2 TB on claw for the clip pipeline</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/nvme-upgrade</span><span class="age">15h ago</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://guide.organizedai.vip/posthog-autoresearch/">
+        <div class="tier-label">Analytics Guide</div>
+        <h3>PostHog × AutoResearch — queries, logs, evals, traces for agent loops</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/posthog-autoresearch</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/portrait-captions/">
+        <div class="tier-label">Pipeline Guide</div>
+        <h3>PortraitCaptions — podcast sources → vertical foreign-film clips → Drive</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/portrait-captions</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/gtm-autoresearch/">
+        <div class="tier-label">GTM Guide</div>
+        <h3>GTM AutoResearch — Guide</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/gtm-autoresearch</span><span class="age">4d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/gtm-autoresearch-docs/">
+        <div class="tier-label">GTM Docs</div>
+        <h3>GTM AutoResearch — Fine-Tune Pipeline Docs</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/gtm-autoresearch-docs</span><span class="age">2d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/token-machine/">
+        <div class="tier-label">Infra Guide</div>
+        <h3>Token Machine — Autonomous Token Routing &amp; Cost Optimization</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/token-machine</span><span class="age">3d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/tailnet/">
+        <div class="tier-label">Network Guide</div>
+        <h3>Tailnet Guide · bluehighlightedtext.com</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/tailnet</span><span class="age">3d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/pi5-setup/">
+        <div class="tier-label">Hardware Guide</div>
+        <h3>Pi 5 Setup Guide · pi5-dev</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/pi5-setup</span><span class="age">4d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/hermes-agent/">
+        <div class="tier-label">Agent Guide</div>
+        <h3>Hermes Agent — Self-Improving AI Agent by Nous Research</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/hermes-agent</span><span class="age">4d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/duraclaw/">
+        <div class="tier-label">Orchestrator Guide</div>
+        <h3>Duraclaw — Claude Code Session Orchestrator</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/duraclaw</span><span class="age">6d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/pi-agent/">
+        <div class="tier-label">Agent Guide</div>
+        <h3>Pi Agent — Minimal Coding Agent &amp; LLM Toolkit</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/pi-agent</span><span class="age">6d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/openclaw-education/">
+        <div class="tier-label">Education</div>
+        <h3>OpenClaw Education — Docs</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/openclaw-education</span><span class="age">6d ago</span></div>
+      </a>
+
+      <a class="card" href="https://guide.organizedai.vip/organized-ai-docs/">
+        <div class="tier-label">Canonical Docs</div>
+        <h3>Organized AI — Docs</h3>
+        <div class="card-footer"><span class="domain">guide.organizedai.vip/organized-ai-docs</span><span class="age">1w ago</span></div>
+      </a>
+
+      <a class="card dead" href="https://guide.organizedai.vip/autoagent-autoresearch/">
+        <div class="tier-label">Guide · offline</div>
+        <h3>AutoAgent AutoResearch Guide</h3>
+        <div class="card-footer"><span class="status-dead">Deployment Not Found</span><span class="age">1h ago</span></div>
+      </a>
+
+      <a class="card dead" href="https://guide.organizedai.vip/hermes-pi-harness/">
+        <div class="tier-label">Guide · offline</div>
+        <h3>Hermes Pi Harness Guide</h3>
+        <div class="card-footer"><span class="status-dead">Deployment Not Found</span><span class="age">16h ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section id="wikis" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>LLM Wikis</h2>
+      <span class="count">22 · LLM-loadable knowledge graphs</span>
+      <p>Distilled project graphs — every concept has a stable <code style="font-family: var(--font-mono); font-size: 0.82em;">#id</code>, a type badge, and chips to what it depends on and what depends on it. Load one as context when an LLM needs to reason about a project without scanning the whole repo.</p>
+    </div>
+
+    <div class="grid">
+
+
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/stripe-agentic-commerce/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Stripe Agentic Commerce Wiki — LLM knowledge base for the Agentic Commerce Suite</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/stripe-agentic-commerce</span><span class="age">just now</span></div>
+      </a>
+      <a class="card highlighted" href="https://wiki.organizedai.vip/symphony/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Symphony Wiki — orchestrator knowledge graph (8 components · 6 layers · domain entities · WORKFLOW.md · Linear · Codex · BLU workspace)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/symphony</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/codex-plugin-cc/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Codex Plugin (CC) Wiki — slash commands · subagent · broker · hooks · skills · ACP · Linear · Symphony composition</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/codex-plugin-cc</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/autoresearch-linear/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Autoresearch Linear Wiki — pipeline knowledge graph (poster module · env · UUIDs · webhooks · linear-worker · BLU workspace)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/autoresearch-linear</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/harness/">
+        <div class="tier-label">Wiki · new · cyan</div>
+        <h3>Harness Engineering Wiki — LLM reference for agent harness design (anatomy · types · components · benchmarks · systems · patterns)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/harness</span><span class="age">just now</span></div>
+      </a>
+      <a class="card highlighted" href="https://wiki.organizedai.vip/openclaw-gateway/">
+        <div class="tier-label">System Wiki · new · openclaw red+yellow</div>
+        <h3>OpenClaw Gateway Wiki — system · phases · paths · ExoClaw bridge · OpenClaw + Hermes + NoClaw</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/openclaw-gateway</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/organized-gateway/">
+        <div class="tier-label">Worker Wiki · new · organized ai</div>
+        <h3>organized-gateway Wiki — Worker focus · bindings · routes · functions · D1 schema</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/organized-gateway</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/wrangler/">
+        <div class="tier-label">Wiki · emerald</div>
+        <h3>Wrangler Wiki — Cloudflare CLI knowledge graph (commands · resources · bindings · WFP · queues · tunnel)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/wrangler</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/mlx/">
+        <div class="tier-label">Wiki · new · rose</div>
+        <h3>MLX Wiki — Apple ML framework knowledge graph (mlx-lm · mlx-vlm · Gemma 3 · concepts)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/mlx</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/acp/">
+        <div class="tier-label">Wiki · violet</div>
+        <h3>ACP Wiki — Agent Client Protocol knowledge graph (actors · methods · types · RFDs · acpx)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/acp</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/claude-code/">
+        <div class="tier-label">Wiki</div>
+        <h3>Claude Code Wiki — Anthropic CLI knowledge graph (tools · slash · hooks · skills · MCP · subagents · memory)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/claude-code</span><span class="age">recent</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/codex/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Codex Wiki — OpenAI coding agent knowledge graph (CLI · ChatGPT · Cloud · auth · tools · config · models)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/codex</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/claude-desktop/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Claude Desktop Wiki — Anthropic desktop app knowledge graph (artifacts · projects · MCP · tools · files)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/claude-desktop</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/matchbox/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>MatchBox Wiki — founder/VC matching engine knowledge graph (Signal data model · stakeholders · routes)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/matchbox</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/hermes/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>Hermes Wiki — Hermes Agent (NousResearch) + Pi Harness deployment on claws-mac-mini</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/hermes</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://wiki.organizedai.vip/openclaw/">
+        <div class="tier-label">Wiki · new</div>
+        <h3>OpenClaw Wiki — personal AI assistant knowledge graph (gateway · channels · agents · skills · nodes · security)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/openclaw</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/clawbox/">
+        <div class="tier-label">Wiki</div>
+        <h3>ClawBox Wiki — desktop client knowledge graph (processes · views · routes · RPCs)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/clawbox</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/autoagent-autoresearch/">
+        <div class="tier-label">Wiki</div>
+        <h3>AutoAgent × Autoresearch Wiki — hill-climb loop (SEPL operators · RSPL entities · optimisers)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/autoagent-autoresearch</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/duraclaw/">
+        <div class="tier-label">Wiki</div>
+        <h3>Duraclaw Wiki — session orchestrator knowledge graph (DOs · packages · adapters · PRs)</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/duraclaw</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/clip-pipeline/">
+        <div class="tier-label">Wiki</div>
+        <h3>Clip Pipeline Wiki — portrait-captions + pipeline-viz knowledge graph</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/clip-pipeline</span><span class="age">1d ago</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/llm/">
+        <div class="tier-label">Pattern Ref</div>
+        <h3>LLM Wiki — Karpathy's Pattern &amp; Reference Implementation</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/llm</span><span class="age">1w ago</span></div>
+      </a>
+
+      <a class="card" href="https://wiki.organizedai.vip/pi-llm/">
+        <div class="tier-label">How-to</div>
+        <h3>Pi × LLM Wiki — Build a Self-Maintaining Knowledge Base</h3>
+        <div class="card-footer"><span class="domain">wiki.organizedai.vip/pi-llm</span><span class="age">1w ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section id="arch" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>Architecture &amp; Plans</h2>
+      <span class="count">11 · system diagrams &amp; build plans</span>
+      <p>The shape of things before they ship — component maps, data flows, and hardened plans.</p>
+    </div>
+
+    <div class="grid">
+
+
+      <a class="card highlighted" href="https://arch.organizedai.vip/stripe-agentic-commerce/">
+        <div class="tier-label">System Arch · new</div>
+        <h3>Stripe Agentic Commerce — System Architecture</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/stripe-agentic-commerce</span><span class="age">just now</span></div>
+      </a>
+      <a class="card highlighted" href="https://arch.organizedai.vip/openclaw-gateway-hybrid-v2/">
+        <div class="tier-label">System Arch · new · openclaw red+yellow</div>
+        <h3>OpenClaw Gateway — Hybrid Queue + DO Architecture (per-user Durable Objects · CF Queues · BYOK · prompt_logs · breakaway export)</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/openclaw-gateway-hybrid-v2</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://arch.organizedai.vip/openclaw-linear-mcp/">
+        <div class="tier-label">System Arch · new</div>
+        <h3>OpenClaw × Linear MCP — Mermaid pipeline diagram (assemble · model · execute · 3 injection points · 4 extension mechanisms)</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/openclaw-linear-mcp</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card highlighted" href="https://arch.organizedai.vip/autoresearch-linear/">
+        <div class="tier-label">Pipeline Arch · new</div>
+        <h3>Autoresearch → Linear — closed-loop diagram (poster · GitHub linking · webhook receiver · BLU team projects)</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/autoresearch-linear</span><span class="age">just now</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/organized-market/">
+        <div class="tier-label">System Arch</div>
+        <h3>OrganizedMarket — Predictive Market Intelligence</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/organized-market</span><span class="age">2d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/organizedmarket/">
+        <div class="tier-label">System Arch · alt</div>
+        <h3>OrganizedMarket Architecture (alt slug)</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/organizedmarket</span><span class="age">2d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/claudeflare/">
+        <div class="tier-label">Workers Arch</div>
+        <h3>ClaudeFlare — Ephemeral CF Workers + Auto-Docs</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/claudeflare</span><span class="age">3d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/claude-flair/">
+        <div class="tier-label">Workers Arch · alt</div>
+        <h3>Claude Flair — Ephemeral CF Workers + Auto-Docs</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/claude-flair</span><span class="age">3d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/map-leads/">
+        <div class="tier-label">Lead-gen Arch</div>
+        <h3>Map Leads — Autonomous B2B Lead Gen</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/map-leads</span><span class="age">4d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/map-leads-plan-v2/">
+        <div class="tier-label">Build Plan v2</div>
+        <h3>Map Leads — Build Plan v2 Hardened</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/map-leads-plan-v2</span><span class="age">4d ago</span></div>
+      </a>
+
+      <a class="card" href="https://arch.organizedai.vip/map-leads-plan-v1/">
+        <div class="tier-label">Build Plan v1</div>
+        <h3>Map Leads — Build Plan v1</h3>
+        <div class="card-footer"><span class="domain">arch.organizedai.vip/map-leads-plan-v1</span><span class="age">4d ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section id="apps" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>Products &amp; Apps</h2>
+      <span class="count">5 · live tools &amp; utilities</span>
+      <p>Running software, not docs — interactive apps, PWAs, and data audits.</p>
+    </div>
+
+    <div class="grid">
+
+      <a class="card" href="https://app.organizedai.vip/duraclaw/">
+        <div class="tier-label">Orchestrator</div>
+        <h3>Duraclaw — Claude Code Session Orchestrator (app)</h3>
+        <div class="card-footer"><span class="domain">app.organizedai.vip/duraclaw</span><span class="age">1w ago</span></div>
+      </a>
+
+      <a class="card" href="https://app.organizedai.vip/rttdata/">
+        <div class="tier-label">Data Tool</div>
+        <h3>rttdata — Real-Time Tracking Data</h3>
+        <div class="card-footer"><span class="domain">app.organizedai.vip/rttdata</span><span class="age">3mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://app.organizedai.vip/planner/">
+        <div class="tier-label">Planning App</div>
+        <h3>Planner — planner.organizedai.vip</h3>
+        <div class="card-footer"><span class="domain">app.organizedai.vip/planner</span><span class="age">4mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://weekly-planner-pwa.pages.dev/">
+        <div class="tier-label">PWA</div>
+        <h3>Weekly Planner PWA</h3>
+        <div class="card-footer"><span class="domain">weekly-planner-pwa.pages.dev</span><span class="age">4mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://app.organizedai.vip/bladeaudit/">
+        <div class="tier-label">Data Audit</div>
+        <h3>BLADE Data Audit — 2026-04-08</h3>
+        <div class="card-footer"><span class="domain">app.organizedai.vip/bladeaudit</span><span class="age">1w ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section id="brand" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>Brand &amp; Landing</h2>
+      <span class="count">7 · Organized AI public surface</span>
+      <p>The pages customers, sponsors, and collaborators land on.</p>
+    </div>
+
+    <div class="grid">
+
+      <a class="card highlighted" href="https://brand.organizedai.vip/organizedai/">
+        <div class="tier-label">Primary Site</div>
+        <h3>Organized AI — Managed AI Agent Infrastructure</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/organizedai</span><span class="age">3d ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/bht-enterprise-ai/">
+        <div class="tier-label">Enterprise</div>
+        <h3>BHT Enterprise AI — On-Site Training</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/bht-enterprise-ai</span><span class="age">2w ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/mspart2/">
+        <div class="tier-label">Microsite</div>
+        <h3>MS Part 2 — mspart2.organizedai.vip</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/mspart2</span><span class="age">5d ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/appliedai3/">
+        <div class="tier-label">Campaign</div>
+        <h3>Clawdbot Ready — Organized AI</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/appliedai3</span><span class="age">3w ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/christmas/">
+        <div class="tier-label">Seasonal</div>
+        <h3>Organized AI — Christmas</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/christmas</span><span class="age">4mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/sponsor/">
+        <div class="tier-label">Sponsorship</div>
+        <h3>AI TX — Sponsorship</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/sponsor</span><span class="age">4mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://brand.organizedai.vip/organized-ai-sponsor-vip/">
+        <div class="tier-label">Hackathon</div>
+        <h3>Organized AI Virtual Hackathon — Sponsor Partnership</h3>
+        <div class="card-footer"><span class="domain">brand.organizedai.vip/organized-ai-sponsor-vip</span><span class="age">4mo ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section id="talks" class="section-border">
+  <div class="container">
+    <div class="section-header">
+      <h2>Presentations</h2>
+      <span class="count">2 · decks &amp; live talks</span>
+      <p>Shipped slide decks — Slidev, standalone, archived.</p>
+    </div>
+
+    <div class="grid">
+
+      <a class="card" href="https://talk.organizedai.vip/sharon-presentation/">
+        <div class="tier-label">Slidev Deck</div>
+        <h3>Organized AI — Frameworks &amp; The Skills Revolution</h3>
+        <div class="card-footer"><span class="domain">talk.organizedai.vip/sharon-presentation</span><span class="age">2mo ago</span></div>
+      </a>
+
+      <a class="card" href="https://talk.organizedai.vip/sharon-slides/">
+        <div class="tier-label">AIAM Talk</div>
+        <h3>AIAM — Sharon Slides</h3>
+        <div class="card-footer"><span class="domain">talk.organizedai.vip/sharon-slides</span><span class="age">2mo ago</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    ORGANIZED AI · <a href="https://brand.organizedai.vip/organizedai/" style="color: var(--gold);">organizedai.vip</a> · served through Cloudflare Workers Assets · source of truth: <code>Workers Assets vanity router</code>
+  </div>
+</footer>
+
+</body>
+</html>

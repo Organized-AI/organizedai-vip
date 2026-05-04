@@ -1,0 +1,55 @@
+# Organized AI
+
+> Hub of guides, LLM-loadable wikis, and architecture pages for Organized AI projects — Claude Code, Codex, Symphony, Linear pipelines, and the AI engineering primitives that hold them together. All pages are crawl-friendly and structured for LLM context loading.
+
+## Beginner Guides
+
+- [AI Engineer Essentials](https://guide.organizedai.vip/ai-essentials/): The 14 production-AI concepts every AI engineer should understand — tokenization, embeddings, vector DBs, RAG, context windows, KV cache, fine-tuning, LoRA, quantization, function calling, prompt chaining, hallucination, guardrails, eval frameworks. Diagrams + analogies + use-cases.
+
+## Operator Guides
+
+
+- [Stripe Agentic Commerce — Operator Guide](https://guide.organizedai.vip/stripe-agentic-commerce/): Operator guide for Stripe's Agentic Commerce Suite — how businesses, agents, and developers integrate UCP, MPP, x402, Shared Payment Tokens, Stripe Radar, Link agent wallet, and Issuing for agents.
+- [Claude Code — Operator Guide](https://guide.organizedai.vip/claude-code/): Anthropic's terminal-native coding agent. CLI · slash commands · hooks · skills · MCP · subagents · settings · permissions · memory · source-level analysis (VILA-Lab Dive paper).
+- [OpenAI Symphony — Operator Guide](https://guide.organizedai.vip/symphony/): OpenAI's orchestrator that turns Linear issues into autonomous Codex runs. 8 components, 6 abstraction layers, WORKFLOW.md as policy contract, Codex via app-server / ACP, Linear adapter, Organized Codebase composition, codex-plugin-cc integration.
+- [Codex Plugin for Claude Code — Operator Guide](https://guide.organizedai.vip/codex-plugin-cc/): Use Codex from inside Claude Code. /codex:review, /codex:adversarial-review, /codex:rescue, /codex:status, /codex:result, /codex:cancel, /codex:setup. Broker + companion architecture, optional Stop-hook review gate, ACP-driven Symphony composition, Linear integration via skill + MCP.
+- [Autoresearch → Linear — Pipeline Guide](https://guide.organizedai.vip/autoresearch-linear/): How the gtm-autoresearch loop posts run results to Linear. Poster module (PR #3 in Organized-AI/gtm-autoresearch), GitHub linking, linear-worker webhook receiver, BLU team Autoresearch + AutoAgent projects.
+- [Agent Client Protocol (ACP) — Operator Guide](https://guide.organizedai.vip/acp/): JSON-RPC standard for editor↔agent communication. acpx headless CLI. Lifecycle, methods, transports, sessions, prompt turns, tools, permissions.
+- [AutoAgent × Autoresearch](https://guide.organizedai.vip/autoagent-autoresearch/): Hill-climb meta-agents that mutate code or external systems against a measurable objective. Karpathy-style autonomous loops.
+
+## LLM Wikis (knowledge graphs)
+
+
+- [Stripe Agentic Commerce Wiki — LLM knowledge base for the Agentic Commerce Suite](https://wiki.organizedai.vip/stripe-agentic-commerce/): Wiki for Stripe's Agentic Commerce Suite: nodes for the three roles (businesses, agents, developers), four protocols (UCP, MPP, x402, SPTs), Stripe products (Radar, Link, Issuing), and integration patterns.
+- [Claude Code Wiki](https://wiki.organizedai.vip/claude-code/): Concept graph for Claude Code. Stable #ids, type badges, dep chips. Includes source-level analysis section (98.4% / 1.6% split, 9-step turn pipeline, 7 permission modes, 4 extension mechanisms, 5-layer compaction).
+- [Symphony Wiki](https://wiki.organizedai.vip/symphony/): Symphony orchestrator knowledge graph. 8 components, 6 layers, domain entities, WORKFLOW.md schema, Linear adapter, Codex protocol, Organized Codebase fit, codex-plugin-cc composition, ACP-mediated two-Codex chain.
+- [Codex Plugin (CC) Wiki](https://wiki.organizedai.vip/codex-plugin-cc/): Plugin internals — slash commands, codex-rescue subagent, broker + companion runtime, hooks, skills, prompts, lib modules, Symphony composition with ACP, Linear integration paths.
+- [Autoresearch Linear Wiki](https://wiki.organizedai.vip/autoresearch-linear/): Pipeline knowledge graph. Poster module, env vars, UUIDs, GraphQL endpoints, webhooks, artifacts, CLI, integrations, BLU workspace.
+
+## Architecture Pages
+
+
+- [Stripe Agentic Commerce — System Architecture](https://arch.organizedai.vip/stripe-agentic-commerce/): System diagram of Stripe's Agentic Commerce Suite — how businesses, agents, and developers connect through UCP, MPP, x402, Shared Payment Tokens, Stripe Radar, Link agent wallet, and Issuing.
+- [OpenClaw × Linear MCP](https://arch.organizedai.vip/openclaw-linear-mcp/): Mermaid pipeline diagram. Linear MCP as the assistive Linear access path inside Claude Code. Setup walkthrough.
+- [Autoresearch → Linear](https://arch.organizedai.vip/autoresearch-linear/): Closed-loop diagram for the autoresearch poster pipeline. Trigger → write artifacts → POST Linear → GitHub commit linking → review.
+- [OpenClaw Gateway Hybrid v2](https://arch.organizedai.vip/openclaw-gateway-hybrid-v2/): Hybrid CF Queue + Durable Objects architecture for the OpenClaw workshop.
+- [OpenClaw Gateway Flow](https://arch.organizedai.vip/openclaw-gateway-flow/): Alice's 11-step request flow, horizontal process diagram.
+
+## Per-Surface Sitemaps
+
+- [arch.organizedai.vip sitemap](https://arch.organizedai.vip/sitemap.xml): All architecture pages.
+- [guide.organizedai.vip sitemap](https://guide.organizedai.vip/sitemap.xml): All operator guides.
+- [wiki.organizedai.vip sitemap](https://wiki.organizedai.vip/sitemap.xml): All LLM wikis.
+
+## Conventions
+
+- Each guide is a tabbed single-page application with lazy-rendered Mermaid diagrams.
+- Each wiki is a serif-typeset node grid where every concept has a stable #id-anchor.
+- Each arch page is a single Mermaid flow with a color-coded legend.
+- All pages are dark-themed, IBM Plex typography, and consistent navigation.
+- Source repos: github.com/Organized-AI · github.com/openai/symphony · github.com/openai/codex-plugin-cc
+
+## Optional
+
+- [Hub root](https://hub.organizedai.vip/): Landing page with cards for every Organized AI page, organized by section.
+- [Sitemap (XML)](https://hub.organizedai.vip/sitemap.xml): Full URL set.
