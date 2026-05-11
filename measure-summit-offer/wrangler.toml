@@ -1,0 +1,11 @@
+name = "offer-organizedai"
+compatibility_date = "2025-01-01"
+account_id = "691fe25d377abac03627d6a88d3eeac9"
+
+[assets]
+directory = "./public"
+not_found_handling = "404-page"
+
+routes = [
+  { pattern = "offer.organizedai.vip", custom_domain = true }
+]
