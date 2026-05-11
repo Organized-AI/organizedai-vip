@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="/autoresearch-linear/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoresearch + AutoAgent → Linear — Pipeline Guide</title>
+<meta name="description" content="How gtm-autoresearch and AutoAgent runs file structured per-run issues into Linear, with auto-linked GitHub commits. Two projects, one poster pattern, secrets stay on claws-mac-mini.">
+<meta property="og:title" content="Autoresearch + AutoAgent → Linear">
+<meta property="og:description" content="Per-run issues in Linear from autonomous loops. Two projects, one poster pattern, GitHub commit linking via Linear's native integration.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0b09;--bg-1:#0d1813;--bg-2:#12201a;--bg-3:#182a22;
+  --border:#2a2520;--border-h:#3d3830;
+  --orange:#f97316;--amber:#fbbf24;--green:#4ade80;--red:#f87171;
+  --blue:#60a5fa;--cyan:#22d3ee;--purple:#a78bfa;--linear:#5e6ad2;
+  --text:#e8e0d0;--text-2:#a09888;--text-3:#6a6058;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text-2);font-family:var(--sans);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(94,106,210,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(94,106,210,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+a{color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:.9em;transition:color .2s}
+a:hover{color:var(--amber)}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-3);padding:2px 6px;border-radius:3px;color:var(--cyan)}
+
+.bar{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;background:rgba(12,11,9,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px}
+.logo{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--border);margin-right:14px}
+.logo-badge{background:var(--linear);color:#fff;font-family:var(--mono);font-weight:700;font-size:11px;padding:3px 8px;border-radius:3px;letter-spacing:.05em}
+.logo-text{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);letter-spacing:.05em}
+.logo-text span{color:var(--text-3);font-weight:400}
+.bar-end{display:flex;align-items:center;gap:18px;margin-left:auto}
+.bar-end a{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.04em;text-transform:uppercase}
+.bar-end a:hover{color:var(--cyan)}
+
+.layout{position:relative;z-index:1;padding:108px 24px 80px;max-width:1320px;margin:0 auto}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--linear);letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--linear);padding:5px 11px;border-radius:3px;margin-bottom:24px}
+h1{font-family:var(--sans);font-size:clamp(32px,5vw,52px);font-weight:700;color:var(--text);line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
+h1 .accent{color:var(--linear)}
+.lead{font-size:16px;color:var(--text-2);max-width:880px;line-height:1.65;margin-bottom:40px}
+
+.diagram-wrap{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:36px 24px;overflow-x:auto;margin-bottom:32px}
+.mermaid{font-family:var(--mono)!important;min-width:1180px}
+.mermaid svg{max-width:none!important}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:48px}
+.legend-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--bg-1);border:1px solid var(--border);border-radius:6px}
+.swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;margin-top:4px;border:1px solid rgba(255,255,255,.15)}
+.legend-item .label{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:4px}
+.legend-item .desc{font-size:13px;color:var(--text-2)}
+
+.section{margin-top:64px;padding-top:32px;border-top:1px solid var(--border)}
+.section-label{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+h2{font-family:var(--sans);font-size:clamp(22px,3vw,30px);font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-.01em;margin-bottom:24px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;margin-bottom:32px}
+.card{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:22px 24px;border-left-width:3px}
+.card.live{border-left-color:var(--green)}
+.card.pending{border-left-color:var(--amber)}
+.card .status{font-family:var(--mono);font-size:11px;letter-spacing:.12em;margin-bottom:10px;text-transform:uppercase}
+.card.live .status{color:var(--green)}
+.card.pending .status{color:var(--amber)}
+.card h3{font-family:var(--sans);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px}
+.card p{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px}
+.card .meta{font-family:var(--mono);font-size:11px;color:var(--text-3);line-height:1.7;border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+.card .meta strong{color:var(--text-2);font-weight:500}
+
+.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.benefit{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:18px 20px;border-left-width:3px;transition:border-color .2s}
+.benefit.trigger{border-left-color:var(--cyan)}
+.benefit.write{border-left-color:var(--orange)}
+.benefit.post{border-left-color:var(--linear)}
+.benefit.link{border-left-color:var(--green)}
+.benefit.review{border-left-color:var(--purple)}
+.benefit.skip{border-left-color:var(--red)}
+.benefit .num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;margin-bottom:8px}
+.benefit.trigger .num{color:var(--cyan)}
+.benefit.write .num{color:var(--orange)}
+.benefit.post .num{color:var(--linear)}
+.benefit.link .num{color:var(--green)}
+.benefit.review .num{color:var(--purple)}
+.benefit.skip .num{color:var(--red)}
+.benefit .title{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.benefit .body{font-size:13px;color:var(--text-2);line-height:1.55}
+
+.cli-block{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:16px 18px;font-family:var(--mono);font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px;overflow-x:auto;white-space:pre}
+.cli-block .c{color:var(--text-3)}
+.cli-block .k{color:var(--cyan)}
+.cli-block .v{color:var(--amber)}
+.cli-block .l{color:var(--linear)}
+
+.issue-mock{background:var(--bg-1);border:1px solid var(--border);border-radius:6px;padding:24px 28px;margin-bottom:24px;font-size:13px}
+.issue-mock .imhead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:14px;font-family:var(--mono);font-size:12px;color:var(--text-2)}
+.issue-mock .imhead strong{color:var(--text)}
+.issue-mock .imdone{color:var(--green);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.issue-mock .imrow{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-bottom:6px}
+.issue-mock .imrow strong{color:var(--text-2);font-weight:500;display:inline-block;width:90px}
+.issue-mock .imbody{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-family:var(--sans);color:var(--text-2);line-height:1.7}
+.issue-mock .imbody h4{font-family:var(--mono);font-size:12px;color:var(--text);margin:12px 0 6px;letter-spacing:.06em}
+.issue-mock .imbody ul{list-style:none;padding-left:0;margin-bottom:8px}
+.issue-mock .imbody ul li{font-family:var(--mono);font-size:12px;color:var(--text-2);margin-bottom:3px}
+.issue-mock .imbody ul li::before{content:'• ';color:var(--linear)}
+.issue-mock table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin:8px 0 12px}
+.issue-mock th,.issue-mock td{padding:5px 10px;text-align:left;border-bottom:1px solid var(--border);color:var(--text-2)}
+.issue-mock th{color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;font-size:10px}
+.issue-mock .imlinks{font-family:var(--mono);font-size:11px;color:var(--text-3);border-top:1px dashed var(--border);margin-top:14px;padding-top:12px}
+.issue-mock .imlinks .imlinkrow{margin-bottom:4px}
+.issue-mock .imlinks .imlinkrow::before{content:'⤷ ';color:var(--green)}
+
+footer{margin-top:96px;padding-top:24px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-3);display:flex;flex-wrap:wrap;gap:14px 24px;justify-content:space-between}
+footer a{color:var(--text-3)}
+footer a:hover{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">
+    <span class="logo-badge">L</span>
+    <span class="logo-text">autoresearch<span>·linear</span></span>
+  </div>
+  <div class="bar-end">
+    <a href="https://guide.organizedai.vip/harness/">harness</a>
+    <a href="https://hermes-agent-guide.pages.dev/">hermes</a>
+    <a href="https://guide.organizedai.vip/pi-agent/">pi</a>
+    <a href="https://arch.organizedai.vip/openclaw-linear-mcp/">linear-mcp</a>
+    <a href="https://guide.organizedai.vip/autoagent-autoresearch/">guide</a>
+    <a href="https://linear-worker.jordan-691.workers.dev/health">worker</a>
+    <a href="https://github.com/Organized-AI/gtm-autoresearch">github</a>
+    <a href="https://linear.app/bluehighlightedtext">linear</a>
+  </div>
+</div>
+
+<div class="layout">
+
+  <span class="tag">Pipeline · Autonomous Loops · Linear</span>
+  <h1>Every run, one Linear issue. <span class="accent">Automatically.</span></h1>
+  <p class="lead">Two autonomous loops, two Linear projects, one poster module. <code>gtm-autoresearch</code> files into the <strong style="color:var(--linear)">Autoresearch</strong> project on every loop completion. <strong style="color:var(--linear)">AutoAgent</strong> harness experiments — wrapped by Hermes on <code>claws-mac-mini</code> — file into their own project. Title encodes the score, body embeds the run notes plus GitHub blob links to four artifacts. Commits referencing the issue key auto-link via Linear's native GitHub integration. Secrets stay on the host.</p>
+
+  <div class="diagram-wrap">
+<pre class="mermaid">
+flowchart LR
+    subgraph SG1 ["&nbsp;TRIGGER · claws-mac-mini&nbsp;"]
+      direction TB
+      T1["gtm-autoresearch<br/>loop completes<br/>(BLADE/HRE/...)"]:::trigger
+      T2["AutoAgent<br/>experiment ends<br/>(Harbor scored)"]:::trigger
+    end
+
+    subgraph SG2 ["&nbsp;WRITE · local artifacts&nbsp;"]
+      direction TB
+      W1["winning/&lt;ts&gt;.json<br/>loop-results/&lt;ts&gt;.json<br/>notes/&lt;ts&gt;.md<br/>data-audits/&lt;ts&gt;.md"]:::write
+      W2["agent.py<br/>+ trajectory<br/>+ harbor scores"]:::write
+    end
+
+    POSTER[["scripts/<br/>post-to-linear.ts<br/>(shared module)"]]:::poster
+
+    subgraph SG3 ["&nbsp;LINEAR · two projects&nbsp;"]
+      direction TB
+      L1["Autoresearch project<br/>BLU-NN issues<br/>state: Done"]:::linear
+      L2["AutoAgent project<br/>BLU-NN issues<br/>state: Done"]:::linear
+    end
+
+    GH[("GitHub<br/>Organized-AI/<br/>gtm-autoresearch")]:::repo
+
+    WORKER[["linear-worker<br/>jordan-691.workers.dev<br/>(webhook receiver)"]]:::worker
+
+    REVIEW(["👤 Jordan<br/>reviews in Linear"]):::review
+
+    T1 ==> W1 ==> POSTER
+    T2 ==> W2 ==> POSTER
+    POSTER ==>|"LINEAR_PROJECT_ID<br/>= Autoresearch"| L1
+    POSTER ==>|"LINEAR_PROJECT_ID<br/>= AutoAgent"| L2
+    GH -.->|"commits ref BLU-NN<br/>(Linear↔GH integration)"| L1
+    GH -.->|"commits ref BLU-NN"| L2
+    L1 -.->|"webhook<br/>Issue / Comment"| WORKER
+    L2 -.->|"webhook"| WORKER
+    WORKER -.->|"fan-out<br/>(Slack / Hermes / KV)"| REVIEW
+    L1 ==> REVIEW
+    L2 ==> REVIEW
+
+    classDef trigger fill:#0d1813,stroke:#22d3ee,stroke-width:2px,color:#22d3ee
+    classDef write   fill:#0d1813,stroke:#f97316,stroke-width:2px,color:#f97316
+    classDef poster  fill:#1a1d3a,stroke:#5e6ad2,stroke-width:2px,color:#e8e0d0
+    classDef linear  fill:#0d1813,stroke:#5e6ad2,stroke-width:2px,color:#5e6ad2
+    classDef repo    fill:#0d1813,stroke:#a09888,stroke-width:2px,color:#e8e0d0
+    classDef worker  fill:#0d1813,stroke:#22d3ee,stroke-width:2px,color:#22d3ee
+    classDef review  fill:#12201a,stroke:#a78bfa,stroke-width:2px,color:#e8e0d0
+</pre>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="swatch" style="background:#22d3ee"></div>
+      <div><span class="label">Trigger · Cyan</span><span class="desc">Loop end on claws-mac-mini. gtm-autoresearch on plateau or AutoAgent after Harbor pass.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#f97316"></div>
+      <div><span class="label">Write · Orange</span><span class="desc">Local artifacts written to disk first — winning JSON, run notes, audits. Source of truth.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#5e6ad2"></div>
+      <div><span class="label">Poster · Linear</span><span class="desc"><code>scripts/post-to-linear.ts</code> — shared GraphQL client. <code>LINEAR_PROJECT_ID</code> selects target.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#4ade80"></div>
+      <div><span class="label">GitHub Link · Green</span><span class="desc">Native Linear↔GitHub. Commits / PRs that reference BLU-NN auto-attach to the issue.</span></div>
+    </div>
+    <div class="legend-item">
+      <div class="swatch" style="background:#a78bfa"></div>
+      <div><span class="label">Review · Purple</span><span class="desc">Single triage surface. Filter by label, sort by score delta, comment on regressions.</span></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-label">The two projects</div>
+    <h2>One poster, two destinations.</h2>
+    <div class="cards">
+      <div class="card live">
+        <div class="status">● Live · Phase 2 merged</div>
+        <h3>Autoresearch</h3>
+        <p>Per-run issues from the <code>gtm-autoresearch</code> hill-climb loop. Each completed run (plateau, regression cap, or max-rounds) files one issue with the full run-notes markdown.</p>
+        <div class="meta">
+          <strong>Source:</strong> <code>scripts/run-gtm-loop.ts</code><br>
+          <strong>Project URL:</strong> <a href="https://linear.app/bluehighlightedtext/project/autoresearch-faa1a02b69ad">linear.app/.../autoresearch</a><br>
+          <strong>State on file:</strong> Done (run already complete)<br>
+          <strong>Title format:</strong> <code>Autoresearch · {client} · {score}% (±pp) · {date}</code>
+        </div>
+      </div>
+      <div class="card pending">
+        <div class="status">◐ Pending · Phase 4 (Hermes wrapper)</div>
+        <h3>AutoAgent</h3>
+        <p>Per-experiment issues from AutoAgent harness runs. AutoAgent is upstream (kevinrgu / thirdlayer.inc) — no fork. Hermes on <code>claws-mac-mini</code> wraps the invocation and posts results.</p>
+        <div class="meta">
+          <strong>Source:</strong> Hermes wrapper (TBD on claws-mac-mini)<br>
+          <strong>Project URL:</strong> <a href="https://linear.app/bluehighlightedtext/project/autoagent-fa48d3e7c0ef">linear.app/.../autoagent</a><br>
+          <strong>State on file:</strong> Done<br>
+          <strong>Title format:</strong> <code>AutoAgent · {harness} · {harborScore} · {date}</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">End-to-end pipeline</div>
+    <h2>Six steps from loop end to triage.</h2>
+    <div class="benefits">
+      <div class="benefit trigger"><div class="num">TRIGGER · 01</div><div class="title">Loop reaches a stop condition</div><div class="body">Plateau (≥92% × 3 rounds), regression cap (3 reverts), JSON-fail cap (5), or max rounds. Final winning container is selected. AutoAgent stops on Harbor target or wallclock budget.</div></div>
+      <div class="benefit write"><div class="num">WRITE · 02</div><div class="title">Four artifacts to disk</div><div class="body">Winning JSON, structured experiment log JSON, human-readable notes MD, data-audit MD. Written to <code>content/gtm-templates/{client}/loop-results/</code>. Source of truth — Linear is downstream.</div></div>
+      <div class="benefit post"><div class="num">POST · 03</div><div class="title">Linear GraphQL: issueCreate</div><div class="body"><code>scripts/post-to-linear.ts</code> reads the notes MD, builds the title from score deltas, prepends artifact blob links, fires <code>issueCreate</code>. Skips silently if <code>LINEAR_API_KEY</code> unset.</div></div>
+      <div class="benefit link"><div class="num">LINK · 04</div><div class="title">GitHub commits auto-attach</div><div class="body">Linear's native GitHub integration watches commits/PRs in <code>Organized-AI/gtm-autoresearch</code>. Any reference to the issue key (e.g. <code>BLU-12</code>) attaches a preview to the issue. No code needed.</div></div>
+      <div class="benefit review"><div class="num">REVIEW · 05</div><div class="title">Single triage surface</div><div class="body">Filter the Autoresearch project by client label or score delta. Comment on regressions. Re-open if a deploy reveals the winning config didn't actually improve live ads metrics.</div></div>
+      <div class="benefit skip"><div class="num">BOUNDARY · 06</div><div class="title">What the poster doesn't do</div><div class="body">Doesn't run the loop. Doesn't deploy the GTM container. Doesn't replace the disk artifacts. Doesn't conditional-label by improvement state (yet). Pure post-hoc record.</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Issue body anatomy</div>
+    <h2>What a posted run looks like.</h2>
+    <div class="issue-mock">
+      <div class="imhead">
+        <span><strong>BLU-12</strong> · Autoresearch · BLADE · 76.8% (+12.3pp) · 2026-04-29</span>
+        <span class="imdone">● Done</span>
+      </div>
+      <div class="imrow"><strong>Project:</strong> Autoresearch</div>
+      <div class="imrow"><strong>Labels:</strong> autoresearch · BLADE</div>
+      <div class="imrow"><strong>Created:</strong> 2026-04-29 14:36 by gtm-autoresearch loop</div>
+      <div class="imbody">
+        <h4>## Artifacts</h4>
+        <ul>
+          <li>Winning config: BLADE/winning/2026-04-29T143650-blade-web.json</li>
+          <li>Experiment log: BLADE/loop-results/2026-04-29T143650.json</li>
+          <li>Run notes: BLADE/loop-results/notes/2026-04-29T143650.md</li>
+          <li>Data audit: BLADE/loop-results/data-audits/2026-04-29T143650.md</li>
+        </ul>
+        <h4># GTM Autoresearch Loop — Run Notes</h4>
+        <h4>## Score Summary</h4>
+        <table>
+          <tr><th>Metric</th><th>Value</th></tr>
+          <tr><td>Start Score</td><td>64.5%</td></tr>
+          <tr><td>Best Score</td><td>76.8%</td></tr>
+          <tr><td>Improvement</td><td>+12.3pp</td></tr>
+          <tr><td>Rounds</td><td>18</td></tr>
+        </table>
+        <h4>## Final Dimension Scores</h4>
+        <table>
+          <tr><th>Dimension</th><th>Score</th><th>Issues</th></tr>
+          <tr><td>consent</td><td>92%</td><td>0E / 2W</td></tr>
+          <tr><td>metaCoverage</td><td>85%</td><td>1E / 4W</td></tr>
+          <tr><td>parameters</td><td>71%</td><td>2E / 8W</td></tr>
+        </table>
+        <div class="imlinks">
+          <div class="imlinkrow">commit a3f1c9d &nbsp;feat(blade): apply round-12 mutations &nbsp;[PR #14]</div>
+          <div class="imlinkrow">commit 7e2b104 &nbsp;fix(blade): consent gating on TikTok pixel</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Setup — claws-mac-mini</div>
+    <h2>Three env vars, never the key in chat.</h2>
+
+    <div class="cli-block"><span class="c"># 1. Install Linear CLI on the host (one-time)</span>
+<span class="k">npm</span> install -g <span class="v">@kyaukyuai/linear-cli</span>
+
+<span class="c"># 2. Auth — key prompts in terminal, stored in macOS Keychain</span>
+<span class="k">linear</span> auth login -w <span class="v">bluehighlightedtext</span> --profile human-debug -i
+
+<span class="c"># 3. Look up the team + project UUIDs</span>
+<span class="k">linear</span> team list -w <span class="v">bluehighlightedtext</span> --json
+<span class="k">linear</span> project list -w <span class="v">bluehighlightedtext</span> --team <span class="v">BLU</span> --status started --json</div>
+
+    <div class="cli-block"><span class="c"># 4. Edit .env in the gtm-autoresearch checkout</span>
+<span class="l">LINEAR_API_KEY</span>=<span class="c">&lt;new key — set on host only, not in chat&gt;</span>
+<span class="l">LINEAR_TEAM_ID</span>=<span class="v">2cd7e67a-a6a4-4ae3-b6e3-50214e5c747b</span>  <span class="c"># BLU</span>
+<span class="l">LINEAR_PROJECT_ID</span>=<span class="v">f9fba522-1300-4c20-aa9d-7c1c14727281</span>  <span class="c"># Autoresearch</span>
+
+<span class="c"># 5. Pull the merged Linear poster + run a loop. That's it.</span>
+<span class="k">git</span> pull origin main
+<span class="k">npm</span> run gtm-loop</div>
+
+    <p style="font-size:13px;color:var(--text-2);margin-top:12px">For Phase 4 (AutoAgent), the same env vars apply — only <code>LINEAR_PROJECT_ID</code> changes to <code>47b4c42f-11f6-495b-afb9-feddc8d6c30b</code>. Hermes invokes the same shared poster module from a different process.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">linear-worker · the reverse path</div>
+    <h2>When Linear needs to talk back.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px">The poster module handles <em>outbound</em> writes — claws-mac-mini → Linear. The reverse direction (Linear → other systems) flows through <code>linear-worker.jordan-691.workers.dev</code>, a Cloudflare Worker that receives Linear's webhooks and fans them out.</p>
+    <div class="cli-block"><span class="c"># Probe: GET / returns 405 (POST-only webhook receiver)</span>
+<span class="k">curl</span> -i <span class="v">https://linear-worker.jordan-691.workers.dev/</span>
+<span class="c">→ HTTP 405 Method Not Allowed</span>
+
+<span class="c"># Health check works</span>
+<span class="k">curl</span> <span class="v">https://linear-worker.jordan-691.workers.dev/health</span>
+<span class="c">→ {"ok":true}</span></div>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px">Configured as the webhook target in Linear → Settings → API → Webhooks, the worker receives events for <code>Issue</code>, <code>Comment</code>, <code>IssueAttachment</code>, etc. on both projects (Autoresearch + AutoAgent). From there it can:</p>
+    <ul style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px;padding-left:24px">
+      <li style="margin-bottom:6px"><strong style="color:var(--text)">Notify Slack</strong> when a regression issue gets a comment</li>
+      <li style="margin-bottom:6px"><strong style="color:var(--text)">Trigger Hermes</strong> to re-run a loop when an issue is reopened with a specific label</li>
+      <li style="margin-bottom:6px"><strong style="color:var(--text)">Persist to KV</strong> for downstream analytics on regression patterns</li>
+      <li style="margin-bottom:6px"><strong style="color:var(--text)">Forward to GitHub</strong> as workflow_dispatch when an issue transitions to a "deploy" state</li>
+    </ul>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px">The worker keeps secrets at the edge: webhook signing secret + any downstream API tokens live in Cloudflare Worker Secrets, not on claws-mac-mini. Outbound posting (poster module) and inbound webhooks (worker) form a closed loop where Linear is the coordination plane and neither end of the loop holds the other's credentials.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Why this shape</div>
+    <h2>Linear is downstream of disk, not in front of it.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px">The autoresearch loop produces four structured artifacts per run — winning config, experiment log, run notes, data audit. Those files are the source of truth: committable, diffable, replayable, survivable if Linear goes down. The Linear post is a <strong style="color:var(--text)">render of those artifacts into a triage-friendly form</strong> — not a write that anything depends on.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:18px">Practically: if <code>LINEAR_API_KEY</code> is unset, the loop runs identically and produces identical disk output. Linear failure modes (rate limit, downtime, key revoke) degrade gracefully to a single <code>console.warn</code>, never fail the loop. This is also why the issue files into the <em>Done</em> state on creation — the work that produced it has already happened, and Linear's role is recordkeeping plus discovery, not workflow gating.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px">The same logic applies when Hermes wires AutoAgent in Phase 4. AutoAgent's harness/trajectory artifacts live on <code>claws-mac-mini</code> first; the Linear post is the public-facing index into them.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Wiring · Pi · Hermes · Harness Engineering</div>
+    <h2>What gets tuned: a Pi-built harness, delegated by Hermes.</h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:14px">The <em>thing</em> AutoAgent is iterating on &mdash; the harness under test &mdash; is typically scaffolded with <a href="https://guide.organizedai.vip/pi-agent/"><strong style="color:var(--text)">Pi Mono</strong></a> (Mario Zechner's <code>pi-agent-core</code> toolkit). <a href="https://hermes-agent-guide.pages.dev/"><strong style="color:var(--text)">Hermes</strong></a> on <code>claws-mac-mini</code> is the runtime that <em>hosts</em> the harness and the <code>/hermes delegate</code> flow that <em>spins up</em> a fresh worktree to build it. AutoAgent then drives the loop: a Linear issue per run, scores in the title, trajectory + winning config + run notes + audit linked in the body.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px;margin-bottom:14px">Re-runs are issue-driven. Reopen with the right label and the Worker forwards the trigger back to Hermes, which re-launches the loop against the latest harness build. Linear stays downstream of disk; Hermes stays the only thing holding host secrets.</p>
+    <p style="font-size:14px;color:var(--text-2);max-width:860px">The umbrella discipline is <a href="https://guide.organizedai.vip/harness/"><strong style="color:var(--text)">Harness Engineering</strong></a> &mdash; anatomy, layers, patterns, notable systems. The LLM reference is at <a href="https://wiki.organizedai.vip/harness/">wiki.organizedai.vip/harness</a>. Naming heads-up: <a href="https://wiki.organizedai.vip/hermes/">hermes-wiki</a> calls the <code>claws-mac-mini</code> deployment of Hermes the &ldquo;Pi Harness&rdquo; &mdash; that's a host-name &ldquo;Pi,&rdquo; not Pi Mono. If a doc says &ldquo;Pi Harness&rdquo; it means Hermes-on-claws; if it says &ldquo;Pi&rdquo; or &ldquo;pi-agent-core&rdquo; it means Mario's toolkit.</p>
+  </section>
+
+  <footer>
+    <div>Autoresearch + AutoAgent → Linear · Pipeline Guide</div>
+    <div>
+      <a href="https://guide.organizedai.vip/pi-agent/">pi-agent</a> ·
+      <a href="https://hermes-agent-guide.pages.dev/">hermes</a> ·
+      <a href="https://guide.organizedai.vip/harness/">harness engineering</a> ·
+      <a href="https://wiki.organizedai.vip/harness/">harness wiki</a>
+    </div>
+    <div>
+      <a href="https://arch.organizedai.vip/openclaw-linear-mcp/">linear-mcp</a> ·
+      <a href="https://guide.organizedai.vip/autoagent-autoresearch/">autoresearch guide</a> ·
+      <a href="https://linear-worker.jordan-691.workers.dev/health">linear-worker</a> ·
+      <a href="https://github.com/Organized-AI/gtm-autoresearch">github</a> ·
+      <a href="https://linear.app/bluehighlightedtext">linear workspace</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    darkMode: true,
+    background: '#0d1813',
+    primaryColor: '#182a22',
+    primaryTextColor: '#e8e0d0',
+    primaryBorderColor: '#3d3830',
+    lineColor: '#a09888',
+    secondaryColor: '#12201a',
+    tertiaryColor: '#0c0b09',
+    fontFamily: 'IBM Plex Mono, monospace',
+    fontSize: '12px',
+    clusterBkg: '#0c0b09',
+    clusterBorder: '#3d3830',
+    edgeLabelBackground: '#0d1813',
+  },
+  flowchart: { curve: 'basis', htmlLabels: true, padding: 12 }
+});
+</script>
+
+</body>
+</html>
